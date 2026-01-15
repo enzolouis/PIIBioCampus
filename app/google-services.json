@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "906199639910",
+    "project_id": "piibiocampus-c8f50",
+    "storage_bucket": "piibiocampus-c8f50.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:906199639910:android:3190e79a668316fe9a0aa7",
+        "android_client_info": {
+          "package_name": "com.example.piibiocampus"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB07ycDHSn2m2Kcne8u-brESgVaWmgaCYI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
