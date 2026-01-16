@@ -1,0 +1,80 @@
+Conversion du MCD (MLD) en schéma NoSql pour firebase
+
+Collection : species
+
+{
+  "idSpecie": 1,
+  "name": "Lion",
+  "defaultImageUrl": "https://...",
+  "valid": true,
+  "habitat": "Marrécage",
+  "cityIds": ["1","2"],     // Specie-City (relation n-n)
+  "groupIds": ["1","3"],    // Specie-Group (relation n-n)
+  "campusIds": ["2"]        // Specie-Campus (relation n-n)
+}
+
+Collection : news
+{
+  "idNews": 1,
+  "imageUrl": "https://...",
+  "content": "Nouveau census disponible !!!"
+}
+
+Collection : census
+{
+  "idCensus": 1,
+  "ordre": 1,
+  "urlImage": "https://...",
+  "text": "Le lyon est-il blanc ?"
+}
+
+Collection : campuses
+{
+  "idCampus": 1,
+  "name": "Université Paul Sabatier",
+  "radius": "1500",
+  "longitudeCenter": "1.23",
+  "latitudeCenter": "4.56"
+}
+
+Collection : groups
+{
+  "idGroup": 1,
+  "name": "Groupe A"
+}
+
+Collection : roles
+{
+  "idRole": 1,
+  "libelle": "admin"
+}
+
+Collection : cities
+{
+  "idCity": 1,
+  "name": "Paris",
+  "zipcode": "75000",
+  "campusId": "1"
+}
+
+Collection : users
+{
+  "idUser": 1,
+  "name": "Alice",
+  "password": "hashed_password",
+  "roleId": "1"
+}
+
+Collection : pictures
+{
+  "idPicture": 1,
+  "longitude": "1.23",
+  "latitude": "4.56",
+  "altitude": "10",
+  "hours": "14:00",
+  "dateP": "2026-01-15",
+  "url": "https://...",
+  "censusId": "1",
+  "userId": "1",
+  "specieIds": ["1","2"]   // relation n-n
+}
