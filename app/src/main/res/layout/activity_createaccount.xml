@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background"
+    android:paddingBottom="40dp">
+
+    <ImageView
+        android:id="@+id/purpleFigure"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/rectangle"
+        android:translationY="-1000px" />
+
+    <ImageView
+        android:id="@+id/logoPurple"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:src="@drawable/logo_purple" />
+
+    <TextView
+        android:id="@+id/titleCreateAccount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/logoPurple"
+        android:layout_centerHorizontal="true"
+        android:text="@string/titleCreateAccount"
+        android:textAlignment="center"
+        android:textColor="@color/white"
+        android:textSize="30sp" />
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_below="@id/titleCreateAccount"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="50dp"
+        android:src="@drawable/logo" />
+
+    <EditText
+        android:id="@+id/txtIdentifiant"
+        android:layout_width="207dp"
+        android:layout_height="48dp"
+        android:layout_below="@id/imageView"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/fields_round_border"
+        android:ems="10"
+        android:hint="@string/txtName"
+        android:inputType="text"
+        android:paddingStart="10dp"
+        android:textColorHint="@color/grey"
+        android:textSize="20sp" />
+    <EditText
+        android:id="@+id/txtMail"
+        android:layout_width="207dp"
+        android:layout_height="48dp"
+        android:layout_below="@id/txtIdentifiant"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/fields_round_border"
+        android:ems="10"
+        android:hint="@string/txtMail"
+        android:inputType="text"
+        android:paddingStart="10dp"
+        android:textColorHint="@color/grey"
+        android:textSize="20sp" />
+
+    <EditText
+        android:id="@+id/txtMdp"
+        android:layout_width="207dp"
+        android:layout_height="48dp"
+        android:layout_below="@id/txtMail"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/fields_round_border"
+        android:ems="10"
+        android:hint="@string/txtPassword"
+        android:inputType="textPassword"
+        android:paddingStart="10dp"
+        android:textColorHint="@color/grey"
+        android:textSize="20sp" />
+
+    <TextView
+        android:id="@+id/btnAlreadyAccount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/txtMdp"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="10dp"
+        android:text="@string/txtAlreadyAccount"
+        android:textSize="15sp" />
+
+    <Button
+        android:id="@+id/btnConnexion"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerInParent="true"
+        android:text="@string/titleCreateAccount"
+        android:theme="@style/Bouton" />
+</RelativeLayout>
