@@ -12,7 +12,12 @@
           "package_name": "com.example.piibiocampus"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "906199639910-52rul5albfke4cj5mnqd1vu8rv8o48qr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyB07ycDHSn2m2Kcne8u-brESgVaWmgaCYI"
@@ -20,7 +25,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "906199639910-52rul5albfke4cj5mnqd1vu8rv8o48qr.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
