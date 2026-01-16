@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".DashboardAdminActivity">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        app:title="Tableau de bord administrateur"
+        app:titleTextColor="@android:color/white" />
+
+    <GridLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/toolbar"
+        android:columnCount="2"
+        android:rowCount="3">
+
+        <!-- Note : J'utilise MaterialButton pour plus de style -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnNews"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_columnWeight="1"
+            android:layout_rowWeight="1"
+            android:layout_margin="8dp"
+            android:text="Les actu'"
+            android:textSize="16sp"
+            app:icon="@android:drawable/ic_popup_reminder"
+            app:iconGravity="textTop"
+            app:iconSize="48dp"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Medium" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnExport"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_columnWeight="1"
+            android:layout_rowWeight="1"
+            android:layout_margin="8dp"
+            android:text="Exportation de données"
+            android:textSize="16sp"
+            app:icon="@android:drawable/stat_sys_download"
+            app:iconGravity="textTop"
+            app:iconSize="48dp"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Medium" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSearch"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_columnWeight="1"
+            android:layout_rowWeight="1"
+            android:layout_margin="8dp"
+            android:text="Rechercher un utilisateur"
+            android:textSize="16sp"
+            app:icon="@android:drawable/ic_search_category_default"
+            app:iconGravity="textTop"
+            app:iconSize="48dp"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Medium" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnTree"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_columnWeight="1"
+            android:layout_rowWeight="1"
+            android:layout_margin="8dp"
+            android:text="Arbre de recensement"
+            android:textSize="16sp"
+            app:icon="@android:drawable/ic_lock_idle_charging"
+            app:iconGravity="textTop"
+            app:iconSize="48dp"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Medium" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnLstAdmin"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_columnWeight="1"
+            android:layout_rowWeight="1"
+            android:layout_margin="8dp"
+            android:text="Liste des administrateurs"
+            android:textSize="16sp"
+            app:icon="@android:drawable/star_big_on"
+            app:iconGravity="textTop"
+            app:iconSize="48dp"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Medium" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnLstCensus"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_columnWeight="1"
+            android:layout_rowWeight="1"
+            android:layout_margin="8dp"
+            android:text="Liste de recensement"
+            android:textSize="16sp"
+            app:icon="@android:drawable/ic_dialog_dialer"
+            app:iconGravity="textTop"
+            app:iconSize="48dp"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Medium" />
+    </GridLayout>
+</RelativeLayout>
