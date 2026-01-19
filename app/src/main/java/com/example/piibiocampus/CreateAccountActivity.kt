@@ -28,41 +28,16 @@ class CreateAccountActivity : AppCompatActivity() {
         alreadyAccountBtn = findViewById<TextView?>(R.id.btnAlreadyAccount)
 
         alreadyAccountBtn?.setOnClickListener {
-            startActivity(Intent(this, ConnexionActivity::class.java))
+            startActivity(Intent(this, ConnectionActivity::class.java))
         }
         connectBtn?.setOnClickListener {
-            val userNameInput = pseudoZone?.text.toString().trim()
-            val emailInput = mailZone?.text.toString().trim()
-            val passwordInput = passwordZone?.text.toString().trim()
+            val userName = pseudoZone?.text.toString().trim()
+            val email = mailZone?.text.toString().trim()
+            val password = passwordZone?.text.toString().trim()
 
-            if (userNameInput.isEmpty() || emailInput.isEmpty() || passwordInput.isEmpty()) {
-                Toast.makeText(this, "Veuillez remplir tous les champs", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            if (!isPasswordStrong(passwordInput)) {
-                Toast.makeText(this, "Le mot de passe doit contenir au moins 12 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial !", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            val userDao = UserDao()
-
-            lifecycleScope.launch {
-                val result = userDao.signup(emailInput, passwordInput, userNameInput)
-
-                result
-                    .onSuccess { user ->
-                        Toast.makeText(this@CreateAccountActivity, "Compte créé avec succès !", Toast.LENGTH_SHORT).show()
-                        goToMainScreen()
-                    }
-                    .onFailure { error ->
-                        Toast.makeText(
-                            this@CreateAccountActivity,
-                            "Erreur lors de la création du compte : ${error.message}",
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
-            }
+            createAccount(email, password, userName)
         }
+
 
     }
     private fun goToMainScreen() {
@@ -70,15 +45,30 @@ class CreateAccountActivity : AppCompatActivity() {
         finish()
     }
 
-    private fun isPasswordStrong(password: String): Boolean {
-        if (password.length < 12) return false
+    private fun createAccount(
+        email: String,
+        password: String,
+        userName: String
+    ) {
 
-        val hasUpperCase = password.any { it.isUpperCase() }
-        val hasLowerCase = password.any { it.isLowerCase() }
-        val hasDigit = password.any { it.isDigit() }
-        val hasSpecialChar = password.any { "!@#\$%^&*()_+-=[]{}|;:'\",.<>?/".contains(it) }
+        lifecycleScope.launch {
+            UserDao.signUp(email, password, userName)
+                .onSuccess {
+                    showToast("Compte créé avec succès !")
+                    goToMainScreen()
+                }
+                .onFailure { error ->
+                    showToast(
+                        "Erreur lors de la création du compte : ${error.message}",
+                        Toast.LENGTH_LONG
+                    )
+                }
+        }
+    }
 
-        return hasUpperCase && hasLowerCase && hasDigit && hasSpecialChar
+
+    private fun showToast(message: String, duration: Int = Toast.LENGTH_SHORT) {
+        Toast.makeText(this, message, duration).show()
     }
 
 
