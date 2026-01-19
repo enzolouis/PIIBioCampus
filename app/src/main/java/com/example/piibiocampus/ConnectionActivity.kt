@@ -41,8 +41,7 @@ class ConnectionActivity : AppCompatActivity() {
     }
 
     private fun goToMainScreen() {
-        val userDao = UserDao()
-        val currentUser = userDao.getCurrentUser()
+        val currentUser = UserDao.getCurrentUser()
 
         if (currentUser == null) {
             showToast("Utilisateur non connecté")
@@ -50,7 +49,7 @@ class ConnectionActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-            userDao.getRoleByUid(currentUser.uid)
+            UserDao.getRoleByUid(currentUser.uid)
                 .onSuccess { role ->
                     when (role) {
                         "USER" -> {
@@ -108,10 +107,8 @@ class ConnectionActivity : AppCompatActivity() {
         email: String,
         password: String
     ) {
-        val userDao = UserDao()
-
         lifecycleScope.launch {
-            userDao.loginWithEmail(email, password)
+            UserDao.loginWithEmail(email, password)
                 .onSuccess {
                     goToMainScreen()
                 }

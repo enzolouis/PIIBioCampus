@@ -1,6 +1,7 @@
 package com.example.piibiocampus
 
 
+import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
@@ -11,10 +12,11 @@ import kotlinx.coroutines.tasks.await
  * Data access for user operations.
  * Constructor parameters allow injecting mocks for testing.
  */
-class UserDao(
-    private val auth: FirebaseAuth = FirebaseAuth.getInstance(),
-    private val db: FirebaseFirestore = FirebaseFirestore.getInstance()
-) {
+object UserDao{
+    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+    private val db: FirebaseFirestore by lazy {
+        FirebaseFirestore.getInstance(FirebaseApp.getInstance())
+    }
 
 
     suspend fun loginWithEmail(identifier: String, password: String): Result<FirebaseUser> =

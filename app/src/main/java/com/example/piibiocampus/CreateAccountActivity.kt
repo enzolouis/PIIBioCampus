@@ -50,10 +50,9 @@ class CreateAccountActivity : AppCompatActivity() {
         password: String,
         userName: String
     ) {
-        val userDao = UserDao()
 
         lifecycleScope.launch {
-            userDao.signUp(email, password, userName)
+            UserDao.signUp(email, password, userName)
                 .onSuccess {
                     showToast("Compte créé avec succès !")
                     goToMainScreen()
