@@ -40,7 +40,7 @@
         android:layout_below="@id/titleConnexion"
         android:layout_centerInParent="true"
         android:layout_marginTop="50dp"
-        android:src="@drawable/logo" />
+        android:src="@drawable/logo_piibiocampus" />
 
     <EditText
         android:id="@+id/txtIdentifiant"
@@ -51,7 +51,7 @@
         android:layout_marginTop="10dp"
         android:background="@drawable/fields_round_border"
         android:ems="10"
-        android:hint="@string/txtName"
+        android:hint="@string/txtMail"
         android:inputType="text"
         android:paddingStart="10dp"
         android:textColorHint="@color/grey"
