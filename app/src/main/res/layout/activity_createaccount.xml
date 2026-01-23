@@ -40,7 +40,7 @@
         android:layout_below="@id/titleCreateAccount"
         android:layout_centerInParent="true"
         android:layout_marginTop="50dp"
-        android:src="@drawable/logo" />
+        android:src="@drawable/logo_piibiocampus" />
 
     <EditText
         android:id="@+id/txtIdentifiant"
@@ -95,6 +95,18 @@
         android:layout_marginTop="10dp"
         android:text="@string/txtAlreadyAccount"
         android:textSize="15sp" />
+
+    <TextView
+        android:id="@+id/errorMsg"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/btnAlreadyAccount"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="10dp"
+        android:text=""
+        android:textAlignment="center"
+        android:textColor="@android:color/holo_red_dark"
+        android:textSize="13sp" />
 
     <Button
         android:id="@+id/btnConnexion"

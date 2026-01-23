@@ -23,20 +23,5 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        // --- Firestore : récupération des noms de users ---
-        val db = FirebaseFirestore.getInstance()
-
-        // Supposons que ta collection s'appelle "users"
-        db.collection("user")
-            .get()
-            .addOnSuccessListener { result ->
-                // Crée une liste des noms
-                val names = result.map { it.getString("name") ?: "Nom inconnu" }
-                // Affiche dans le log
-                Log.d(TAG, "Liste des noms : $names")
-            }
-            .addOnFailureListener { e ->
-                Log.e(TAG, "Erreur lors de la récupération des users", e)
-            }
     }
 }

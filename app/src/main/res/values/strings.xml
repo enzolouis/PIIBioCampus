@@ -1,10 +1,18 @@
 <resources>
     <string name="app_name">PIIBioCampus</string>
     <string name="titleConnexion">Connexion</string>
-    <string name="txtName">Pseudo</string>
+    <string name="txtName">E-mail</string>
     <string name="txtPassword">Mot de passe</string>
     <string name="txtNewAccount">Vous n\'avez pas de compte, Cliquez-ici</string>
     <string name="txtAlreadyAccount">Vous avez déjà un compte, Cliquez-ici</string>
-    <string name="titleCreateAccount">Créer un compte</string>
+    <string name="titleCreateAccount">Création de compte</string>
     <string name="txtMail">Adresse e-mail</string>
+
+    <string name="titleAdmin">Tableau de bord administrateur</string>
+    <string name="titleActu">Les actu'</string>
+    <string name="titleExport">Exportation de données</string>
+    <string name="titleSearchUser">Rechercher un utilisateur</string>
+    <string name="titleCensus">Arbre de rencemsent</string>
+    <string name="titleListAdmin">Liste des administrateurs</string>
+    <string name="titleListCensus">Liste des recensements</string>
 </resources>
