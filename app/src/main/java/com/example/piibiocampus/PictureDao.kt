@@ -147,6 +147,18 @@ object PictureDao {
             .addOnFailureListener(onError)
     }
 
+    fun getAllPictures(
+        onSuccess: (List<Map<String, Any>>) -> Unit,
+        onError: (Exception) -> Unit
+    ) {
+        picturesRef
+            .get()
+            .addOnSuccessListener { snapshot ->
+                onSuccess(snapshot.documents.mapNotNull { it.data })
+            }
+            .addOnFailureListener(onError)
+    }
+
     fun getPicturesByCensus(
         censusRef: String,
         onSuccess: (List<Map<String, Any>>) -> Unit,

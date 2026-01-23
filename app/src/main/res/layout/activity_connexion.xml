@@ -88,6 +88,6 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerInParent="true"
-        android:text="@string/titleConnexion"
+        android:text="@string/txtBtnConnect"
         android:theme="@style/Bouton" />
 </RelativeLayout>
