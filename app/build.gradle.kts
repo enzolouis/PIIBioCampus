@@ -62,4 +62,9 @@ dependencies {
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-storage")
+
+    // OpenStreetMap / OSMDroid
+    implementation("org.osmdroid:osmdroid-android:6.1.14")
+    // Coil pour charger les images
+    implementation("io.coil-kt:coil:2.5.0")
 }
