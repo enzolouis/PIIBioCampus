@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">PIIBioCampus</string>
     <string name="titleConnexion">Connexion</string>
-    <string name="txtName">Pseudo</string>
+    <string name="txtName">E-mail</string>
     <string name="txtPassword">Mot de passe</string>
     <string name="txtNewAccount">Vous n\'avez pas de compte, Cliquez-ici</string>
     <string name="txtAlreadyAccount">Vous avez déjà un compte, Cliquez-ici</string>
