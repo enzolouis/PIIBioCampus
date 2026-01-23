@@ -112,10 +112,25 @@ object PictureDao {
         onSuccess: (Uri) -> Unit,
         onError: (Exception) -> Unit
     ) {
-        storageRef.child("$pictureId.webp")
-            .downloadUrl
-            .addOnSuccessListener(onSuccess)
-            .addOnFailureListener(onError)
+        // Récupération du document Firestore
+        picturesRef.document(pictureId)
+            .get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val url = document.getString("imageUrl")
+                    if (!url.isNullOrEmpty()) {
+                        // Convertir en Uri pour Picasso/Glide
+                        onSuccess(Uri.parse(url))
+                    } else {
+                        onError(Exception("L'URL de l'image est vide"))
+                    }
+                } else {
+                    onError(Exception("Document inexistant"))
+                }
+            }
+            .addOnFailureListener { exception ->
+                onError(exception)
+            }
     }
 
     fun getPicturesByUser(
