@@ -22,5 +22,6 @@
     <string name="txtBtnReinitaliserMotDePasse">Envoyé</string>
     <string name="txtWarningMail">Le Mail que vous allez recevoir peut se trouvé dans vos spam</string>
 
-
+    <string name="txtBtnBack">Retour</string>
+    <string name="txtBtnWatchProfile">Profil de l\'auteur</string>
 </resources>

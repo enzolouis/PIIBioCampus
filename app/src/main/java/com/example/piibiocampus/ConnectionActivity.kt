@@ -63,7 +63,7 @@ class ConnectionActivity : AppCompatActivity() {
                     when (role) {
                         "USER" -> {
                             startActivity(
-                                Intent(this@ConnectionActivity, MainActivity::class.java)
+                                Intent(this@ConnectionActivity, MapActivity::class.java)
                             )
                         }
 

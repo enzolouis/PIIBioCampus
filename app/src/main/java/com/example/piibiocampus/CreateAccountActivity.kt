@@ -48,7 +48,7 @@ class CreateAccountActivity : AppCompatActivity() {
 
     }
     private fun goToMainScreen() {
-        startActivity(Intent(this, MainActivity::class.java))
+        startActivity(Intent(this, MapActivity::class.java))
         finish()
     }
 

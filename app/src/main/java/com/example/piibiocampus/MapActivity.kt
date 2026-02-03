@@ -3,7 +3,8 @@ package com.example.piibiocampus
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
-import android.widget.EditText
+import android.widget.Button
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
@@ -11,9 +12,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import coil.ImageLoader
-import coil.request.ImageRequest
-import com.google.firebase.firestore.FirebaseFirestore
 import com.squareup.picasso.Picasso
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.XYTileSource
@@ -27,10 +25,39 @@ class MapActivity : AppCompatActivity() {
     private val TAG = "MapActivity"
     private lateinit var map: MapView
 
+    private lateinit var overlay: FrameLayout
+    private lateinit var zoomImage: ImageView
+    private lateinit var photoDate: TextView
+    private lateinit var photoInfos: TextView
+    private lateinit var authorButton: Button
+    private lateinit var backButton: Button
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_map)
+
+        overlay = findViewById(R.id.overlay)
+        zoomImage = findViewById(R.id.zoomImage)
+        photoDate = findViewById(R.id.photoDate)
+        photoInfos = findViewById(R.id.photoInfos)
+        authorButton = findViewById(R.id.authorButton)
+        backButton = findViewById(R.id.backButton)
+
+        // click implies back to map
+        backButton.setOnClickListener {
+            overlay.animate()
+                .alpha(0f)
+                .setDuration(200)
+                .withEndAction {
+                    overlay.visibility = FrameLayout.GONE
+                    overlay.alpha = 1f
+                }
+                .start()
+        }
+
+
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
@@ -50,18 +77,7 @@ class MapActivity : AppCompatActivity() {
         map.setTilesScaledToDpi(true)
         map.setMultiTouchControls(true)
         map.controller.setZoom(15.0)
-        map.controller.setCenter(GeoPoint(48.8566, 2.3522)) // Paris
-
-        // coil image loader
-        val imageLoader = ImageLoader(this)
-
-        // ajouter des markers prédéfinis placeholder
-        val points2 = listOf(
-            Pair("Tour Eiffel", GeoPoint(48.8584, 2.2945)),
-            Pair("Louvre", GeoPoint(48.8606, 2.3376))
-        )
-
-        var points: List<Map<String,Any>>? = null
+        map.controller.setCenter(GeoPoint(43.562817415184526, 1.467314949845769)) // Toulouse by default
 
         PictureDao.getAllPictures(
             onSuccess = { points ->
@@ -94,10 +110,35 @@ class MapActivity : AppCompatActivity() {
                             val titleView = mView.findViewById<TextView>(R.id.title)
                             val photoView = mView.findViewById<ImageView>(R.id.photo)
 
-                            titleView.text = marker.title
+                            val imageUrl = o["imageUrl"] as String
 
-                            Picasso.get().load(Uri.parse(o["imageUrl"] as String)).into(photoView)
+                            titleView.text = marker.title
+                            Picasso.get().load(Uri.parse(imageUrl)).into(photoView)
+
+                            photoView.setOnClickListener {
+                                val imageUrl = o["imageUrl"] as String
+
+                                Picasso.get().load(Uri.parse(imageUrl)).into(zoomImage)
+
+                                photoDate.text = "Date : ${o["date"] ?: "Non connu"} à ${o["hours"] ?: "Non connu"}"
+                                // joins the table
+                                photoInfos.text =
+                                    "Genre : ${o["genre"] ?: "Non identifié"}\n" +
+                                            "Espèce : ${o["specie"] ?: "Non identifié"}\n" +
+                                            "Famille : ${o["family"] ?: "Non identifié"}"
+
+                                authorButton.setOnClickListener {
+                                    // link to user pofile (todo)
+                                }
+
+                                overlay.apply {
+                                    alpha = 0f
+                                    visibility = FrameLayout.VISIBLE
+                                    animate().alpha(1f).setDuration(200).start()
+                                }
+                            }
                         }
+
 
                         override fun onClose() {
                             val titleView = mView.findViewById<TextView>(R.id.title)
