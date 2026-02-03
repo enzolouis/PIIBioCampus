@@ -17,6 +17,9 @@ class ConnectionActivity : AppCompatActivity() {
     private var connectBtn: Button? = null
     private var createAccountBtn: TextView? = null
 
+    private var resetPassWordBtn: TextView? = null
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_connexion)
@@ -25,9 +28,15 @@ class ConnectionActivity : AppCompatActivity() {
         passwordZone = findViewById<EditText?>(R.id.txtMdp)
         connectBtn = findViewById<Button?>(R.id.btnConnexion)
         createAccountBtn = findViewById<TextView?>(R.id.btnAlreadyAccount)
+        resetPassWordBtn = findViewById<TextView?>(R.id.btnResetPassWord)
+
 
         createAccountBtn?.setOnClickListener {
             startActivity(Intent(this, CreateAccountActivity::class.java))
+        }
+
+        resetPassWordBtn?.setOnClickListener {
+            startActivity(Intent(this, ResetPassWord::class.java))
         }
         connectBtn?.setOnClickListener {
             val email = pseudoZone?.text.toString().trim()

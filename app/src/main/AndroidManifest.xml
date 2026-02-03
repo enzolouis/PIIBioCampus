@@ -32,6 +32,10 @@
         <activity
             android:name=".MapActivity"
             android:exported="true" />
+        <activity
+            android:name=".ResetPassWord"
+            android:exported="true" />
+
     </application>
 
 </manifest>

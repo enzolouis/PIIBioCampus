@@ -17,4 +17,10 @@
     <string name="titleCensus">Arbre de rencemsent</string>
     <string name="titleListAdmin">Liste des administrateurs</string>
     <string name="titleListCensus">Liste des recensements</string>
+    <string name="txtBtnForgetPassWord">Mot de passe oublié, Cliquez-ici</string>
+    <string name="titleMotDePasseOublie">Mot de passe oublié</string>
+    <string name="txtBtnReinitaliserMotDePasse">Envoyé</string>
+    <string name="txtWarningMail">Le Mail que vous allez recevoir peut se trouvé dans vos spam</string>
+
+
 </resources>
