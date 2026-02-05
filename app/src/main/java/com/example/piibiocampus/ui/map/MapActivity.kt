@@ -1,4 +1,4 @@
-package com.example.piibiocampus
+package com.example.piibiocampus.ui.map
 
 import android.net.Uri
 import android.os.Bundle
@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.piibiocampus.R
 import com.squareup.picasso.Picasso
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.XYTileSource
