@@ -1,7 +1,8 @@
-package com.example.piibiocampus
+package com.example.piibiocampus.ui.admin
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.example.piibiocampus.R
 
 class DashboardAdminActivity : AppCompatActivity() {
 
