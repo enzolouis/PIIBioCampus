@@ -1,16 +1,15 @@
 package com.example.piibiocampus
 
+import PictureDao
+import android.content.Intent
 import android.graphics.BitmapFactory
-import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.camera.view.LifecycleCameraController
 import com.example.piibiocampus.data.model.LocationMeta
-import com.example.piibiocampus.databinding.ActivityPictureBinding
 import com.example.piibiocampus.databinding.ActivityPreviewPictureBinding
-import com.google.firebase.auth.FirebaseAuth
+import com.example.piibiocampus.ui.MainActivity
 
 class PreviewPictureActivity : AppCompatActivity() {
     private lateinit var viewBinding: ActivityPreviewPictureBinding
@@ -22,7 +21,8 @@ class PreviewPictureActivity : AppCompatActivity() {
         setContentView(viewBinding.root)
 
         imageBytes = intent.getByteArrayExtra("imageBytes")!!
-        // Convertir en Bitmap pour l'affichage
+
+        // convertir en Bitmap pour l'affichage
         val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
         viewBinding.imagePreview.setImageBitmap(bitmap)
 
@@ -41,10 +41,13 @@ class PreviewPictureActivity : AppCompatActivity() {
                 speciesRef = "",
                 onSuccess = {
                     Toast.makeText(this, "Photo correcement envoyé", Toast.LENGTH_SHORT).show()
-                    finish()
+
+                    // emmener vers le recensement à l'avenir
+                    val intent = Intent(this@PreviewPictureActivity, MainActivity::class.java)
+                    startActivity(intent)
                 },
                 onError = { e ->
-                    Log.e("UPLOAD", "Erreur upload", e)
+                    Log.e("UPLOAD", "Erreur lors de l'envoi de la photo", e)
                     Toast.makeText(this, e.message, Toast.LENGTH_LONG).show()
                 }
 

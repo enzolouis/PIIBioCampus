@@ -19,20 +19,22 @@
         android:id="@+id/btnRetake"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Annuler"
+        android:text="@string/txtCancel"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/btnConfirm"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_margin="16dp" />
+        android:layout_margin="16dp"
+        android:theme="@style/Bouton"/>
 
     <Button
         android:id="@+id/btnConfirm"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Confirmer"
+        android:text="@string/txtConfirm"
         app:layout_constraintStart_toEndOf="@+id/btnRetake"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_margin="16dp" />
+        android:layout_margin="16dp"
+        android:theme="@style/Bouton"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

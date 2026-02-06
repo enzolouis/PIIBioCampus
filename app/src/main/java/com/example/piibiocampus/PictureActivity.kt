@@ -1,20 +1,11 @@
 package com.example.piibiocampus
 
 import android.Manifest
-import android.content.ContentValues
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
-import android.provider.MediaStore
 import android.util.Log
-import android.widget.Button
-import android.widget.EditText
-import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
@@ -24,14 +15,8 @@ import androidx.camera.view.LifecycleCameraController
 import androidx.camera.view.PreviewView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.lifecycleScope
 import com.example.piibiocampus.databinding.ActivityPictureBinding
 import com.example.piibiocampus.utils.ImageUtils.resizeAndCompress
-import com.google.firebase.FirebaseException
-import com.google.firebase.auth.FirebaseAuthUserCollisionException
-import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Locale
 
 private const val FILENAME_FORMAT = "yyyy-MM-dd-HH-mm-ss-SSS"
 class PictureActivity  : AppCompatActivity() {
@@ -49,6 +34,10 @@ class PictureActivity  : AppCompatActivity() {
 
         viewBinding.btnTakePicture.setOnClickListener {
             takePhoto()
+        }
+
+        viewBinding.btnBack.setOnClickListener {
+            finish()
         }
 
     }
@@ -70,19 +59,26 @@ class PictureActivity  : AppCompatActivity() {
             ContextCompat.getMainExecutor(this),
             object : ImageCapture.OnImageCapturedCallback() {
                 override fun onError(exc: ImageCaptureException) {
-                    Log.e("CAMERA", "La photo a échoué: ${exc.message}", exc)
+                    Log.e("CAMERA", "La photo a rencontrée une erreur: ${exc.message}", exc)
                 }
 
                 override fun onCaptureSuccess(image: ImageProxy) {
                     val buffer = image.planes[0].buffer
                     val bytes = ByteArray(buffer.remaining())
                     buffer.get(bytes)
+
+                    val rotation = image.imageInfo.rotationDegrees
                     image.close()
 
-                    // 🔹 Resize + compress avant de passer à l'activité suivante
-                    val compressedBytes = resizeAndCompress(bytes, maxWidth = 1080, maxHeight = 1920, quality = 80)
+                    val compressedBytes = resizeAndCompress(
+                        imageBytes = bytes,
+                        rotationDegrees = rotation,
+                        maxWidth = 1080,
+                        maxHeight = 1920,
+                        quality = 80
+                    )
 
-                    // 🔹 Passer le ByteArray compressé ou mieux : sauvegarder dans un fichier temporaire
+                    // parametre pour la prochaine activité
                     val intent = Intent(this@PictureActivity, PreviewPictureActivity::class.java)
                     intent.putExtra("imageBytes", compressedBytes)
                     startActivity(intent)

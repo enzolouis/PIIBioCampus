@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">PIIBioCampus</string>
     <string name="titleConnexion">Connexion</string>
-    <string name="txtName">Speudo</string>
+    <string name="txtName">Pseudo</string>
     <string name="txtPassword">Mot de passe</string>
     <string name="txtNewAccount">Vous n\'avez pas de compte, Cliquez-ici</string>
     <string name="txtAlreadyAccount">Vous avez déjà un compte, Cliquez-ici</string>
@@ -20,9 +20,11 @@
     <string name="txtBtnForgetPassWord">Mot de passe oublié, Cliquez-ici</string>
     <string name="titleMotDePasseOublie">Mot de passe oublié</string>
     <string name="txtBtnReinitaliserMotDePasse">Envoyer</string>
-    <string name="txtWarningMail">Le mail que vous allez recevoir peut se trouver dans vos spams.</string>
+    <string name="txtWarningMail">Le mail que vous allez reçevoir peut se trouver dans vos spams.</string>
 
     <string name="txtBtnBack">Retour</string>
     <string name="txtBtnWatchProfile">Profil de l\'auteur</string>
     <string name="camera">camera</string>
+    <string name="txtConfirm">Confirmer</string>
+    <string name="txtCancel">Annuler</string>
 </resources>

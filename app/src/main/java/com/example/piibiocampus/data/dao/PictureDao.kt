@@ -87,28 +87,28 @@ object PictureDao {
         onError: (Exception) -> Unit
     ) {
         try {
-            // 🔹 Récupère l'UID actuel si userRef pas fourni
+            // récupère l'UID actuel si userRef pas fourni
             val currentUserUid = userRef ?: FirebaseAuth.getInstance().currentUser?.uid
             ?: throw IllegalStateException("Utilisateur non connecté")
 
-            // 🔹 Conversion ByteArray -> fichier WebP temporaire
+            // conversion ByteArray -> fichier WebP temporaire
             val webpFile = bytesToWebpFile(context, imageBytes)
 
-            // 🔹 ID unique pour la photo
+            // ID unique pour la photo
             val pictureId = picturesRef.document().id
             val pictureStorageRef = storageRef.child("$pictureId.webp")
 
-            // 🔹 Metadata obligatoire pour passer les rules
+            // metadata obligatoire pour passer les rules
             val metadata = com.google.firebase.storage.StorageMetadata.Builder()
                 .setCustomMetadata("userRef", currentUserUid)
                 .build()
 
-            // 🔹 Upload vers Firebase Storage
+            // upload vers Firebase Storage
             pictureStorageRef.putFile(Uri.fromFile(webpFile), metadata)
                 .addOnSuccessListener {
                     pictureStorageRef.downloadUrl.addOnSuccessListener { downloadUrl ->
 
-                        // 🔹 Stockage Firestore
+                        // stockage Firestore
                         val data = hashMapOf(
                             "imageUrl" to downloadUrl.toString(),
                             "timestamp" to Date(),
@@ -138,8 +138,6 @@ object PictureDao {
             onError(e)
         }
     }
-
-
 
 
     /**
