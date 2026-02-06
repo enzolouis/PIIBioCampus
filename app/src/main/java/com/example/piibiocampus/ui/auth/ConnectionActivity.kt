@@ -11,8 +11,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.piibiocampus.R
+import com.example.piibiocampus.ui.MainActivity
 import com.example.piibiocampus.ui.admin.DashboardAdminActivity
-import com.example.piibiocampus.ui.map.MapActivity
 import com.example.piibiocampus.utils.Extensions.toast
 import com.example.piibiocampus.utils.Validators
 import kotlinx.coroutines.launch
@@ -69,7 +69,7 @@ class ConnectionActivity : AppCompatActivity() {
                                 "USER" -> startActivity(
                                     Intent(
                                         this@ConnectionActivity,
-                                        MapActivity::class.java
+                                        MainActivity::class.java
                                     )
                                 )
 

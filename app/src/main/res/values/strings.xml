@@ -24,4 +24,5 @@
 
     <string name="txtBtnBack">Retour</string>
     <string name="txtBtnWatchProfile">Profil de l\'auteur</string>
+    <string name="camera">camera</string>
 </resources>

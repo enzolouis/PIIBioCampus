@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/nav_actualite"
+        android:icon="@drawable/newspaper"
+        android:title="Actualité"/>
+
+    <item
+        android:id="@+id/nav_recherche"
+        android:icon="@drawable/search"
+        android:title="Recherche"/>
+
+    <item
+        android:id="@+id/nav_bibliotheque"
+        android:icon="@drawable/book_open"
+        android:title="Bibliothèque"/>
+
+    <item
+        android:id="@+id/nav_map"
+        android:icon="@drawable/map"
+        android:title="Map"/>
+
+    <item
+        android:id="@+id/nav_compte"
+        android:icon="@drawable/user_circle"
+        android:title="Compte"/>
+
+</menu>
+
