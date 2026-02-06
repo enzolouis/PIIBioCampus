@@ -3,6 +3,8 @@ package com.example.piibiocampus.ui
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.example.piibiocampus.PictureActivity
+import com.example.piibiocampus.PreviewPictureActivity
 import com.example.piibiocampus.R
 import com.example.piibiocampus.ui.map.MapFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -43,7 +45,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         fabCamera.setOnClickListener {
-            // CameraActivity reste une activité séparée
+            val intent = Intent(this@MainActivity, PictureActivity::class.java)
+            startActivity(intent)
 
         }
     }
