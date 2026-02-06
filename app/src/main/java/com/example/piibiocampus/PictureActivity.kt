@@ -26,6 +26,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.piibiocampus.databinding.ActivityPictureBinding
+import com.example.piibiocampus.utils.ImageUtils.resizeAndCompress
 import com.google.firebase.FirebaseException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import kotlinx.coroutines.launch
@@ -72,20 +73,24 @@ class PictureActivity  : AppCompatActivity() {
                     Log.e("CAMERA", "La photo a échoué: ${exc.message}", exc)
                 }
 
-                override fun onCaptureSuccess(image : ImageProxy) {
+                override fun onCaptureSuccess(image: ImageProxy) {
                     val buffer = image.planes[0].buffer
                     val bytes = ByteArray(buffer.remaining())
                     buffer.get(bytes)
                     image.close()
 
+                    // 🔹 Resize + compress avant de passer à l'activité suivante
+                    val compressedBytes = resizeAndCompress(bytes, maxWidth = 1080, maxHeight = 1920, quality = 80)
+
+                    // 🔹 Passer le ByteArray compressé ou mieux : sauvegarder dans un fichier temporaire
                     val intent = Intent(this@PictureActivity, PreviewPictureActivity::class.java)
-                    intent.putExtra("imageBytes", bytes)
+                    intent.putExtra("imageBytes", compressedBytes)
                     startActivity(intent)
                 }
             }
         )
-
     }
+
 
     private fun askCameraPermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED
