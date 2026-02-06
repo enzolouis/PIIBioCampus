@@ -5,6 +5,7 @@ import android.net.Uri
 import com.example.piibiocampus.LocationMeta
 import com.google.firebase.FirebaseApp
 import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import java.io.File
@@ -50,6 +51,96 @@ object PictureDao {
 
         return file
     }
+
+    private fun bytesToWebpFile(
+        context: Context,
+        imageBytes: ByteArray,
+        quality: Int = 90
+    ): File {
+        val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+
+        val file = File.createTempFile("picture_", ".webp", context.cacheDir)
+        val outputStream = FileOutputStream(file)
+
+        val format = if (android.os.Build.VERSION.SDK_INT >= 30) {
+            Bitmap.CompressFormat.WEBP_LOSSY
+        } else {
+            Bitmap.CompressFormat.WEBP
+        }
+
+        bitmap.compress(format, quality, outputStream)
+
+        outputStream.flush()
+        outputStream.close()
+
+        return file
+    }
+
+    fun exportPictureFromBytes(
+        context: Context,
+        imageBytes: ByteArray,
+        location: LocationMeta,
+        censusRef: String?,
+        userRef: String? = null, // si null, on prend l'UID FirebaseAuth
+        speciesRef: String?,
+        onSuccess: () -> Unit,
+        onError: (Exception) -> Unit
+    ) {
+        try {
+            // 🔹 Récupère l'UID actuel si userRef pas fourni
+            val currentUserUid = userRef ?: FirebaseAuth.getInstance().currentUser?.uid
+            ?: throw IllegalStateException("Utilisateur non connecté")
+
+            // 🔹 Conversion ByteArray -> fichier WebP temporaire
+            val webpFile = bytesToWebpFile(context, imageBytes)
+
+            // 🔹 ID unique pour la photo
+            val pictureId = picturesRef.document().id
+            val pictureStorageRef = storageRef.child("$pictureId.webp")
+
+            // 🔹 Metadata obligatoire pour passer les rules
+            val metadata = com.google.firebase.storage.StorageMetadata.Builder()
+                .setCustomMetadata("userRef", currentUserUid)
+                .build()
+
+            // 🔹 Upload vers Firebase Storage
+            pictureStorageRef.putFile(Uri.fromFile(webpFile), metadata)
+                .addOnSuccessListener {
+                    pictureStorageRef.downloadUrl.addOnSuccessListener { downloadUrl ->
+
+                        // 🔹 Stockage Firestore
+                        val data = hashMapOf(
+                            "imageUrl" to downloadUrl.toString(),
+                            "timestamp" to Date(),
+                            "location" to mapOf(
+                                "latitude" to location.latitude,
+                                "longitude" to location.longitude,
+                                "altitude" to location.altitude
+                            ),
+                            "censusRef" to censusRef,
+                            "userRef" to currentUserUid,
+                            "speciesRef" to speciesRef
+                        )
+
+                        picturesRef.document(pictureId)
+                            .set(data)
+                            .addOnSuccessListener {
+                                // 🧹 nettoyage
+                                webpFile.delete()
+                                onSuccess()
+                            }
+                            .addOnFailureListener(onError)
+                    }.addOnFailureListener(onError)
+                }
+                .addOnFailureListener(onError)
+
+        } catch (e: Exception) {
+            onError(e)
+        }
+    }
+
+
+
 
     /**
      * Exporter une photo (upload + Firestore)
