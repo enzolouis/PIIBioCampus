@@ -41,6 +41,8 @@
             android:exported="true" />
         <activity
             android:name=".ui.MainActivity"
+            android:exported="true" />
+        <activity
             android:name=".PictureActivity"
             android:exported="true" />
         <activity

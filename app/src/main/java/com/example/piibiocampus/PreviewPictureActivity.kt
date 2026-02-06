@@ -7,6 +7,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.view.LifecycleCameraController
+import com.example.piibiocampus.data.model.LocationMeta
 import com.example.piibiocampus.databinding.ActivityPictureBinding
 import com.example.piibiocampus.databinding.ActivityPreviewPictureBinding
 import com.google.firebase.auth.FirebaseAuth
@@ -30,7 +31,7 @@ class PreviewPictureActivity : AppCompatActivity() {
         }
 
         viewBinding.btnConfirm.setOnClickListener {
-            val myCurrentLocation = LocationMeta(0.0,0.0,0.0) // placeholder
+            val myCurrentLocation = LocationMeta(0.0, 0.0, 0.0) // placeholder
             PictureDao.exportPictureFromBytes(
                 context = this,
                 imageBytes = imageBytes,
