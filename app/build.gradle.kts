@@ -78,4 +78,7 @@ dependencies {
     implementation("org.osmdroid:osmdroid-android:6.1.14")
     // Coil pour charger les images
     implementation("io.coil-kt:coil:2.5.0")
+    implementation("androidx.activity:activity-ktx:1.8.2")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
 }

@@ -1,4 +1,4 @@
-package com.example.piibiocampus
+package com.example.piibiocampus.data.model
 
 data class LocationMeta(
     val latitude: Double,

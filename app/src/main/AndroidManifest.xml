@@ -19,13 +19,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.PIIBioCampus">
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.auth.CreateAccountActivity"
             android:exported="true" />
         <activity
-            android:name=".CreateAccountActivity"
-            android:exported="true" />
-        <activity
-            android:name=".ConnectionActivity"
+            android:name=".ui.auth.ConnectionActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -34,13 +31,13 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".DashboardAdminActivity"
+            android:name=".ui.admin.DashboardAdminActivity"
             android:exported="true" />
         <activity
-            android:name=".MapActivity"
+            android:name=".ui.map.MapActivity"
             android:exported="true" />
         <activity
-            android:name=".ResetPassWord"
+            android:name=".ui.auth.ResetPassWordActivity"
             android:exported="true" />
         <activity
             android:name=".PictureActivity"
