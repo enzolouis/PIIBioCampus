@@ -15,6 +15,8 @@ import androidx.core.content.ContextCompat
 import com.example.piibiocampus.data.model.LocationMeta
 import com.example.piibiocampus.databinding.ActivityPreviewPictureBinding
 import com.example.piibiocampus.ui.census.CensusTreeActivity
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 
 class PreviewPictureActivity : AppCompatActivity() {
 
