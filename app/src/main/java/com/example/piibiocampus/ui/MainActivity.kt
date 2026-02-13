@@ -7,6 +7,8 @@ import com.example.piibiocampus.PictureActivity
 import com.example.piibiocampus.PreviewPictureActivity
 import com.example.piibiocampus.R
 import com.example.piibiocampus.ui.map.MapFragment
+import com.example.piibiocampus.ui.profiles.MyProfileFragment
+import com.example.piibiocampus.utils.DatabaseFiller
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
@@ -33,7 +35,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_recherche -> /* RechercheFragment() */ MapFragment()
                 R.id.nav_bibliotheque -> /* BibliothequeFragment() */ MapFragment()
                 R.id.nav_map -> MapFragment()
-                R.id.nav_compte -> /* CompteFragment() */ MapFragment()
+                R.id.nav_compte -> MyProfileFragment()
                 else -> null
             }
             fragment?.let {

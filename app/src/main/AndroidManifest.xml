@@ -3,6 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.CAMERA" />
 
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
@@ -49,9 +52,11 @@
             android:name=".PreviewPictureActivity"
             android:exported="true" />
         <activity
+            android:name=".ui.profiles.MyProfileActivity"
+            android:exported="true" />
+        <activity
             android:name=".ui.census.CensusTreeActivity"
             android:exported="true" />
-
     </application>
 
 </manifest>

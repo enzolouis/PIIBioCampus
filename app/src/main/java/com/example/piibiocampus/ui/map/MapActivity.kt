@@ -82,9 +82,6 @@ class MapActivity : AppCompatActivity() {
 
         PictureDao.getAllPictures(
             onSuccess = { points ->
-
-                Log.d("test", "$points")
-
                 for (o in points) {
                     val marker = Marker(map)
                     val lat = o["latitude"] as Double
