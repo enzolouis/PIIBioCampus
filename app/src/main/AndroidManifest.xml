@@ -48,6 +48,9 @@
         <activity
             android:name=".PreviewPictureActivity"
             android:exported="true" />
+        <activity
+            android:name=".ui.census.CensusTreeActivity"
+            android:exported="true" />
 
     </application>
 
