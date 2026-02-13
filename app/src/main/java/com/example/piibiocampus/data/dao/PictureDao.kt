@@ -22,7 +22,7 @@ object PictureDao {
     }
 
     private val picturesRef = firestore.collection("pictures")
-    private val storageRef = storage.reference.child("pictures")
+    private val storageRef = storage.reference
 
     private fun uriToWebpFile(
         context: Context,
