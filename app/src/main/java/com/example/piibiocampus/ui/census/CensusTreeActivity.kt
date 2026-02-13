@@ -1,5 +1,6 @@
 package com.example.piibiocampus.ui.census
 
+import PictureDao.exportPictureFromBytes
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.os.Bundle
@@ -225,7 +226,7 @@ class CensusTreeActivity : AppCompatActivity() {
         }
 
         // speciesRef not used: pass null
-        PictureDao.exportPictureFromBytes(
+        exportPictureFromBytes(
             context = this,
             imageBytes = imgBytes,
             location = loc,

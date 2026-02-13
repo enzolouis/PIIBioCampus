@@ -81,31 +81,38 @@ object PictureDao {
         context: Context,
         imageBytes: ByteArray,
         location: LocationMeta,
-        censusRef: String?,             // idNodeCensus (dernier noeud sélectionné)
-        userRef: String? = null,        // si null => FirebaseAuth uid
-        speciesRef: String?,            // on peut laisser null si non utilisé
-        recordingStatus: Boolean,       // true si recensement jusqu'à espèce, false sinon
-        adminValidated: Boolean = false,// par défaut false
+        censusRef: String?,
+        userRef: String? = null,
+        speciesRef: String?,
+        recordingStatus: Boolean,
+        adminValidated: Boolean = false,
         onSuccess: () -> Unit,
         onError: (Exception) -> Unit
     ) {
         try {
-            val currentUserUid = userRef ?: FirebaseAuth.getInstance().currentUser?.uid
-            ?: throw IllegalStateException("Utilisateur non connecté")
+            // 🔹 VÉRIFICATION CRITIQUE : utilisateur connecté
+            val currentUser = FirebaseAuth.getInstance().currentUser
+            if (currentUser == null) {
+                onError(IllegalStateException("Utilisateur non connecté. Veuillez vous connecter."))
+                return
+            }
+
+            val currentUserUid = userRef ?: currentUser.uid
 
             val webpFile = bytesToWebpFile(context, imageBytes)
-
             val pictureId = picturesRef.document().id
             val pictureStorageRef = storageRef.child("$pictureId.webp")
 
+            // 🔹 Ajouter des métadonnées pour debug
             val metadata = com.google.firebase.storage.StorageMetadata.Builder()
-                .setCustomMetadata("userRef", currentUserUid)
+                .setContentType("image/webp") // Important pour l'affichage
+                .setCustomMetadata("userRef", currentUserUid) // Pour info, mais pas utilisé dans les règles
+                .setCustomMetadata("uploadDate", Date().toString())
                 .build()
 
             pictureStorageRef.putFile(Uri.fromFile(webpFile), metadata)
                 .addOnSuccessListener {
                     pictureStorageRef.downloadUrl.addOnSuccessListener { downloadUrl ->
-
                         val data = hashMapOf(
                             "imageUrl" to downloadUrl.toString(),
                             "timestamp" to Date(),
@@ -130,7 +137,10 @@ object PictureDao {
                             .addOnFailureListener(onError)
                     }.addOnFailureListener(onError)
                 }
-                .addOnFailureListener(onError)
+                .addOnFailureListener { exception ->
+                    webpFile.delete() // 🔹 Nettoyer le fichier temp en cas d'erreur
+                    onError(exception)
+                }
 
         } catch (e: Exception) {
             onError(e)
