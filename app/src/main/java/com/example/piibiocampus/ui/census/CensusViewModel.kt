@@ -4,12 +4,17 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.piibiocampus.data.repository.CensusRepository
+import com.example.piibiocampus.ui.census.CensusNode
 
 class CensusViewModel(private val repository: CensusRepository) : ViewModel() {
 
     // la liste d'éléments actuellement affichée (ex: listes d'ordres, puis familles, ...)
     private val _currentNodes = MutableLiveData<List<CensusNode>>(emptyList())
     val currentNodes: LiveData<List<CensusNode>> = _currentNodes
+
+    // selection actuelle (id du noeud)
+    private val _selectedNodeId = MutableLiveData<String?>(null)
+    val selectedNodeId: LiveData<String?> = _selectedNodeId
 
     // stack de navigation (permet de revenir en arrière)
     private val navStack = ArrayDeque<List<CensusNode>>()
@@ -20,11 +25,9 @@ class CensusViewModel(private val repository: CensusRepository) : ViewModel() {
         repository.roots.observeForever { roots ->
             // Au premier chargement, affiche les ordres
             if (roots.isNotEmpty() && _currentNodes.value.isNullOrEmpty()) {
-                // Clear stacks et push roots
                 navStack.clear()
                 pathStack.clear()
                 _currentNodes.postValue(roots)
-                // parent null pour racine
                 pathStack.addLast(null)
             }
         }
@@ -38,6 +41,8 @@ class CensusViewModel(private val repository: CensusRepository) : ViewModel() {
         // push current list sur la pile
         _currentNodes.value?.let { navStack.addLast(it) }
         pathStack.addLast(node)
+        // clear selection lors de la navigation vers un nouveau niveau
+        _selectedNodeId.postValue(null)
         // affiche les enfants (peut être vide)
         _currentNodes.postValue(node.children)
     }
@@ -49,7 +54,14 @@ class CensusViewModel(private val repository: CensusRepository) : ViewModel() {
             val previous = navStack.removeLast()
             pathStack.removeLastOrNull()
             _currentNodes.postValue(previous)
+            // clear selection en remontant
+            _selectedNodeId.postValue(null)
         }
+    }
+
+    fun selectNode(node: CensusNode) {
+        // Si node est feuille (species) on conserve selection ; sinon on conserve la sélection comme dernier noeud choisi
+        _selectedNodeId.postValue(node.id)
     }
 
     // expose un helper pour récupérer le chemin (utile si tu veux afficher breadcrumb)

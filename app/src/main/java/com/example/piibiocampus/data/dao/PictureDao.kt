@@ -81,35 +81,31 @@ object PictureDao {
         context: Context,
         imageBytes: ByteArray,
         location: LocationMeta,
-        censusRef: String?,
-        userRef: String? = null, // si null, on prend l'UID FirebaseAuth
-        speciesRef: String?,
+        censusRef: String?,             // idNodeCensus (dernier noeud sélectionné)
+        userRef: String? = null,        // si null => FirebaseAuth uid
+        speciesRef: String?,            // on peut laisser null si non utilisé
+        recordingStatus: Boolean,       // true si recensement jusqu'à espèce, false sinon
+        adminValidated: Boolean = false,// par défaut false
         onSuccess: () -> Unit,
         onError: (Exception) -> Unit
     ) {
         try {
-            // récupère l'UID actuel si userRef pas fourni
             val currentUserUid = userRef ?: FirebaseAuth.getInstance().currentUser?.uid
             ?: throw IllegalStateException("Utilisateur non connecté")
 
-            // conversion ByteArray -> fichier WebP temporaire
             val webpFile = bytesToWebpFile(context, imageBytes)
 
-            // ID unique pour la photo
             val pictureId = picturesRef.document().id
             val pictureStorageRef = storageRef.child("$pictureId.webp")
 
-            // metadata obligatoire pour passer les rules
             val metadata = com.google.firebase.storage.StorageMetadata.Builder()
                 .setCustomMetadata("userRef", currentUserUid)
                 .build()
 
-            // upload vers Firebase Storage
             pictureStorageRef.putFile(Uri.fromFile(webpFile), metadata)
                 .addOnSuccessListener {
                     pictureStorageRef.downloadUrl.addOnSuccessListener { downloadUrl ->
 
-                        // stockage Firestore
                         val data = hashMapOf(
                             "imageUrl" to downloadUrl.toString(),
                             "timestamp" to Date(),
@@ -120,13 +116,14 @@ object PictureDao {
                             ),
                             "censusRef" to censusRef,
                             "userRef" to currentUserUid,
-                            "speciesRef" to speciesRef
+                            "speciesRef" to speciesRef,
+                            "recordingStatus" to recordingStatus,
+                            "adminValidated" to adminValidated
                         )
 
                         picturesRef.document(pictureId)
                             .set(data)
                             .addOnSuccessListener {
-                                // 🧹 nettoyage
                                 webpFile.delete()
                                 onSuccess()
                             }
@@ -139,6 +136,7 @@ object PictureDao {
             onError(e)
         }
     }
+
 
 
     /**
