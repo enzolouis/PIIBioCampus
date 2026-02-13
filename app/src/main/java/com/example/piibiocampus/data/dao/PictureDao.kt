@@ -7,6 +7,7 @@ import com.google.firebase.FirebaseApp
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.storage.FirebaseStorage
 import java.io.File
 import java.io.FileOutputStream
@@ -338,4 +339,23 @@ object PictureDao {
             }
             .addOnFailureListener(onError)
     }
+
+    fun listenToPicturesByUser(
+        userId: String,
+        onUpdate: (List<Map<String, Any>>) -> Unit
+    ): ListenerRegistration {
+        return FirebaseFirestore.getInstance()
+            .collection("pictures")
+            .whereEqualTo("userRef", userId)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) return@addSnapshotListener
+
+                val pictures = snapshot?.documents?.map { doc ->
+                    doc.data ?: emptyMap<String, Any>()
+                } ?: emptyList()
+
+                onUpdate(pictures)
+            }
+    }
+
 }

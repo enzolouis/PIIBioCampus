@@ -94,7 +94,6 @@ class MapFragment : Fragment(R.layout.fragment_map) {
         map.overlays.clear()
 
         for (o in points) {
-            // Extraction robuste des coordonnées (supporte deux formes : a) lat/lon à la racine b) location -> {latitude,longitude})
             val latLon: Pair<Double, Double>? = when {
                 o["latitude"] is Double && o["longitude"] is Double -> {
                     Pair(o["latitude"] as Double, o["longitude"] as Double)
@@ -155,7 +154,7 @@ class MapFragment : Fragment(R.layout.fragment_map) {
                             zoomImage.setImageDrawable(null)
                         }
 
-                        photoDate.text = "Date : ${o["date"] ?: "Non connu"} à ${o["hours"] ?: "Non connu"}"
+                        photoDate.text = "Date : ${o["timestamp"] ?: "Non connu"}"
                         photoInfos.text =
                             "Famille : ${o["family"] ?: "Non identifié"}\n" +
                                     "Genre : ${o["genre"] ?: "Non identifié"}\n" +

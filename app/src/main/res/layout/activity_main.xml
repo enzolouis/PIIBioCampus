@@ -18,13 +18,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        app:menu="@menu/bottom_nav_menu"
-        app:labelVisibilityMode="labeled"
+        android:fitsSystemWindows="true"
+        app:background="?attr/colorSurface"
         app:itemIconTint="@color/black"
         app:itemTextColor="@color/black"
-        app:background="?attr/colorSurface"
-        android:fitsSystemWindows="true"
-        app:paddingBottomSystemWindowInsets="true"/>
+        app:labelVisibilityMode="labeled"
+        app:menu="@menu/bottom_nav_menu"
+        app:paddingBottomSystemWindowInsets="true" />
 
     <!-- Bouton caméra flottant -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton

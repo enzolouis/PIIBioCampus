@@ -1,5 +1,6 @@
 package com.example.piibiocampus.data.dao
 
+import com.example.piibiocampus.data.model.UserProfile
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -58,4 +59,15 @@ object UserDao {
     fun getCurrentUser(): FirebaseUser? = auth.currentUser
 
     fun signOut() = auth.signOut()
+
+    suspend fun getCurrentUserProfile(): UserProfile? {
+        val currentUser = auth.currentUser ?: return null
+
+        val snapshot = db.collection("users")
+            .document(currentUser.uid)
+            .get()
+            .await()
+
+        return snapshot.toObject(UserProfile::class.java)
+    }
 }
