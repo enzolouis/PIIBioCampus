@@ -44,7 +44,7 @@ class CensusAdapter(
         // highlight si selectionné
         if (item.id == selectedNodeId) {
             holder.card.strokeWidth = (3 * holder.card.context.resources.displayMetrics.density).toInt()
-            holder.card.strokeColor = ContextCompat.getColor(holder.card.context, R.color.primary) // ou ?attr/colorPrimary
+            holder.card.strokeColor = ContextCompat.getColor(holder.card.context, R.color.primary)
         } else {
             holder.card.strokeWidth = 0
         }

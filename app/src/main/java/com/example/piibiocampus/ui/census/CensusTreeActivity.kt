@@ -84,23 +84,6 @@ class CensusTreeActivity : AppCompatActivity() {
                 .show()
         }
 
-        // Grid layout (ne pas agrandir le dernier élément : on laisse spanSizeLookup à 1)
-        val glm = GridLayoutManager(this, spanCount)
-        recyclerView.layoutManager = glm
-
-        val spacingPx = (spacingDp * resources.displayMetrics.density).toInt()
-        recyclerView.addItemDecoration(GridSpacingItemDecoration(spanCount, spacingPx, true))
-        recyclerView.clipToPadding = false
-
-        // window insets : ajoute padding bottom pour bottom bar
-        val root = findViewById<View>(R.id.root)
-        ViewCompat.setOnApplyWindowInsetsListener(root) { _, insets ->
-            val bottom = insets.systemWindowInsetBottom
-            val bottomBarHeight = (80 * resources.displayMetrics.density).toInt()
-            recyclerView.updatePadding(bottom = bottom + bottomBarHeight)
-            insets
-        }
-
         // adapter initial vide
         adapter = CensusAdapter(emptyList(), selectedNodeId = null,
             onItemClick = { node, _ ->
@@ -116,6 +99,8 @@ class CensusTreeActivity : AppCompatActivity() {
                 showInfoDialog(node)
             }
         )
+
+        recyclerView.layoutManager = GridLayoutManager(this, spanCount)
         recyclerView.adapter = adapter
 
         // Observers

@@ -3,7 +3,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
 
     <ImageView
         android:id="@+id/imagePreview"
@@ -24,7 +25,8 @@
         app:layout_constraintEnd_toStartOf="@+id/btnConfirm"
         app:layout_constraintBottom_toBottomOf="parent"
         android:layout_margin="16dp"
-        android:theme="@style/Bouton"/>
+        android:theme="@style/Bouton"
+        app:paddingBottomSystemWindowInsets="true"/>
 
     <Button
         android:id="@+id/btnConfirm"
@@ -35,6 +37,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         android:layout_margin="16dp"
-        android:theme="@style/Bouton"/>
+        android:theme="@style/Bouton"
+        app:paddingBottomSystemWindowInsets="true"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

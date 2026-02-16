@@ -23,11 +23,11 @@
             android:id="@+id/previewThumbnail"
             android:layout_width="72dp"
             android:layout_height="72dp"
-            android:scaleType="centerCrop"
-            android:contentDescription="Photo preview"
-            android:src="@drawable/ic_placeholder_image"
             android:layout_marginEnd="12dp"
-            android:background="?attr/selectableItemBackgroundBorderless"/>
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Photo preview"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_placeholder_image" />
 
         <TextView
             android:id="@+id/tvHeaderTitle"
