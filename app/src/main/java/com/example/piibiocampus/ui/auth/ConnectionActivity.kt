@@ -56,7 +56,6 @@ class ConnectionActivity : AppCompatActivity() {
 
             viewModel.login(email, password)
         }
-
         viewModel.checkCurrentUserAndFetchRoleIfNeeded()
         // Observe le state flow
         lifecycleScope.launch {

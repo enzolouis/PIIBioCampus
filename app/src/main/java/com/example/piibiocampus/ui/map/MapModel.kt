@@ -13,7 +13,7 @@ class MapViewModel : ViewModel() {
     private val TAG = "MapViewModel"
 
     fun loadAllPictures() {
-        PictureDao.getAllPictures(
+        PictureDao.getAllPicturesEnriched(
             onSuccess = { list ->
                 _pictures.postValue(list)
             },
@@ -25,9 +25,11 @@ class MapViewModel : ViewModel() {
     }
 
     fun loadPicturesNear(lat: Double, lon: Double, radiusMeters: Double) {
-        PictureDao.getPicturesNearLocation(
+        PictureDao.getPicturesNearLocationEnriched(
             lat, lon, radiusMeters,
-            onSuccess = { list -> _pictures.postValue(list) },
+            onSuccess = { list ->
+                _pictures.postValue(list)
+            },
             onError = { e ->
                 Log.e(TAG, "Erreur récupération nearby pictures", e)
                 _pictures.postValue(emptyList())

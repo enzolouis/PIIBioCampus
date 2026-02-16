@@ -210,14 +210,11 @@ class CensusTreeActivity : AppCompatActivity() {
             return
         }
 
-        // speciesRef not used: pass null
         exportPictureFromBytes(
             context = this,
             imageBytes = imgBytes,
             location = loc,
             censusRef = censusRef,
-            userRef = null,
-            speciesRef = null,
             recordingStatus = recordingStatus,
             adminValidated = false,
             onSuccess = {
