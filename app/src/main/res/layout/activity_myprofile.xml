@@ -4,11 +4,13 @@
     android:layout_height="match_parent">
 
     <!-- CONTENU PRINCIPAL -->
-    <ScrollView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:orientation="vertical"
         android:background="#F4F4F4">
 
+        <!-- EN-TÊTE FIXE (non scrollable) -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -74,14 +76,20 @@
                 android:background="#CCCCCC"
                 android:layout_marginTop="12dp"/>
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/photosRecycler"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"/>
-
         </LinearLayout>
-    </ScrollView>
+
+        <!-- RECYCLERVIEW SCROLLABLE -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/photosRecycler"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:paddingBottom="80dp"
+            android:clipToPadding="false"/>
+
+    </LinearLayout>
 
     <!-- OVERLAY (zoom photo) -->
     <FrameLayout
@@ -145,6 +153,5 @@
             </LinearLayout>
         </ScrollView>
     </FrameLayout>
-
 
 </FrameLayout>

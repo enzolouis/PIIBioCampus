@@ -9,42 +9,50 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.piibiocampus.PictureActivity
-import com.example.piibiocampus.PreviewPictureActivity
 import com.example.piibiocampus.R
 import com.example.piibiocampus.ui.map.MapFragment
 import com.example.piibiocampus.ui.profiles.MyProfileFragment
-import com.example.piibiocampus.utils.DatabaseFiller
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class MainActivity : AppCompatActivity() {
 
+    private lateinit var fabCamera: FloatingActionButton
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main) // ton layout précédemment corrigé
+        setContentView(R.layout.activity_main)
 
         askLocationPermission()
 
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNav)
-        val fabCamera = findViewById<FloatingActionButton>(R.id.fabCamera)
+        fabCamera = findViewById(R.id.fabCamera)
 
-        // Charge le fragment par défaut (Actualité si tu en as un)
+        // Charge le fragment par défaut (Map)
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, MapFragment()) // par défaut Map pour l'exemple
+                .replace(R.id.fragment_container, MapFragment())
                 .commit()
             bottomNav.selectedItemId = R.id.nav_map
         }
 
         bottomNav.setOnItemSelectedListener { item ->
             val fragment = when (item.itemId) {
-                R.id.nav_actualite -> /* ActualiteFragment() */ MapFragment() // remplace par ton fragment réel
-                R.id.nav_recherche -> /* RechercheFragment() */ MapFragment()
-                R.id.nav_bibliotheque -> /* BibliothequeFragment() */ MapFragment()
+                R.id.nav_actualite -> MapFragment() // remplace par ton fragment réel
+                R.id.nav_recherche -> MapFragment()
+                R.id.nav_bibliotheque -> MapFragment()
                 R.id.nav_map -> MapFragment()
                 R.id.nav_compte -> MyProfileFragment()
                 else -> null
             }
+
+            // Gestion de la visibilité du FAB selon l'onglet
+            if (item.itemId == R.id.nav_compte) {
+                fabCamera.hide()
+            } else {
+                fabCamera.show()
+            }
+
             fragment?.let {
                 supportFragmentManager.beginTransaction()
                     .replace(R.id.fragment_container, it)
@@ -56,23 +64,24 @@ class MainActivity : AppCompatActivity() {
         fabCamera.setOnClickListener {
             val intent = Intent(this@MainActivity, PictureActivity::class.java)
             startActivity(intent)
-
         }
     }
-    private fun askLocationPermission() {
 
+    private fun askLocationPermission() {
         val fine = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
         val coarse = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
 
         if (!fine && !coarse) {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION), 100
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION),
+                100
             )
         } else {
             // fonction qui localise l'utilisateur sur la map
         }
     }
 
-    // fonction appellé automatiquement après askLocationPermission
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -87,11 +96,9 @@ class MainActivity : AppCompatActivity() {
                 if (granted) {
                     // fonction qui localise l'utilisateur sur la map
                 } else {
-                    // définir le comportement si l'utilisateur refuse la localisation (interdire l'appareil photo par exemple)
                     Toast.makeText(this, "Permission localisation refusée", Toast.LENGTH_SHORT).show()
                 }
             }
         }
     }
-
 }
