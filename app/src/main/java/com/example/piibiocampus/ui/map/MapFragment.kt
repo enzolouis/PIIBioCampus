@@ -17,6 +17,7 @@ import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.infowindow.InfoWindow
 import androidx.fragment.app.viewModels
+import androidx.core.net.toUri
 
 
 class MapFragment : Fragment(R.layout.fragment_map) {
@@ -34,7 +35,6 @@ class MapFragment : Fragment(R.layout.fragment_map) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // OSMDroid user-agent config — fait ici une seule fois
         Configuration.getInstance().userAgentValue = requireContext().packageName
     }
 
@@ -74,6 +74,22 @@ class MapFragment : Fragment(R.layout.fragment_map) {
 
         // Charge les points (par défaut tous)
         viewModel.loadAllPictures()
+    }
+
+    private fun formatTimestamp(timestamp: Any?): String {
+        return when (timestamp) {
+            is com.google.firebase.Timestamp -> {
+                val date = timestamp.toDate()
+                val format = java.text.SimpleDateFormat("dd/MM/yyyy à HH:mm", java.util.Locale.FRENCH)
+                format.format(date)
+            }
+            is java.util.Date -> {
+                val format = java.text.SimpleDateFormat("dd/MM/yyyy à HH:mm", java.util.Locale.FRENCH)
+                format.format(timestamp)
+            }
+            is String -> timestamp
+            else -> "Date inconnue"
+        }
     }
 
     private fun setupTileSource() {
@@ -133,7 +149,6 @@ class MapFragment : Fragment(R.layout.fragment_map) {
                     val titleView = mView.findViewById<TextView>(R.id.title)
                     val photoView = mView.findViewById<ImageView>(R.id.photo)
 
-                    // Récupère l'URL de l'image (forme dynamique)
                     val imageUrl = when {
                         o["imageUrl"] is String -> o["imageUrl"] as String
                         (o["image"] is String) -> o["image"] as String
@@ -149,12 +164,12 @@ class MapFragment : Fragment(R.layout.fragment_map) {
 
                     photoView.setOnClickListener {
                         if (!imageUrl.isNullOrEmpty()) {
-                            Picasso.get().load(Uri.parse(imageUrl)).into(zoomImage)
+                            Picasso.get().load(imageUrl.toUri()).into(zoomImage)
                         } else {
                             zoomImage.setImageDrawable(null)
                         }
 
-                        photoDate.text = "Date : ${o["timestamp"] ?: "Non connu"}"
+                        photoDate.text = "Date : ${formatTimestamp(o["timestamp"])}"
                         photoInfos.text =
                             "Famille : ${o["family"] ?: "Non identifié"}\n" +
                                     "Genre : ${o["genre"] ?: "Non identifié"}\n" +

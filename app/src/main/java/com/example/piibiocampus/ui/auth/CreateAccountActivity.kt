@@ -11,7 +11,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.piibiocampus.R
-import com.example.piibiocampus.ui.map.MapActivity
+import com.example.piibiocampus.ui.MainActivity
 import com.example.piibiocampus.utils.Extensions.toast
 import com.example.piibiocampus.utils.Validators
 import kotlinx.coroutines.launch
@@ -59,7 +59,7 @@ class CreateAccountActivity : AppCompatActivity() {
                             startActivity(
                                 Intent(
                                     this@CreateAccountActivity,
-                                    MapActivity::class.java
+                                    MainActivity::class.java
                                 )
                             )
                             finish()

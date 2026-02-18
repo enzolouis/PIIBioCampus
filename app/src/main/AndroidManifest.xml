@@ -51,9 +51,6 @@
         <activity
             android:name=".PreviewPictureActivity"
             android:exported="true" />
-        <activity
-            android:name=".ui.profiles.MyProfileActivity"
-            android:exported="true" />
 
     </application>
 

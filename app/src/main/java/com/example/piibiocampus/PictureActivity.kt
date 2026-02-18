@@ -19,11 +19,10 @@ import com.example.piibiocampus.databinding.ActivityPictureBinding
 import com.example.piibiocampus.utils.ImageUtils.resizeAndCompress
 
 private const val FILENAME_FORMAT = "yyyy-MM-dd-HH-mm-ss-SSS"
-class PictureActivity  : AppCompatActivity() {
+
+class PictureActivity : AppCompatActivity() {
     private lateinit var viewBinding: ActivityPictureBinding
-
-
-    private lateinit var cameraController : LifecycleCameraController
+    private var cameraController: LifecycleCameraController? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,23 +38,55 @@ class PictureActivity  : AppCompatActivity() {
         viewBinding.btnBack.setOnClickListener {
             finish()
         }
+    }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        // 🔹 Nettoyer la caméra proprement
+        cleanupCamera()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        // 🔹 CRUCIAL : Arrêter la caméra quand l'activité se met en pause
+        cleanupCamera()
+    }
+
+    private fun cleanupCamera() {
+        cameraController?.let { controller ->
+            try {
+                // Détacher de la PreviewView
+                viewBinding.viewFinder.controller = null
+                // Unbind du lifecycle
+                controller.unbind()
+                cameraController = null
+                Log.d("CAMERA", "Caméra nettoyée correctement")
+            } catch (e: Exception) {
+                Log.e("CAMERA", "Erreur lors du nettoyage de la caméra", e)
+            }
+        }
     }
 
     private fun startCamera() {
         Log.d("CAMERA", "lancement de la caméra")
         val previewView: PreviewView = viewBinding.viewFinder
-        cameraController = LifecycleCameraController(this)
-        cameraController.bindToLifecycle(this)
-        cameraController.cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
-        cameraController.setEnabledUseCases(
-           CameraController.IMAGE_CAPTURE
-        )
+
+        // Si la caméra existe déjà, la nettoyer d'abord
+        cleanupCamera()
+
+        cameraController = LifecycleCameraController(this).apply {
+            bindToLifecycle(this@PictureActivity)
+            cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+            setEnabledUseCases(CameraController.IMAGE_CAPTURE)
+        }
+
         previewView.controller = cameraController
     }
 
     private fun takePhoto() {
-        cameraController.takePicture(
+        val controller = cameraController ?: return
+
+        controller.takePicture(
             ContextCompat.getMainExecutor(this),
             object : ImageCapture.OnImageCapturedCallback() {
                 override fun onError(exc: ImageCaptureException) {
@@ -78,7 +109,10 @@ class PictureActivity  : AppCompatActivity() {
                         quality = 80
                     )
 
-                    // parametre pour la prochaine activité
+                    // 🔹 NE PAS APPELER cleanupCamera() ici
+                    // Le nettoyage se fera automatiquement dans onPause() et onDestroy()
+
+                    // Lancer l'activité suivante
                     val intent = Intent(this@PictureActivity, PreviewPictureActivity::class.java)
                     intent.putExtra("imageBytes", compressedBytes)
                     startActivity(intent)
@@ -87,10 +121,8 @@ class PictureActivity  : AppCompatActivity() {
         )
     }
 
-
     private fun askCameraPermission() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED
-        ) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), 1)
         } else {
             startCamera()
@@ -98,7 +130,11 @@ class PictureActivity  : AppCompatActivity() {
     }
 
     // fonction appellé automatiquement après askCameraPermission
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
         if (requestCode == 1) {
@@ -112,5 +148,4 @@ class PictureActivity  : AppCompatActivity() {
             }
         }
     }
-
 }

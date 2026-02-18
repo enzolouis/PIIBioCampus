@@ -1,5 +1,6 @@
 package com.example.piibiocampus.ui.profiles
 
+import android.icu.text.SimpleDateFormat
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -18,6 +19,7 @@ import com.example.piibiocampus.data.dao.UserDao
 import com.google.firebase.firestore.ListenerRegistration
 import com.squareup.picasso.Picasso
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 class MyProfileFragment : Fragment() {
 
@@ -145,6 +147,22 @@ class MyProfileFragment : Fragment() {
             return PhotoViewHolder(view)
         }
 
+        private fun formatTimestamp(timestamp: Any?): String {
+            return when (timestamp) {
+                is com.google.firebase.Timestamp -> {
+                    val date = timestamp.toDate()
+                    val format = SimpleDateFormat("dd/MM/yyyy à HH:mm", Locale.FRENCH)
+                    format.format(date)
+                }
+                is java.util.Date -> {
+                    val format = SimpleDateFormat("dd/MM/yyyy à HH:mm", Locale.FRENCH)
+                    format.format(timestamp)
+                }
+                is String -> timestamp
+                else -> "Date inconnue"
+            }
+        }
+
         override fun onBindViewHolder(holder: PhotoViewHolder, position: Int) {
             val photo = photos[position]
             val imageUrl = photo["imageUrl"] as? String ?: ""
@@ -165,14 +183,23 @@ class MyProfileFragment : Fragment() {
                     zoomImage.setImageDrawable(null)
                 }
 
-                val timestamp = photo["timestamp"] ?: "Non connu"
+                val timestamp = formatTimestamp(photo["timestamp"])
+                val ordre = photo["ordre"] ?: "Non identifié"
                 val family = photo["family"] ?: "Non identifié"
                 val genre = photo["genre"] ?: "Non identifié"
                 val specie = photo["specie"] ?: "Non identifié"
+                val taxonomyLevel = photo["taxonomyLevel"] as? String ?: "NONE"
 
                 photoDate.text = "Date : $timestamp"
-                photoInfos.text =
-                    "Famille : $family\nGenre : $genre\nEspèce : $specie"
+
+                // Affichage adapté selon le niveau taxonomique
+                photoInfos.text = when (taxonomyLevel) {
+                    "ORDER" -> "Ordre : $ordre\n(Identification au niveau ordre)"
+                    "FAMILY" -> "Ordre : $ordre\nFamille : $family\n(Identification au niveau famille)"
+                    "GENUS" -> "Ordre : $ordre\nFamille : $family\nGenre : $genre\n(Identification au niveau genre)"
+                    "SPECIES" -> "Ordre : $ordre\nFamille : $family\nGenre : $genre\nEspèce : $specie"
+                    else -> "Non identifié"
+                }
 
                 overlay.apply {
                     alpha = 0f
