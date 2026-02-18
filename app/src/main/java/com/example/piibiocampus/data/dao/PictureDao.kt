@@ -26,6 +26,61 @@ object PictureDao {
     private val picturesRef = firestore.collection("pictures")
     private val storageRef = storage.reference
 
+
+    /**
+     * Récupère les photos d'un utilisateur triées par timestamp (plus récent en premier) avec enrichissement
+     * Spécifique pour l'affichage des profils
+     */
+    fun getPicturesByUserEnrichedSortedByDate(
+        userRef: String,
+        onSuccess: (List<Map<String, Any>>) -> Unit,
+        onError: (Exception) -> Unit
+    ) {
+        picturesRef
+            .whereEqualTo("userRef", userRef)
+            .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.DESCENDING)
+            .get()
+            .addOnSuccessListener { snapshot ->
+                val pictures = snapshot.documents.mapNotNull { it.data }
+                enrichPicturesWithCensusData(pictures, onSuccess, onError)
+            }
+            .addOnFailureListener(onError)
+    }
+
+    /**
+     * Écoute en temps réel les photos d'un utilisateur triées par timestamp (plus récent en premier) avec enrichissement
+     * Spécifique pour l'affichage des profils
+     */
+    fun listenToPicturesByUserEnrichedSortedByDate(
+        userId: String,
+        onUpdate: (List<Map<String, Any>>) -> Unit
+    ): ListenerRegistration {
+        return firestore.collection("pictures")
+            .whereEqualTo("userRef", userId)
+            .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.DESCENDING)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    onUpdate(emptyList())
+                    return@addSnapshotListener
+                }
+
+                val pictures = snapshot?.documents?.mapNotNull { it.data } ?: emptyList()
+
+                // Enrichir avec les données du census
+                enrichPicturesWithCensusData(
+                    pictures,
+                    onSuccess = { enrichedPictures ->
+                        onUpdate(enrichedPictures)
+                    },
+                    onError = {
+                        // En cas d'erreur, renvoyer les photos non enrichies
+                        onUpdate(pictures)
+                    }
+                )
+            }
+    }
+
+
     private fun uriToWebpFile(
         context: Context,
         uri: Uri,

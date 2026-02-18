@@ -113,15 +113,16 @@ class MyProfileFragment : Fragment() {
         // on annule l'ancien listener s'il existe déjà
         firestoreListener?.remove()
 
-        // écoute en temps réel si une photo est prise sur l'appli
-        firestoreListener = PictureDao.listenToPicturesByUser(userId) { urlList ->
+        // Écoute en temps réel avec tri par date (plus récent en premier)
+        firestoreListener = PictureDao.listenToPicturesByUserEnrichedSortedByDate(userId) { enrichedPhotos ->
             photos.clear()
-            photos.addAll(urlList)
+            photos.addAll(enrichedPhotos)
+
             val badgeRes = when {
-                urlList.size >= 50 -> R.drawable.diamond
-                urlList.size >= 20 -> R.drawable.gold
-                urlList.size >= 10 -> R.drawable.silver
-                urlList.size >= 2 -> R.drawable.bronze
+                enrichedPhotos.size >= 50 -> R.drawable.diamond
+                enrichedPhotos.size >= 20 -> R.drawable.gold
+                enrichedPhotos.size >= 10 -> R.drawable.silver
+                enrichedPhotos.size >= 2 -> R.drawable.bronze
                 else -> R.drawable.norank
             }
             badge.setImageResource(badgeRes)
@@ -184,22 +185,16 @@ class MyProfileFragment : Fragment() {
                 }
 
                 val timestamp = formatTimestamp(photo["timestamp"])
-                val ordre = photo["ordre"] ?: "Non identifié"
                 val family = photo["family"] ?: "Non identifié"
                 val genre = photo["genre"] ?: "Non identifié"
                 val specie = photo["specie"] ?: "Non identifié"
-                val taxonomyLevel = photo["taxonomyLevel"] as? String ?: "NONE"
 
                 photoDate.text = "Date : $timestamp"
 
                 // Affichage adapté selon le niveau taxonomique
-                photoInfos.text = when (taxonomyLevel) {
-                    "ORDER" -> "Ordre : $ordre\n(Identification au niveau ordre)"
-                    "FAMILY" -> "Ordre : $ordre\nFamille : $family\n(Identification au niveau famille)"
-                    "GENUS" -> "Ordre : $ordre\nFamille : $family\nGenre : $genre\n(Identification au niveau genre)"
-                    "SPECIES" -> "Ordre : $ordre\nFamille : $family\nGenre : $genre\nEspèce : $specie"
-                    else -> "Non identifié"
-                }
+                photoInfos.text = "Famille : $family\nGenre : $genre\nEspèce : $specie"
+
+
 
                 overlay.apply {
                     alpha = 0f

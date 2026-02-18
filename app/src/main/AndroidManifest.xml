@@ -37,7 +37,7 @@
             android:name=".ui.admin.DashboardAdminActivity"
             android:exported="true" />
         <activity
-            android:name=".ui.map.MapActivity"
+            android:name=".ui.census.CensusTreeActivity"
             android:exported="true" />
         <activity
             android:name=".ui.auth.ResetPassWordActivity"
