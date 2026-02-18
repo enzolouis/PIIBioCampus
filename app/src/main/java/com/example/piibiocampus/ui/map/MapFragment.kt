@@ -1,9 +1,12 @@
 package com.example.piibiocampus.ui.map
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.*
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -18,6 +21,7 @@ import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.infowindow.InfoWindow
 import androidx.fragment.app.viewModels
 import androidx.core.net.toUri
+import com.google.android.gms.location.LocationServices
 
 
 class MapFragment : Fragment(R.layout.fragment_map) {
@@ -103,7 +107,30 @@ class MapFragment : Fragment(R.layout.fragment_map) {
         map.setTilesScaledToDpi(true)
         map.setMultiTouchControls(true)
         map.controller.setZoom(15.0)
-        map.controller.setCenter(GeoPoint(43.562817415184526, 1.467314949845769)) // Toulouse par défaut
+
+        // Centrer sur la position actuelle de l'utilisateur (sans marker)
+        if (ActivityCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED ||
+            ActivityCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            val fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
+            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                if (location != null) {
+                    map.controller.setCenter(GeoPoint(location.latitude, location.longitude))
+                } else {
+                    // Fallback sur Toulouse si pas de position
+                    map.controller.setCenter(GeoPoint(43.562817415184526, 1.467314949845769))
+                }
+            }
+        } else {
+            // Fallback sur Toulouse si pas de permission
+            map.controller.setCenter(GeoPoint(43.562817415184526, 1.467314949845769))
+        }
     }
 
     private fun addMarkers(points: List<Map<String, Any>>) {
