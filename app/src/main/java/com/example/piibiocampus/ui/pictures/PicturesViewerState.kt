@@ -29,8 +29,8 @@ data class PhotoViewerState(
     val timestamp: String,          // déjà formaté en String avant de passer
     val adminValidated: Boolean,
     val pictureId: String,          // ID du document Firestore pour actions (delete, validate)
-    val authorId: String,           // UID de l'auteur (pour charger sa photo de profil)
-    val authorProfilePictureUrl: String?,
+    val userRef: String,           // UID de l'auteur (pour charger sa photo de profil)
+    val profilePictureUrl: String?,
 
     // --- Données pour "Reprendre le recensement" ---
     val censusRef: String?,         // ID du nœud CensusTree sélectionné

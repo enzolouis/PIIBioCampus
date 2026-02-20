@@ -249,45 +249,109 @@ object PictureDao {
         onSuccess: (List<Map<String, Any>>) -> Unit,
         onError: (Exception) -> Unit
     ) {
-        if (pictures.isEmpty()) { onSuccess(emptyList()); return }
+        if (pictures.isEmpty()) {
+            onSuccess(emptyList())
+            return
+        }
 
         CensusDao.fetchCensusTree(
             onComplete = { censusNodes ->
+
                 val taxonomyMap = mutableMapOf<String, TaxonomyInfo>()
                 censusNodes.forEach { ordre ->
                     taxonomyMap[ordre.id] = TaxonomyInfo(ordre = ordre.name, type = "ORDER")
                     ordre.children.forEach { famille ->
-                        taxonomyMap[famille.id] = TaxonomyInfo(ordre = ordre.name, famille = famille.name, type = "FAMILY")
+                        taxonomyMap[famille.id] = TaxonomyInfo(
+                            ordre = ordre.name,
+                            famille = famille.name,
+                            type = "FAMILY"
+                        )
                         famille.children.forEach { genre ->
-                            taxonomyMap[genre.id] = TaxonomyInfo(ordre = ordre.name, famille = famille.name, genre = genre.name, type = "GENUS")
+                            taxonomyMap[genre.id] = TaxonomyInfo(
+                                ordre = ordre.name,
+                                famille = famille.name,
+                                genre = genre.name,
+                                type = "GENUS"
+                            )
                             genre.children.forEach { espece ->
-                                taxonomyMap[espece.id] = TaxonomyInfo(ordre = ordre.name, famille = famille.name, genre = genre.name, espece = espece.name, type = "SPECIES")
+                                taxonomyMap[espece.id] = TaxonomyInfo(
+                                    ordre = ordre.name,
+                                    famille = famille.name,
+                                    genre = genre.name,
+                                    espece = espece.name,
+                                    type = "SPECIES"
+                                )
                             }
                         }
                     }
                 }
+                val userIds = pictures.mapNotNull {
+                    it["userRef"] as? String
+                }.distinct()
 
-                val enriched = pictures.map { picture ->
-                    val map = picture.toMutableMap()
-                    if (!map.containsKey("adminValidated"))  map["adminValidated"]  = false
-                    if (!map.containsKey("recordingStatus")) map["recordingStatus"] = false
-                    if (!map.containsKey("userRef"))         map["userRef"]         = ""
-
-                    val censusRef = picture["censusRef"] as? String
-                    val taxonomy  = if (!censusRef.isNullOrEmpty() && censusRef != "null")
-                        taxonomyMap[censusRef] else null
-
-                    map["ordre"]  = taxonomy?.ordre   ?: "Non identifié"
-                    map["family"] = taxonomy?.famille ?: "Non identifié"
-                    map["genre"]  = taxonomy?.genre   ?: "Non identifié"
-                    map["specie"] = taxonomy?.espece  ?: "Non identifié"
-                    map
+                if (userIds.isEmpty()) {
+                    onSuccess(pictures)
+                    return@fetchCensusTree
                 }
-                onSuccess(enriched)
+
+                val userProfileMap = mutableMapOf<String, String>()
+
+                val chunks = userIds.chunked(10)
+                var completed = 0
+
+                chunks.forEach { chunk ->
+                    firestore.collection("users")
+                        .whereIn("__name__", chunk)
+                        .get()
+                        .addOnSuccessListener { snapshot ->
+
+                            snapshot.documents.forEach { doc ->
+                                val uid = doc.id
+                                val profileUrl = doc.getString("profilePictureUrl") ?: ""
+                                userProfileMap[uid] = profileUrl
+                            }
+
+                            completed++
+                            if (completed == chunks.size) {
+
+                                val enriched = pictures.map { picture ->
+                                    val map = picture.toMutableMap()
+
+                                    if (!map.containsKey("adminValidated"))
+                                        map["adminValidated"] = false
+
+                                    if (!map.containsKey("recordingStatus"))
+                                        map["recordingStatus"] = false
+
+                                    val uid = map["userRef"] as? String ?: ""
+                                    map["profilePictureUrl"] =
+                                        userProfileMap[uid] ?: ""
+
+                                    val censusRef = picture["censusRef"] as? String
+                                    val taxonomy =
+                                        if (!censusRef.isNullOrEmpty() && censusRef != "null")
+                                            taxonomyMap[censusRef]
+                                        else null
+
+                                    map["ordre"]  = taxonomy?.ordre   ?: "Non identifié"
+                                    map["family"] = taxonomy?.famille ?: "Non identifié"
+                                    map["genre"]  = taxonomy?.genre   ?: "Non identifié"
+                                    map["specie"] = taxonomy?.espece  ?: "Non identifié"
+
+                                    map
+                                }
+
+                                onSuccess(enriched)
+                            }
+
+                        }
+                        .addOnFailureListener(onError)
+                }
             },
             onError = onError
         )
     }
+
 
     private fun bytesToWebpFile(context: Context, imageBytes: ByteArray, quality: Int = 90): File {
         val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)

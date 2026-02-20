@@ -63,7 +63,8 @@ class PicturesViewerFragment : DialogFragment() {
             ┌─── PhotoViewerState ───────────────────────────────
             │ pictureId           = '${state.pictureId}'
             │ imageUrl            = '${state.imageUrl}'
-            │ authorId            = '${state.authorId}'
+            │ userRef             = '${state.userRef}'
+            | profilePictureUrl   = '${state.profilePictureUrl}'
             │ adminValidated      = ${state.adminValidated}
             │ censusRef           = '${state.censusRef}'
             │ caller              = ${state.caller}
@@ -90,9 +91,9 @@ class PicturesViewerFragment : DialogFragment() {
             .into(photoView)
 
         // --- Photo de profil auteur ---
-        if (state.showAuthorProfile && !state.authorProfilePictureUrl.isNullOrEmpty()) {
+        if (state.showAuthorProfile && !state.profilePictureUrl.isNullOrEmpty()) {
             ivAuthorProfile.visibility = View.VISIBLE
-            Picasso.get().load(state.authorProfilePictureUrl)
+            Picasso.get().load(state.profilePictureUrl)
                 .placeholder(R.drawable.user_circle)
                 .transform(CircleTransform())
                 .into(ivAuthorProfile)

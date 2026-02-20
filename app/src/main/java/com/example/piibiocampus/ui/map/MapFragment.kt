@@ -165,8 +165,8 @@ class MapFragment : Fragment(R.layout.fragment_map) {
                             timestamp             = formatTimestamp(o["timestamp"]),
                             adminValidated        = o["adminValidated"] as? Boolean ?: false,
                             pictureId             = o["id"] as? String ?: "",
-                            authorId              = o["userId"] as? String ?: "",
-                            authorProfilePictureUrl = o["authorProfilePictureUrl"] as? String,
+                            userRef               = o["userRef"] as? String ?: "",
+                            profilePictureUrl     = o["profilePictureUrl"] as? String,
                             censusRef             = o["censusRef"] as? String,
                             imageBytes            = null,   // pas disponible depuis la map
                             latitude              = (loc?.get("latitude") as? Double) ?: lat,

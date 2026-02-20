@@ -184,8 +184,8 @@ class MyProfileFragment : Fragment() {
                 timestamp               = formatTimestamp(photo["timestamp"]),
                 adminValidated          = photo["adminValidated"] as? Boolean ?: false,
                 pictureId               = photo["id"] as? String ?: "",
-                authorId                = currentUserId ?: "",
-                authorProfilePictureUrl = null,   // MY_PROFILE : pas de profil auteur
+                userRef               = currentUserId ?: "",
+                profilePictureUrl = null,   // MY_PROFILE : pas de profil auteur
                 censusRef               = photo["censusRef"] as? String,
                 imageBytes              = null,
                 latitude                = (loc?.get("latitude")  as? Double) ?: 0.0,
