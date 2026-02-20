@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="12dp"
+    android:background="@drawable/item_user_border"
+    android:layout_margin="5dp"
+    >
+
+    <!-- user picture -->
+    <ImageView
+        android:id="@+id/userAvatar"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginEnd="16dp"
+        android:src="@drawable/bzz"
+        android:contentDescription="Temp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:scaleType="centerCrop"
+        android:background="@drawable/circle_background2"/>
+
+    <!-- username -->
+    <TextView
+        android:id="@+id/userPseudo"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Ember"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:fontFamily="@font/kg_blank_space_sketch"
+        android:textColor="@color/black"
+        app:layout_constraintStart_toEndOf="@id/userAvatar"
+        app:layout_constraintTop_toTopOf="@id/userAvatar"
+        app:layout_constraintBottom_toBottomOf="@id/userAvatar"
+        app:layout_constraintEnd_toStartOf="@id/btnBan"
+        android:ellipsize="end"
+        android:singleLine="true"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"/>
+
+    <!-- Bouton Voir le profil -->
+    <!--<com.google.android.material.button.MaterialButton
+        android:id="@+id/btnSeeProfile"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Profil"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintEnd_toStartOf="@id/btnBan"
+        app:layout_constraintTop_toTopOf="@id/userAvatar"
+        app:layout_constraintBottom_toBottomOf="@id/userAvatar"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:textSize="14sp"/>
+    -->
+    <!-- Ban button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnBan"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Bannir"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/userAvatar"
+        app:layout_constraintBottom_toBottomOf="@id/userAvatar"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:textSize="14sp"
+        android:backgroundTint="@color/danger"
+        android:textColor="@color/white"/>
+</androidx.constraintlayout.widget.ConstraintLayout>

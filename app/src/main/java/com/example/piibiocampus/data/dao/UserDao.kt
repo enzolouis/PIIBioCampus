@@ -70,4 +70,69 @@ object UserDao {
 
         return snapshot.toObject(UserProfile::class.java)
     }
+
+    suspend fun getUsersPage(limit: Long): List<UserProfile> {
+        val snapshot = db.collection("users")
+            .orderBy("name")
+            .limit(limit)
+            .get()
+            .await()
+
+        return snapshot.documents.mapNotNull {
+            it.toObject(UserProfile::class.java)
+        }
+    }
+
+    suspend fun getUsersPageAfter(
+        lastName: String,
+        limit: Long
+    ): List<UserProfile> {
+
+        val snapshot = db.collection("users")
+            .orderBy("name")
+            .startAfter(lastName)
+            .limit(limit)
+            .get()
+            .await()
+
+        return snapshot.documents.mapNotNull {
+            it.toObject(UserProfile::class.java)
+        }
+    }
+
+    suspend fun searchUsers(query: String, limit: Long): List<UserProfile> {
+        val snapshot = db.collection("users")
+            .orderBy("name")
+            .startAt(query)
+            .endAt(query + "\uf8ff")
+            .limit(limit)
+            .get()
+            .await()
+
+        return snapshot.documents.mapNotNull {
+            it.toObject(UserProfile::class.java)
+        }
+    }
+
+    suspend fun searchUsersAfter(
+        query: String,
+        lastName: String,
+        limit: Long
+    ): List<UserProfile> {
+
+        val snapshot = db.collection("users")
+            .orderBy("name")
+            .startAt(query)
+            .endAt(query + "\uf8ff")
+            .startAfter(lastName)
+            .limit(limit)
+            .get()
+            .await()
+
+        return snapshot.documents.mapNotNull {
+            it.toObject(UserProfile::class.java)
+        }
+    }
+
+
 }

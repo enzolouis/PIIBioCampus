@@ -37,6 +37,10 @@
             android:name=".ui.admin.DashboardAdminActivity"
             android:exported="true" />
         <activity
+            android:name=".ui.admin.SearchUsersAdminActivity"
+            android:exported="true" />
+
+        <activity
             android:name=".ui.census.CensusTreeActivity"
             android:exported="true" />
         <activity
