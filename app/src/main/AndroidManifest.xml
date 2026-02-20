@@ -51,6 +51,8 @@
         <activity
             android:name=".PreviewPictureActivity"
             android:exported="true" />
+        <activity android:name=".ui.photo.PicturesViewerFragment"
+            android:exported="true" />
 
     </application>
 

@@ -1,17 +1,21 @@
+package com.example.piibiocampus.data.dao
+
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
-import com.example.piibiocampus.data.dao.CensusDao
+import android.os.Build
 import com.example.piibiocampus.data.model.LocationMeta
 import com.google.firebase.FirebaseApp
-import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
+import com.google.firebase.firestore.Query
 import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageMetadata
 import java.io.File
 import java.io.FileOutputStream
+import java.net.URL
 import java.util.Date
 import kotlin.math.*
 
@@ -26,111 +30,107 @@ object PictureDao {
     private val picturesRef = firestore.collection("pictures")
     private val storageRef = storage.reference
 
-
     /**
-     * Récupère les photos d'un utilisateur triées par timestamp (plus récent en premier) avec enrichissement
-     * Spécifique pour l'affichage des profils
+     * Télécharge une image depuis son URL Firebase Storage et retourne ses bytes.
+     * À appeler dans un thread background (coroutine ou executor).
+     * Utilisé pour "Reprendre le recensement" depuis MyProfile où imageBytes est null.
      */
-    fun getPicturesByUserEnrichedSortedByDate(
-        userRef: String,
-        onSuccess: (List<Map<String, Any>>) -> Unit,
+    fun downloadImageBytes(
+        imageUrl: String,
+        onSuccess: (ByteArray) -> Unit,
         onError: (Exception) -> Unit
     ) {
-        picturesRef
-            .whereEqualTo("userRef", userRef)
-            .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.DESCENDING)
-            .get()
-            .addOnSuccessListener { snapshot ->
-                val pictures = snapshot.documents.mapNotNull { it.data }
-                enrichPicturesWithCensusData(pictures, onSuccess, onError)
+        Thread {
+            try {
+                val bytes = URL(imageUrl).readBytes()
+                onSuccess(bytes)
+            } catch (e: Exception) {
+                onError(e)
             }
-            .addOnFailureListener(onError)
+        }.start()
     }
 
-    /**
-     * Écoute en temps réel les photos d'un utilisateur triées par timestamp (plus récent en premier) avec enrichissement
-     * Spécifique pour l'affichage des profils
-     */
     fun listenToPicturesByUserEnrichedSortedByDate(
         userId: String,
         onUpdate: (List<Map<String, Any>>) -> Unit
     ): ListenerRegistration {
         return firestore.collection("pictures")
             .whereEqualTo("userRef", userId)
-            .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.DESCENDING)
+            .orderBy("timestamp", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
                     onUpdate(emptyList())
                     return@addSnapshotListener
                 }
 
-                val pictures = snapshot?.documents?.mapNotNull { it.data } ?: emptyList()
+                val pictures = snapshot?.documents?.mapNotNull { document ->
+                    val data = document.data ?: return@mapNotNull null
+                    val map = data.toMutableMap()
+                    map["id"] = document.id
+                    map
+                } ?: emptyList()
 
-                // Enrichir avec les données du census
                 enrichPicturesWithCensusData(
                     pictures,
-                    onSuccess = { enrichedPictures ->
-                        onUpdate(enrichedPictures)
-                    },
-                    onError = {
-                        // En cas d'erreur, renvoyer les photos non enrichies
-                        onUpdate(pictures)
-                    }
+                    onSuccess = { onUpdate(it) },
+                    onError   = { onUpdate(pictures) }
                 )
             }
     }
 
-
-    private fun uriToWebpFile(
-        context: Context,
-        uri: Uri,
-        quality: Int = 90
-    ): File {
-        val inputStream = context.contentResolver.openInputStream(uri)
-            ?: throw IllegalArgumentException("Impossible d'ouvrir l'URI")
-
-        val bitmap = BitmapFactory.decodeStream(inputStream)
-        inputStream.close()
-
-        val file = File.createTempFile("picture_", ".webp", context.cacheDir)
-        val outputStream = FileOutputStream(file)
-
-        val format = if (android.os.Build.VERSION.SDK_INT >= 30) {
-            Bitmap.CompressFormat.WEBP_LOSSY
-        } else {
-            Bitmap.CompressFormat.WEBP
-        }
-
-        bitmap.compress(format, quality, outputStream)
-
-        outputStream.flush()
-        outputStream.close()
-
-        return file
+    fun getAllPicturesEnriched(
+        onSuccess: (List<Map<String, Any>>) -> Unit,
+        onError: (Exception) -> Unit
+    ) {
+        picturesRef.get()
+            .addOnSuccessListener { snapshot ->
+                val pictures = snapshot.documents.mapNotNull { document ->
+                    val data = document.data ?: return@mapNotNull null
+                    val map = data.toMutableMap()
+                    map["id"] = document.id
+                    map
+                }
+                enrichPicturesWithCensusData(pictures, onSuccess, onError)
+            }
+            .addOnFailureListener(onError)
     }
 
-    private fun bytesToWebpFile(
-        context: Context,
-        imageBytes: ByteArray,
-        quality: Int = 90
-    ): File {
-        val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+    fun getPicturesNearLocation(
+        centerLat: Double,
+        centerLon: Double,
+        radiusMeters: Double,
+        onSuccess: (List<Map<String, Any>>) -> Unit,
+        onError: (Exception) -> Unit
+    ) {
+        picturesRef.get()
+            .addOnSuccessListener { snapshot ->
+                val result = snapshot.documents.mapNotNull { document ->
+                    val data = document.data ?: return@mapNotNull null
+                    val location = data["location"] as? Map<*, *> ?: return@mapNotNull null
+                    val lat = location["latitude"] as? Double ?: return@mapNotNull null
+                    val lon = location["longitude"] as? Double ?: return@mapNotNull null
+                    if (distanceInMeters(centerLat, centerLon, lat, lon) <= radiusMeters) {
+                        val map = data.toMutableMap()
+                        map["id"] = document.id
+                        map
+                    } else null
+                }
+                onSuccess(result)
+            }
+            .addOnFailureListener(onError)
+    }
 
-        val file = File.createTempFile("picture_", ".webp", context.cacheDir)
-        val outputStream = FileOutputStream(file)
-
-        val format = if (android.os.Build.VERSION.SDK_INT >= 30) {
-            Bitmap.CompressFormat.WEBP_LOSSY
-        } else {
-            Bitmap.CompressFormat.WEBP
-        }
-
-        bitmap.compress(format, quality, outputStream)
-
-        outputStream.flush()
-        outputStream.close()
-
-        return file
+    fun getPicturesNearLocationEnriched(
+        centerLat: Double,
+        centerLon: Double,
+        radiusMeters: Double,
+        onSuccess: (List<Map<String, Any>>) -> Unit,
+        onError: (Exception) -> Unit
+    ) {
+        getPicturesNearLocation(centerLat, centerLon, radiusMeters,
+            onSuccess = { enrichPicturesWithCensusData(it, onSuccess, onError) },
+            onError   = onError
+        )
     }
 
     fun exportPictureFromBytes(
@@ -145,411 +145,167 @@ object PictureDao {
     ) {
         try {
             val currentUser = FirebaseAuth.getInstance().currentUser
-            if (currentUser == null) {
-                onError(IllegalStateException("Utilisateur non connecté. Veuillez vous connecter."))
-                return
-            }
+                ?: run { onError(IllegalStateException("Utilisateur non connecté.")); return }
 
-            val currentUserUid = currentUser.uid
-
-            val webpFile = bytesToWebpFile(context, imageBytes)
+            val uid       = currentUser.uid
+            val webpFile  = bytesToWebpFile(context, imageBytes)
             val pictureId = picturesRef.document().id
-            val pictureStorageRef = storageRef.child("$pictureId.webp")
+            val picRef    = storageRef.child("$pictureId.webp")
 
-            val metadata = com.google.firebase.storage.StorageMetadata.Builder()
+            val metadata = StorageMetadata.Builder()
                 .setContentType("image/webp")
-                .setCustomMetadata("userRef", currentUserUid) // Pour info, mais pas utilisé dans les règles
+                .setCustomMetadata("userRef", uid)
                 .setCustomMetadata("uploadDate", Date().toString())
                 .build()
 
-            pictureStorageRef.putFile(Uri.fromFile(webpFile), metadata)
+            picRef.putFile(Uri.fromFile(webpFile), metadata)
                 .addOnSuccessListener {
-                    pictureStorageRef.downloadUrl.addOnSuccessListener { downloadUrl ->
+                    picRef.downloadUrl.addOnSuccessListener { downloadUrl ->
                         val data = hashMapOf(
-                            "imageUrl" to downloadUrl.toString(),
-                            "timestamp" to Date(),
-                            "location" to mapOf(
-                                "latitude" to location.latitude,
+                            "imageUrl"        to downloadUrl.toString(),
+                            "timestamp"       to Date(),
+                            "location"        to mapOf(
+                                "latitude"  to location.latitude,
                                 "longitude" to location.longitude,
-                                "altitude" to location.altitude
+                                "altitude"  to location.altitude
                             ),
-                            "censusRef" to censusRef,
-                            "userRef" to currentUserUid,
+                            "censusRef"       to (censusRef ?: ""),
+                            "userRef"         to uid,
                             "recordingStatus" to recordingStatus,
-                            "adminValidated" to adminValidated
+                            "adminValidated"  to adminValidated
                         )
-
                         picturesRef.document(pictureId)
                             .set(data)
-                            .addOnSuccessListener {
-                                webpFile.delete()
-                                onSuccess()
-                            }
+                            .addOnSuccessListener { webpFile.delete(); onSuccess() }
                             .addOnFailureListener(onError)
                     }.addOnFailureListener(onError)
                 }
-                .addOnFailureListener { exception ->
-                    webpFile.delete() // 🔹 Nettoyer le fichier temp en cas d'erreur
-                    onError(exception)
-                }
+                .addOnFailureListener { e -> webpFile.delete(); onError(e) }
 
         } catch (e: Exception) {
             onError(e)
         }
     }
 
-
     /**
-     * Télécharger une photo depuis Storage
+     * Met à jour uniquement les champs de recensement d'un document existant.
+     * L'image n'est PAS re-uploadée (elle est déjà sur Storage).
+     *
+     * @param pictureId       ID du document Firestore à mettre à jour
+     * @param censusRef       Nouveau nœud sélectionné dans l'arbre taxonomique
+     * @param recordingStatus true si le recensement est terminé (Valider), false si stoppé
      */
-    fun downloadPicture(
+    fun updatePictureCensus(
         pictureId: String,
-        onSuccess: (Uri) -> Unit,
+        censusRef: String?,
+        recordingStatus: Boolean,
+        onSuccess: () -> Unit,
         onError: (Exception) -> Unit
     ) {
-        // Récupération du document Firestore
+        val updates = mapOf(
+            "censusRef"       to (censusRef ?: ""),
+            "recordingStatus" to recordingStatus
+        )
+
         picturesRef.document(pictureId)
-            .get()
-            .addOnSuccessListener { document ->
-                if (document.exists()) {
-                    val url = document.getString("imageUrl")
-                    if (!url.isNullOrEmpty()) {
-                        // Convertir en Uri pour Picasso/Glide
-                        onSuccess(Uri.parse(url))
-                    } else {
-                        onError(Exception("L'URL de l'image est vide"))
-                    }
-                } else {
-                    onError(Exception("Document inexistant"))
-                }
-            }
-            .addOnFailureListener { exception ->
-                onError(exception)
-            }
+            .update(updates)
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { e -> onError(e) }
     }
 
-    fun getPicturesByUser(
-        userRef: String,
-        onSuccess: (List<Map<String, Any>>) -> Unit,
+    fun setAdminValidated(
+        pictureId: String,
+        validated: Boolean,
+        onSuccess: () -> Unit,
         onError: (Exception) -> Unit
     ) {
-        picturesRef
-            .whereEqualTo("userRef", userRef)
-            .get()
-            .addOnSuccessListener { snapshot ->
-                onSuccess(snapshot.documents.mapNotNull { it.data })
-            }
-            .addOnFailureListener(onError)
+        picturesRef.document(pictureId)
+            .update("adminValidated", validated)
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { e -> onError(e) }
     }
 
-    fun getAllPictures(
-        onSuccess: (List<Map<String, Any>>) -> Unit,
+    fun deletePicture(
+        pictureId: String,
+        onSuccess: () -> Unit,
         onError: (Exception) -> Unit
     ) {
-        picturesRef
-            .get()
-            .addOnSuccessListener { snapshot ->
-                onSuccess(snapshot.documents.mapNotNull { it.data })
-            }
-            .addOnFailureListener(onError)
+        picturesRef.document(pictureId)
+            .delete()
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { e -> onError(e) }
     }
 
-    fun getPicturesByCensus(
-        censusRef: String,
-        onSuccess: (List<Map<String, Any>>) -> Unit,
-        onError: (Exception) -> Unit
-    ) {
-        picturesRef
-            .whereEqualTo("censusRef", censusRef)
-            .get()
-            .addOnSuccessListener { snapshot ->
-                onSuccess(snapshot.documents.mapNotNull { it.data })
-            }
-            .addOnFailureListener(onError)
-    }
-
-    fun getPicturesBySpecies(
-        speciesRef: String,
-        onSuccess: (List<Map<String, Any>>) -> Unit,
-        onError: (Exception) -> Unit
-    ) {
-        picturesRef
-            .whereEqualTo("speciesRef", speciesRef)
-            .get()
-            .addOnSuccessListener { snapshot ->
-                onSuccess(snapshot.documents.mapNotNull { it.data })
-            }
-            .addOnFailureListener(onError)
-    }
-
-    fun getPicturesByDateRange(
-        start: Date,
-        end: Date,
-        onSuccess: (List<Map<String, Any>>) -> Unit,
-        onError: (Exception) -> Unit
-    ) {
-        picturesRef
-            .whereGreaterThanOrEqualTo("timestamp", Timestamp(start))
-            .whereLessThanOrEqualTo("timestamp", Timestamp(end))
-            .orderBy("timestamp")
-            .get()
-            .addOnSuccessListener { snapshot ->
-                onSuccess(snapshot.documents.mapNotNull { it.data })
-            }
-            .addOnFailureListener(onError)
-    }
-
-
-
-    private fun distanceInMeters(
-        lat1: Double, lon1: Double,
-        lat2: Double, lon2: Double
-    ): Double {
-        val R = 6371000.0 // rayon Terre (m)
-        val dLat = Math.toRadians(lat2 - lat1)
-        val dLon = Math.toRadians(lon2 - lon1)
-
-        val a = sin(dLat / 2).pow(2) +
-                cos(Math.toRadians(lat1)) *
-                cos(Math.toRadians(lat2)) *
-                sin(dLon / 2).pow(2)
-
-        return 2 * R * atan2(sqrt(a), sqrt(1 - a))
-    }
-
-    fun getPicturesNearLocation(
-        centerLat: Double,
-        centerLon: Double,
-        radiusMeters: Double,
-        onSuccess: (List<Map<String, Any>>) -> Unit,
-        onError: (Exception) -> Unit
-    ) {
-        picturesRef.get()
-            .addOnSuccessListener { snapshot ->
-                val result = snapshot.documents.mapNotNull { doc ->
-                    val location = doc.get("location") as? Map<*, *> ?: return@mapNotNull null
-
-                    val lat = location["latitude"] as? Double ?: return@mapNotNull null
-                    val lon = location["longitude"] as? Double ?: return@mapNotNull null
-
-                    val distance = distanceInMeters(
-                        centerLat, centerLon,
-                        lat, lon
-                    )
-
-                    if (distance <= radiusMeters) doc.data else null
-                }
-
-                onSuccess(result)
-            }
-            .addOnFailureListener(onError)
-    }
-
-    fun listenToPicturesByUser(
-        userId: String,
-        onUpdate: (List<Map<String, Any>>) -> Unit
-    ): ListenerRegistration {
-        return FirebaseFirestore.getInstance()
-            .collection("pictures")
-            .whereEqualTo("userRef", userId)
-            .addSnapshotListener { snapshot, error ->
-                if (error != null) return@addSnapshotListener
-
-                val pictures = snapshot?.documents?.map { doc ->
-                    doc.data ?: emptyMap<String, Any>()
-                } ?: emptyList()
-
-                onUpdate(pictures)
-            }
-    }
-
-    /**
-     * Récupère toutes les photos et les enrichit avec les données du census
-     */
-    fun getAllPicturesEnriched(
-        onSuccess: (List<Map<String, Any>>) -> Unit,
-        onError: (Exception) -> Unit
-    ) {
-        picturesRef.get()
-            .addOnSuccessListener { snapshot ->
-                val pictures = snapshot.documents.mapNotNull { it.data }
-                enrichPicturesWithCensusData(pictures, onSuccess, onError)
-            }
-            .addOnFailureListener(onError)
-    }
-
-    /**
-     * Récupère les photos d'un utilisateur et les enrichit avec les données du census
-     */
-    fun getPicturesByUserEnriched(
-        userRef: String,
-        onSuccess: (List<Map<String, Any>>) -> Unit,
-        onError: (Exception) -> Unit
-    ) {
-        picturesRef
-            .whereEqualTo("userRef", userRef)
-            .get()
-            .addOnSuccessListener { snapshot ->
-                val pictures = snapshot.documents.mapNotNull { it.data }
-                enrichPicturesWithCensusData(pictures, onSuccess, onError)
-            }
-            .addOnFailureListener(onError)
-    }
-
-    /**
-     * Classe pour stocker les informations taxonomiques complètes
-     */
     private data class TaxonomyInfo(
-        val ordre: String = "Non identifié",
+        val ordre: String   = "Non identifié",
         val famille: String = "Non identifié",
-        val genre: String = "Non identifié",
-        val espece: String = "Non identifié",
-        val type: String = "" // ORDER, FAMILY, GENUS, SPECIES
+        val genre: String   = "Non identifié",
+        val espece: String  = "Non identifié",
+        val type: String    = ""
     )
 
-    /**
-     * Enrichit une liste de photos avec les données du census (ordre, famille, genre, espèce)
-     */
     private fun enrichPicturesWithCensusData(
         pictures: List<Map<String, Any>>,
         onSuccess: (List<Map<String, Any>>) -> Unit,
         onError: (Exception) -> Unit
     ) {
-        if (pictures.isEmpty()) {
-            onSuccess(emptyList())
-            return
-        }
+        if (pictures.isEmpty()) { onSuccess(emptyList()); return }
 
-        // Récupérer toutes les données du census
         CensusDao.fetchCensusTree(
             onComplete = { censusNodes ->
-                // Créer une map pour accès rapide par ID à TOUS les niveaux
                 val taxonomyMap = mutableMapOf<String, TaxonomyInfo>()
-
                 censusNodes.forEach { ordre ->
-                    // Stocker l'ordre
-                    taxonomyMap[ordre.id] = TaxonomyInfo(
-                        ordre = ordre.name,
-                        type = "ORDER"
-                    )
-
+                    taxonomyMap[ordre.id] = TaxonomyInfo(ordre = ordre.name, type = "ORDER")
                     ordre.children.forEach { famille ->
-                        // Stocker la famille (avec son ordre)
-                        taxonomyMap[famille.id] = TaxonomyInfo(
-                            ordre = ordre.name,
-                            famille = famille.name,
-                            type = "FAMILY"
-                        )
-
+                        taxonomyMap[famille.id] = TaxonomyInfo(ordre = ordre.name, famille = famille.name, type = "FAMILY")
                         famille.children.forEach { genre ->
-                            // Stocker le genre (avec ordre + famille)
-                            taxonomyMap[genre.id] = TaxonomyInfo(
-                                ordre = ordre.name,
-                                famille = famille.name,
-                                genre = genre.name,
-                                type = "GENUS"
-                            )
-
+                            taxonomyMap[genre.id] = TaxonomyInfo(ordre = ordre.name, famille = famille.name, genre = genre.name, type = "GENUS")
                             genre.children.forEach { espece ->
-                                // Stocker l'espèce (avec tout)
-                                taxonomyMap[espece.id] = TaxonomyInfo(
-                                    ordre = ordre.name,
-                                    famille = famille.name,
-                                    genre = genre.name,
-                                    espece = espece.name,
-                                    type = "SPECIES"
-                                )
+                                taxonomyMap[espece.id] = TaxonomyInfo(ordre = ordre.name, famille = famille.name, genre = genre.name, espece = espece.name, type = "SPECIES")
                             }
                         }
                     }
                 }
 
-                // Enrichir chaque photo
-                val enrichedPictures = pictures.map { picture ->
-                    val mutablePicture = picture.toMutableMap()
+                val enriched = pictures.map { picture ->
+                    val map = picture.toMutableMap()
+                    if (!map.containsKey("adminValidated"))  map["adminValidated"]  = false
+                    if (!map.containsKey("recordingStatus")) map["recordingStatus"] = false
+                    if (!map.containsKey("userRef"))         map["userRef"]         = ""
+
                     val censusRef = picture["censusRef"] as? String
+                    val taxonomy  = if (!censusRef.isNullOrEmpty() && censusRef != "null")
+                        taxonomyMap[censusRef] else null
 
-                    if (censusRef != null && taxonomyMap.containsKey(censusRef)) {
-                        val taxonomy = taxonomyMap[censusRef]!!
-
-                        mutablePicture["ordre"] = taxonomy.ordre
-                        mutablePicture["family"] = taxonomy.famille
-                        mutablePicture["genre"] = taxonomy.genre
-                        mutablePicture["specie"] = taxonomy.espece
-                        mutablePicture["taxonomyLevel"] = taxonomy.type
-
-                    } else if (censusRef.isNullOrEmpty()) {
-                        // Pas de référence census
-                        mutablePicture["ordre"] = "Non identifié"
-                        mutablePicture["family"] = "Non identifié"
-                        mutablePicture["genre"] = "Non identifié"
-                        mutablePicture["specie"] = "Non identifié"
-                        mutablePicture["taxonomyLevel"] = "NONE"
-                    } else {
-                        // censusRef existe mais non trouvé dans l'arbre
-                        mutablePicture["ordre"] = "Référence invalide"
-                        mutablePicture["family"] = "Référence invalide"
-                        mutablePicture["genre"] = "Référence invalide"
-                        mutablePicture["specie"] = "Référence invalide"
-                        mutablePicture["taxonomyLevel"] = "INVALID"
-                    }
-
-                    mutablePicture
+                    map["ordre"]  = taxonomy?.ordre   ?: "Non identifié"
+                    map["family"] = taxonomy?.famille ?: "Non identifié"
+                    map["genre"]  = taxonomy?.genre   ?: "Non identifié"
+                    map["specie"] = taxonomy?.espece  ?: "Non identifié"
+                    map
                 }
-
-                onSuccess(enrichedPictures)
+                onSuccess(enriched)
             },
             onError = onError
         )
     }
 
-    /**
-     * Écoute en temps réel les photos d'un utilisateur avec enrichissement
-     */
-    fun listenToPicturesByUserEnriched(
-        userId: String,
-        onUpdate: (List<Map<String, Any>>) -> Unit
-    ): ListenerRegistration {
-        return firestore.collection("pictures")
-            .whereEqualTo("userRef", userId)
-            .addSnapshotListener { snapshot, error ->
-                if (error != null) {
-                    onUpdate(emptyList())
-                    return@addSnapshotListener
-                }
-
-                val pictures = snapshot?.documents?.mapNotNull { it.data } ?: emptyList()
-
-                // Enrichir avec les données du census
-                enrichPicturesWithCensusData(
-                    pictures,
-                    onSuccess = { enrichedPictures ->
-                        onUpdate(enrichedPictures)
-                    },
-                    onError = {
-                        // En cas d'erreur, renvoyer les photos non enrichies
-                        onUpdate(pictures)
-                    }
-                )
-            }
+    private fun bytesToWebpFile(context: Context, imageBytes: ByteArray, quality: Int = 90): File {
+        val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+        val file   = File.createTempFile("picture_", ".webp", context.cacheDir)
+        FileOutputStream(file).use { out ->
+            val format = if (Build.VERSION.SDK_INT >= 30) Bitmap.CompressFormat.WEBP_LOSSY
+            else Bitmap.CompressFormat.WEBP
+            bitmap.compress(format, quality, out)
+        }
+        return file
     }
 
-    /**
-     * Version enrichie pour les photos près d'une localisation
-     */
-    fun getPicturesNearLocationEnriched(
-        centerLat: Double,
-        centerLon: Double,
-        radiusMeters: Double,
-        onSuccess: (List<Map<String, Any>>) -> Unit,
-        onError: (Exception) -> Unit
-    ) {
-        getPicturesNearLocation(centerLat, centerLon, radiusMeters,
-            onSuccess = { pictures ->
-                enrichPicturesWithCensusData(pictures, onSuccess, onError)
-            },
-            onError = onError
-        )
+    private fun distanceInMeters(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
+        val R    = 6371000.0
+        val dLat = Math.toRadians(lat2 - lat1)
+        val dLon = Math.toRadians(lon2 - lon1)
+        val a    = sin(dLat / 2).pow(2) +
+                cos(Math.toRadians(lat1)) * cos(Math.toRadians(lat2)) * sin(dLon / 2).pow(2)
+        return 2 * R * atan2(sqrt(a), sqrt(1 - a))
     }
-
 }
