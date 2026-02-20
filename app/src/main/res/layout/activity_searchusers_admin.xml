@@ -4,36 +4,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/topAppBar"
-        android:layout_width="0dp"
-        android:layout_height="80dp"
-        android:background="@color/primary"
+
+    <include
+        android:id="@+id/topBar"
+        layout="@layout/view_top_bar"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:paddingTop="15dp">
-
-        <ImageView
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:src="@drawable/logo_piibiocampus"
-            android:layout_gravity="end"
-            android:contentDescription="@string/logo_admin" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/txtSearchAdmin"
-            android:textColor="@color/white"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            app:layout_collapseMode="parallax"
-            android:fontFamily="@font/kg_blank_space_sketch"
-            android:layout_marginTop="25dp"
-            />
-
-    </com.google.android.material.appbar.MaterialToolbar>
+        app:layout_constraintEnd_toEndOf="parent"/>
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/searchInputLayout"
@@ -44,7 +21,7 @@
         app:endIconMode="clear_text"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/topAppBar">
+        app:layout_constraintTop_toBottomOf="@id/topBar">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/searchEditText"

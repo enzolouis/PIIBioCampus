@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.appbar.MaterialToolbar xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/topAppBar"
+    android:layout_width="match_parent"
+    android:layout_height="80dp"
+    android:background="@color/primary"
+    android:paddingTop="15dp">
+
+    <ImageView
+        android:id="@+id/topBarLogo"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_gravity="end"
+        android:src="@drawable/logo_piibiocampus"
+        android:contentDescription="@string/logo_admin" />
+
+    <TextView
+        android:id="@+id/topBarTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Titre"
+        android:textColor="@color/white"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:fontFamily="@font/kg_blank_space_sketch"
+        android:layout_marginTop="25dp" />
+
+</com.google.android.material.appbar.MaterialToolbar>

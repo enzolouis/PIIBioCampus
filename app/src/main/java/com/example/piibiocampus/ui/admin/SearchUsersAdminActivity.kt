@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.piibiocampus.R
 import com.example.piibiocampus.data.dao.UserDao
 import com.example.piibiocampus.data.model.UserProfile
+import com.example.piibiocampus.utils.setTopBarTitle
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import kotlinx.coroutines.launch
@@ -30,6 +31,7 @@ class SearchUsersAdminActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_searchusers_admin)
+        setTopBarTitle(R.string.txtSearchAdmin);
 
         val recyclerView = findViewById<RecyclerView>(R.id.resultsRecyclerView)
         btnLoadMore = findViewById(R.id.btnLoadMore)
