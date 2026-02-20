@@ -28,10 +28,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="100dp"
-            android:fontFamily="@font/kg_blank_space_sketch"
+            android:fontFamily="@font/gentium_plus_regular"
             android:imeOptions="actionSearch"
             android:inputType="text"
-            android:layout_marginBottom="20dp"/>
+            android:layout_marginBottom="20dp" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <!-- Results -->
@@ -55,6 +55,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
         android:text="@string/see_more"
+        android:fontFamily="@font/flow_b"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
