@@ -133,9 +133,9 @@ class MyProfileFragment : Fragment() {
         RecyclerView.Adapter<PhotoAdapter.PhotoViewHolder>() {
 
         inner class PhotoViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-            val image: ImageView          = view.findViewById(R.id.photoItem)
-            val recordingDot: View        = view.findViewById(R.id.ivRecordingDot)
-            val validatedBadge: ImageView = view.findViewById(R.id.ivValidatedBadge)
+            val image: ImageView       = view.findViewById(R.id.photoItem)
+            val recordingDot: View     = view.findViewById(R.id.ivRecordingDot)
+            val validatedDot: View     = view.findViewById(R.id.ivValidatedBadge)
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PhotoViewHolder {
@@ -159,13 +159,24 @@ class MyProfileFragment : Fragment() {
                 .centerCrop()
                 .into(holder.image)
 
-            // --- Point rouge si recordingStatus == false ---
             val recordingStatus = photo["recordingStatus"] as? Boolean ?: false
-            holder.recordingDot.visibility = if (!recordingStatus) View.VISIBLE else View.GONE
+            val adminValidated  = photo["adminValidated"]  as? Boolean ?: false
 
-            // --- Badge check si adminValidated == true ---
-            val adminValidated = photo["adminValidated"] as? Boolean ?: false
-            holder.validatedBadge.visibility = if (adminValidated) View.VISIBLE else View.GONE
+            // Priorité : vert (validé) > rouge (recensement non terminé) > rien
+            when {
+                adminValidated  -> {
+                    holder.validatedDot.visibility = View.VISIBLE
+                    holder.recordingDot.visibility = View.GONE
+                }
+                !recordingStatus -> {
+                    holder.recordingDot.visibility = View.VISIBLE
+                    holder.validatedDot.visibility = View.GONE
+                }
+                else -> {
+                    holder.recordingDot.visibility = View.GONE
+                    holder.validatedDot.visibility = View.GONE
+                }
+            }
 
             // --- Clic → ouvre le viewer ---
             holder.image.setOnClickListener {
@@ -195,14 +206,15 @@ class MyProfileFragment : Fragment() {
                 timestamp               = formatTimestamp(photo["timestamp"]),
                 adminValidated          = photo["adminValidated"] as? Boolean ?: false,
                 pictureId               = photo["id"] as? String ?: "",
-                userRef               = currentUserId ?: "",
-                profilePictureUrl = null,   // MY_PROFILE : pas de profil auteur
+                userRef                 = currentUserId ?: "",
+                profilePictureUrl       = null,   // MY_PROFILE : pas de profil auteur
                 censusRef               = photo["censusRef"] as? String,
                 imageBytes              = null,
                 latitude                = (loc?.get("latitude")  as? Double) ?: 0.0,
                 longitude               = (loc?.get("longitude") as? Double) ?: 0.0,
                 altitude                = (loc?.get("altitude")  as? Double) ?: 0.0,
-                caller                  = PicturesViewerCaller.MY_PROFILE
+                caller                  = PicturesViewerCaller.MY_PROFILE,
+                recordingStatus         = photo["recordingStatus"] as? Boolean ?: false
             )
 
             PicturesViewerFragment.show(parentFragmentManager, state)

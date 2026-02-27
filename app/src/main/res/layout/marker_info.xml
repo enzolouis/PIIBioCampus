@@ -20,17 +20,25 @@
             android:scaleType="centerCrop"
             android:src="@drawable/photo_placeholder" />
 
-        <!-- Badge check en bas à droite de la miniature : adminValidated == true -->
-        <ImageView
-            android:id="@+id/ivValidatedBadge"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_gravity="bottom|end"
+        <!-- Point rouge en haut à droite : recordingStatus == false -->
+        <View
+            android:id="@+id/ivRecordingDot"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:layout_gravity="top|end"
             android:layout_margin="5dp"
-            android:src="@drawable/ic_check"
-            android:scaleType="fitCenter"
-            android:visibility="gone"
-            android:contentDescription="Photo validée" />
+            android:background="@drawable/bg_dot_red"
+            android:visibility="gone" />
+
+        <!-- Point vert en haut à droite : adminValidated == true -->
+        <View
+            android:id="@+id/ivValidatedBadge"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:layout_gravity="top|end"
+            android:layout_margin="5dp"
+            android:background="@drawable/bg_dot_green"
+            android:visibility="gone" />
 
     </FrameLayout>
 

@@ -41,17 +41,22 @@
                 android:ellipsize="end"
                 android:text="Non identifié" />
 
-            <ImageView
-                android:id="@+id/ivValidatedBadge"
-                android:layout_width="26dp"
-                android:layout_height="26dp"
-                android:src="@drawable/ic_check"
-                android:scaleType="fitCenter"
+            <!-- Statut validation/recensement : remplace l'ancien badge check -->
+            <TextView
+                android:id="@+id/tvValidationStatus"
+                android:layout_width="90dp"
+                android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:visibility="gone"
-                android:contentDescription="Photo validée par un administrateur" />
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:maxLines="3"
+                android:lineSpacingExtra="1dp"
+                android:gravity="end"
+                android:visibility="gone" />
 
         </LinearLayout>
+
+
 
         <!-- Ligne 2 : image zoomable -->
         <com.github.chrisbanes.photoview.PhotoView
