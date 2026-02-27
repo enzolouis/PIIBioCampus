@@ -124,9 +124,7 @@ class PicturesViewerFragment : DialogFragment() {
         }
 
         // --- Bouton "Reprendre le recensement" ---
-        // showResumeCensus = true si adminValidated==false ET censusRef non vide
-        // On ouvre CensusTreeActivity en mode UPDATE : pictureId + imageUrl suffisent,
-        // pas besoin de télécharger les bytes.
+
         if (state.showResumeCensus) {
             btnResumeCensus.visibility = View.VISIBLE
             btnResumeCensus.text = "Reprendre le recensement"
@@ -135,7 +133,6 @@ class PicturesViewerFragment : DialogFragment() {
                     putExtra("mode",          CensusMode.UPDATE.name)
                     putExtra("pictureId",     state.pictureId)
                     putExtra("imageUrl",      state.imageUrl)
-                    // null ou "null" → initialNodeId absent → repart de la racine
                     val ref = state.censusRef?.takeIf { it.isNotEmpty() && it != "null" }
                     if (ref != null) putExtra("initialNodeId", ref)
                 }

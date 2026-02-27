@@ -19,6 +19,17 @@ class CensusViewModel(private val repository: CensusRepository) : ViewModel() {
     // Garde une référence aux racines pour pouvoir chercher un nœud par ID
     private var cachedRoots: List<CensusNode> = emptyList()
 
+    /**
+     * Dernier nœud sur lequel l'utilisateur a cliqué pour naviguer dans l'arbre.
+     * Utilisé par le bouton Stop : si aucune espèce n'est sélectionnée, on sauvegarde
+     * ce nœud comme recensement partiel.
+     * - Mis à jour à chaque appel à [navigateTo].
+     * - Remis au parent (dernier de pathStack) lors d'un [navigateUp].
+     * - Remis à null lors d'un [refreshRoots].
+     */
+    var lastNavigatedNodeId: String? = null
+        private set
+
     init {
         repository.roots.observeForever { roots ->
             if (roots.isNotEmpty() && _currentNodes.value.isNullOrEmpty()) {
@@ -45,6 +56,7 @@ class CensusViewModel(private val repository: CensusRepository) : ViewModel() {
         _selectedNodeId.value = null
         _currentNodes.value = emptyList()
         cachedRoots = emptyList()
+        lastNavigatedNodeId = null
 
         repository.loadRoots(onError = { e ->
             // Tu peux exposer une LiveData d'erreur ici si besoin
@@ -72,9 +84,11 @@ class CensusViewModel(private val repository: CensusRepository) : ViewModel() {
             repository.roots.observeForever(observer)
         }
     }
+
     fun navigateTo(node: CensusNode) {
         _currentNodes.value?.let { navStack.addLast(it) }
         pathStack.addLast(node)
+        lastNavigatedNodeId = node.id   // ← mémorise le nœud de navigation
         _selectedNodeId.postValue(null)
         _currentNodes.postValue(node.children)
     }
@@ -85,6 +99,9 @@ class CensusViewModel(private val repository: CensusRepository) : ViewModel() {
         if (canNavigateUp()) {
             val previous = navStack.removeLast()
             pathStack.removeLastOrNull()
+            // Après être remonté, le "dernier navigué" est désormais le parent
+            // (avant-dernier de pathStack, i.e. le nouveau dernier non-null)
+            lastNavigatedNodeId = pathStack.lastOrNull { it != null }?.id
             _currentNodes.postValue(previous)
             _selectedNodeId.postValue(null)
         }
@@ -97,28 +114,61 @@ class CensusViewModel(private val repository: CensusRepository) : ViewModel() {
     fun currentPath(): List<CensusNode> = pathStack.filterNotNull().toList()
 
     /**
+     * Renvoie l'ID à utiliser pour une sauvegarde via le bouton Stop :
+     * - Si une espèce est sélectionnée → on la prend (cas classique).
+     * - Sinon → on prend le dernier nœud de navigation (ex : Passeriformes).
+     * - Si on est encore à la racine → null.
+     */
+    fun stopCensusRef(): String? = _selectedNodeId.value ?: lastNavigatedNodeId
+
+    /**
      * Cherche le chemin depuis la racine jusqu'au nœud [targetId]
-     * et rejoue la navigation pour reconstruire la pile.
-     * Appelé uniquement après que les racines sont chargées.
+     * et reconstruit la pile de navigation directement depuis les données,
+     * sans passer par postValue (qui est asynchrone et rendrait _currentNodes.value
+     * toujours vide au moment du addLast suivant).
      */
     private fun navigateToNodeById(targetId: String) {
         val roots = cachedRoots.ifEmpty { _currentNodes.value ?: return }
         val path  = findPathToNode(roots, targetId) ?: return
 
-        // Réinitialise la pile avant de rejouer
+        // Réinitialise les piles
         navStack.clear()
         pathStack.clear()
         pathStack.addLast(null)
+        lastNavigatedNodeId = null
 
-        // Rejoue la navigation jusqu'à l'avant-dernier nœud
-        for (node in path.dropLast(1)) {
-            _currentNodes.value?.let { navStack.addLast(it) }
+        // Construit navStack et pathStack directement depuis les données du chemin.
+        // On ne passe jamais par navigateTo() ni par _currentNodes.value ici,
+        // car postValue est asynchrone : .value serait toujours vide pendant la boucle.
+        //
+        // Schéma pour un chemin [A, B, C] (C = cible feuille) :
+        //   navStack  : [roots, A.children, B.children]
+        //   pathStack : [null, A, B, C]  ← C ajouté seulement si non-feuille
+        //   _currentNodes → B.children (niveau des frères de C)
+        //   _selectedNodeId → C.id si feuille
+        val target = path.last()
+        val pathToParent = path.dropLast(1)
+
+        var currentLevel: List<CensusNode> = roots
+        for (node in pathToParent) {
+            navStack.addLast(currentLevel)
             pathStack.addLast(node)
-            _currentNodes.postValue(node.children)
+            lastNavigatedNodeId = node.id
+            currentLevel = node.children
         }
 
-        // Sélectionne le nœud final (feuille / espèce)
-        path.lastOrNull()?.let { selectNode(it) }
+        if (target.children.isEmpty()) {
+            // Feuille (espèce) : affiche ses frères et la sélectionne
+            _currentNodes.postValue(currentLevel)
+            _selectedNodeId.postValue(target.id)
+        } else {
+            // Nœud intermédiaire : entre dedans et affiche ses enfants
+            navStack.addLast(currentLevel)
+            pathStack.addLast(target)
+            lastNavigatedNodeId = target.id
+            _currentNodes.postValue(target.children)
+            _selectedNodeId.postValue(null)
+        }
     }
 
     /**

@@ -19,6 +19,7 @@ import com.example.piibiocampus.ui.MainActivity
 import com.github.chrisbanes.photoview.PhotoView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.squareup.picasso.Picasso
+import kotlin.math.log
 
 /**
  * CREATE : nouvelle photo depuis PictureActivity → crée un document Firestore
@@ -177,7 +178,7 @@ class CensusTreeActivity : AppCompatActivity() {
         }
 
         btnStop.setOnClickListener {
-            performSave(recordingStatus = false, censusRef = viewModel.selectedNodeId.value)
+            performSave(recordingStatus = false, censusRef = viewModel.stopCensusRef())
         }
 
         btnValidate.setOnClickListener {
