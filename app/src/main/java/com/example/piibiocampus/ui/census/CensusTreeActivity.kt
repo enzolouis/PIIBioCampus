@@ -16,10 +16,10 @@ import com.example.piibiocampus.R
 import com.example.piibiocampus.data.dao.PictureDao
 import com.example.piibiocampus.data.model.LocationMeta
 import com.example.piibiocampus.ui.MainActivity
+import com.example.piibiocampus.ui.photo.PicturesViewerCaller
 import com.github.chrisbanes.photoview.PhotoView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.squareup.picasso.Picasso
-import kotlin.math.log
 
 /**
  * CREATE : nouvelle photo depuis PictureActivity → crée un document Firestore
@@ -46,6 +46,7 @@ class CensusTreeActivity : AppCompatActivity() {
     private var existingPictureId: String? = null
     private var existingImageUrl: String? = null
     private var zoomDialog: android.app.Dialog? = null
+    private var callerName: String = PicturesViewerCaller.MAP.name
 
     private lateinit var adapter: CensusAdapter
 
@@ -67,7 +68,8 @@ class CensusTreeActivity : AppCompatActivity() {
         btnStop          = findViewById(R.id.btnStop)
         btnValidate      = findViewById(R.id.btnValidate)
 
-        mode = CensusMode.valueOf(intent.getStringExtra("mode") ?: CensusMode.CREATE.name)
+        mode       = CensusMode.valueOf(intent.getStringExtra("mode") ?: CensusMode.CREATE.name)
+        callerName = intent.getStringExtra("caller") ?: PicturesViewerCaller.MAP.name
 
         when (mode) {
             CensusMode.CREATE -> setupCreateMode()
@@ -78,10 +80,22 @@ class CensusTreeActivity : AppCompatActivity() {
         setupObservers()
         setupButtons()
 
-        // Si censusRef est null ou "null" (string) → repart de la racine de l'arbre
         val initialNodeId = intent.getStringExtra("initialNodeId")
             ?.takeIf { it.isNotEmpty() && it != "null" }
         viewModel.refreshRoots(initialNodeId)
+    }
+
+    // ── Navigation de retour selon le caller ──────────────────────────────────
+
+    private fun navigateBack() {
+        val intent = Intent(this, MainActivity::class.java).apply {
+            if (callerName == PicturesViewerCaller.MY_PROFILE.name) {
+                putExtra("navigateTo", "myProfile")
+            }
+            flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+        }
+        startActivity(intent)
+        finish()
     }
 
     // ── Setup selon le mode ───────────────────────────────────────────────────
@@ -118,7 +132,6 @@ class CensusTreeActivity : AppCompatActivity() {
             finish(); return
         }
 
-        // Miniature depuis l'URL Firestore — pas de bytes nécessaires
         if (!existingImageUrl.isNullOrEmpty()) {
             Picasso.get().load(existingImageUrl)
                 .placeholder(R.drawable.ic_placeholder_image)
@@ -177,19 +190,15 @@ class CensusTreeActivity : AppCompatActivity() {
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                if (viewModel.canNavigateUp()) viewModel.navigateUp() else finish()
+                if (viewModel.canNavigateUp()) viewModel.navigateUp() else navigateBack()
             }
         })
 
         btnCancel.setOnClickListener {
-            startActivity(Intent(this, MainActivity::class.java))
-            finish()
+            navigateBack()
         }
 
         btnStop.setOnClickListener {
-            // Pour Stop : on prend l'espèce sélectionnée si dispo,
-            // sinon le dernier nœud de navigation (ex : Passeriformes),
-            // sinon null si on est encore à la racine.
             performSave(recordingStatus = false, censusRef = viewModel.stopCensusRef())
         }
 
@@ -225,7 +234,7 @@ class CensusTreeActivity : AppCompatActivity() {
             onSuccess = {
                 runOnUiThread {
                     Toast.makeText(this, "Photo enregistrée", Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(this, MainActivity::class.java)); finish()
+                    navigateBack()
                 }
             },
             onError = { e ->
@@ -245,7 +254,7 @@ class CensusTreeActivity : AppCompatActivity() {
             onSuccess = {
                 runOnUiThread {
                     Toast.makeText(this, "Recensement mis à jour", Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(this, MainActivity::class.java)); finish()
+                    navigateBack()
                 }
             },
             onError = { e ->

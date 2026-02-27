@@ -206,7 +206,17 @@ class MapFragment : Fragment(R.layout.fragment_map) {
         map.invalidate()
     }
 
-    override fun onResume()      { super.onResume();  map.onResume() }
+    fun reloadMarkers() {
+        viewModel.loadAllPictures()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        map.onResume()
+        // Rechargement des marqueurs à chaque retour sur la map
+        // (après ajout/modification d'une photo depuis CensusTreeActivity)
+        viewModel.loadAllPictures()
+    }
     override fun onPause()       { super.onPause();   map.onPause() }
     override fun onDestroyView() { super.onDestroyView(); map.overlays.clear() }
 }

@@ -124,6 +124,19 @@ class MyProfileFragment : Fragment() {
         }
     }
 
+    fun reloadPhotos() {
+        val uid = currentUserId ?: return
+        setupPhotosListener(uid)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Relance le listener si on revient depuis CensusTreeActivity
+        // (modification d'un recensement existant)
+        val uid = currentUserId ?: return
+        setupPhotosListener(uid)
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         firestoreListener?.remove()

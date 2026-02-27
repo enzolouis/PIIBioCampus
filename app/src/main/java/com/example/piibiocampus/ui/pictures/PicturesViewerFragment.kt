@@ -61,32 +61,6 @@ class PicturesViewerFragment : DialogFragment() {
         btnValidateRef = btnValidate
         tvStatusRef    = tvValidationStatus
 
-        // ── DEBUG LOG ─────────────────────────────────────────────────────────
-        android.util.Log.d("PicturesViewer", """
-            ┌─── PhotoViewerState ───────────────────────────────
-            │ pictureId           = '${state.pictureId}'
-            │ imageUrl            = '${state.imageUrl}'
-            │ userRef             = '${state.userRef}'
-            | profilePictureUrl   = '${state.profilePictureUrl}'
-            │ adminValidated      = ${state.adminValidated}
-            │ censusRef           = '${state.censusRef}'
-            │ caller              = ${state.caller}
-            │ family              = '${state.family}'
-            │ genre               = '${state.genre}'
-            │ specie              = '${state.specie}'
-            │ timestamp           = '${state.timestamp}'
-            │ imageBytes null ?   = ${state.imageBytes == null}
-            ├─── Visibilité calculée ────────────────────────────
-            │ showAuthorProfile   = ${state.showAuthorProfile}
-            │ showResumeCensus    = ${state.showResumeCensus}
-            │ showDelete          = ${state.showDelete}
-            │ showValidate        = ${state.showValidate}
-            │ showValidatedBadge  = ${state.showValidatedBadge}
-            │ displayTitle        = '${state.displayTitle}'
-            └────────────────────────────────────────────────────
-        """.trimIndent())
-        // ─────────────────────────────────────────────────────────────────────
-
         // --- Photo principale ---
         Picasso.get().load(state.imageUrl)
             .placeholder(R.drawable.photo_placeholder)
@@ -129,6 +103,7 @@ class PicturesViewerFragment : DialogFragment() {
                     putExtra("mode",      CensusMode.UPDATE.name)
                     putExtra("pictureId", state.pictureId)
                     putExtra("imageUrl",  state.imageUrl)
+                    putExtra("caller",    state.caller.name)
                     val ref = state.censusRef?.takeIf { it.isNotEmpty() && it != "null" }
                     if (ref != null) putExtra("initialNodeId", ref)
                 }
