@@ -19,4 +19,20 @@
     </style>
 
     <style name="Theme.PIIBioCampus" parent="Base.Theme.PIIBioCampus" />
+
+    <!-- Pop-up standard (MAP et MY_PROFILE) : fond semi-transparent, coins arrondis -->
+    <style name="DialogPopup" parent="Theme.MaterialComponents.Dialog">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowElevation">8dp</item>
+        <item name="colorSurface">@android:color/white</item>
+    </style>
+
+    <!-- Plein écran (ADMIN et CENSUS_TREE) -->
+    <style name="DialogFullscreen" parent="Theme.MaterialComponents.Dialog">
+        <item name="android:windowBackground">@android:color/white</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
 </resources>

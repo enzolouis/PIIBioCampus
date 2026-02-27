@@ -1,8 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ImageView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/photoItem"
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="120dp"
-    android:layout_margin="6dp"
-    android:scaleType="centerCrop"
-    android:background="@drawable/photo_placeholder"/>
+    android:layout_height="wrap_content">
+
+    <!-- Photo -->
+    <ImageView
+        android:id="@+id/photoItem"
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/photo_placeholder" />
+
+    <!-- Point rouge en haut à droite : recordingStatus == false -->
+    <View
+        android:id="@+id/ivRecordingDot"
+        android:layout_width="12dp"
+        android:layout_height="12dp"
+        android:layout_gravity="top|end"
+        android:layout_margin="6dp"
+        android:background="@drawable/bg_dot_red"
+        android:visibility="gone" />
+
+    <!-- Badge check en bas à droite : adminValidated == true -->
+    <ImageView
+        android:id="@+id/ivValidatedBadge"
+        android:layout_width="18dp"
+        android:layout_height="18dp"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="6dp"
+        android:src="@drawable/ic_check"
+        android:scaleType="fitCenter"
+        android:visibility="gone"
+        android:contentDescription="Photo validée" />
+
+</FrameLayout>

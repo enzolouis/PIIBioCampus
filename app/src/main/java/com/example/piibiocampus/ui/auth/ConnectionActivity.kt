@@ -2,6 +2,7 @@ package com.example.piibiocampus.ui.auth
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
@@ -15,6 +16,7 @@ import com.example.piibiocampus.ui.MainActivity
 import com.example.piibiocampus.ui.admin.DashboardAdminActivity
 import com.example.piibiocampus.utils.Extensions.toast
 import com.example.piibiocampus.utils.Validators
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 
 class ConnectionActivity : AppCompatActivity() {
@@ -95,8 +97,7 @@ class ConnectionActivity : AppCompatActivity() {
                     }
                 }
             }
-
-
         }
+
     }
 }

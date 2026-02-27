@@ -1,22 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="180dp"
+    android:layout_height="wrap_content"
     android:orientation="vertical"
+    android:background="@drawable/bg_rounded_white"
     android:padding="8dp"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
+    android:elevation="4dp">
 
+    <!-- Miniature cliquable -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="120dp">
+
+        <ImageView
+            android:id="@+id/photo"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:src="@drawable/photo_placeholder" />
+
+        <!-- Badge check en bas à droite de la miniature : adminValidated == true -->
+        <ImageView
+            android:id="@+id/ivValidatedBadge"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="5dp"
+            android:src="@drawable/ic_check"
+            android:scaleType="fitCenter"
+            android:visibility="gone"
+            android:contentDescription="Photo validée" />
+
+    </FrameLayout>
+
+    <!-- Titre (espèce / genre / famille) -->
     <TextView
         android:id="@+id/title"
-        android:textStyle="bold"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="20sp"/>
-
-    <ImageView
-        android:id="@+id/photo"
-        android:layout_width="120dp"
-        android:layout_height="80dp"
-        android:contentDescription="image"
-        android:scaleType="centerCrop"/>
+        android:layout_marginTop="6dp"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        android:textColor="@color/black"
+        android:maxLines="2"
+        android:ellipsize="end"
+        android:text="—" />
 
 </LinearLayout>
