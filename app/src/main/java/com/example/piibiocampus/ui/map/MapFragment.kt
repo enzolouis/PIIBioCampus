@@ -2,6 +2,7 @@ package com.example.piibiocampus.ui.map
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.graphics.*
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
@@ -12,24 +13,58 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.example.piibiocampus.R
-import com.example.piibiocampus.ui.photo.PicturesViewerCaller
+import com.example.piibiocampus.data.model.Campus
 import com.example.piibiocampus.ui.photo.PhotoViewerState
+import com.example.piibiocampus.ui.photo.PicturesViewerCaller
+import com.example.piibiocampus.ui.photo.PicturesViewerFragment
 import com.google.android.gms.location.LocationServices
+import com.squareup.picasso.Picasso
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.XYTileSource
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
+import org.osmdroid.views.overlay.Overlay
+import org.osmdroid.views.overlay.Polygon
 import org.osmdroid.views.overlay.infowindow.InfoWindow
 import android.widget.ImageView
 import android.widget.TextView
-import com.example.piibiocampus.ui.photo.PicturesViewerFragment
-import com.squareup.picasso.Picasso
 
 class MapFragment : Fragment(R.layout.fragment_map) {
 
     private val viewModel: MapViewModel by viewModels()
     private lateinit var map: MapView
+
+    private val campusTextOverlays = mutableListOf<TextOverlay>()
+
+    private inner class TextOverlay(
+        private val position: GeoPoint,
+        private val text: String
+    ) : Overlay() {
+        override fun draw(canvas: Canvas, mapView: MapView, shadow: Boolean) {
+            if (shadow) return
+            val point = mapView.projection.toPixels(position, null)
+
+            val shadowPaint = Paint().apply {
+                color = Color.BLACK
+                textSize = 36f
+                isAntiAlias = true
+                typeface = Typeface.DEFAULT_BOLD
+                textAlign = Paint.Align.CENTER
+                maskFilter = BlurMaskFilter(4f, BlurMaskFilter.Blur.NORMAL)
+            }
+            val textPaint = Paint().apply {
+                color = Color.parseColor("#FFB300")
+                textSize = 36f
+                isAntiAlias = true
+                typeface = Typeface.DEFAULT_BOLD
+                textAlign = Paint.Align.CENTER
+            }
+
+            canvas.drawText(text, point.x.toFloat(), point.y.toFloat(), shadowPaint)
+            canvas.drawText(text, point.x.toFloat(), point.y.toFloat(), textPaint)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,8 +87,12 @@ class MapFragment : Fragment(R.layout.fragment_map) {
         viewModel.pictures.observe(viewLifecycleOwner) { points ->
             addMarkers(points)
         }
-
         viewModel.loadAllPictures()
+
+        viewModel.campusList.observe(viewLifecycleOwner) { campusList ->
+            addCampusOverlays(campusList)
+        }
+        viewModel.loadCampus()
     }
 
     private fun formatTimestamp(timestamp: Any?): String {
@@ -74,9 +113,7 @@ class MapFragment : Fragment(R.layout.fragment_map) {
 
     private fun setupTileSource() {
         val cartoLight = XYTileSource(
-            "CartoLight",
-            0, 20, 256,
-            ".png",
+            "CartoLight", 0, 20, 256, ".png",
             arrayOf("https://cartodb-basemaps-a.global.ssl.fastly.net/light_all/")
         )
         map.setTileSource(cartoLight)
@@ -84,15 +121,10 @@ class MapFragment : Fragment(R.layout.fragment_map) {
         map.setMultiTouchControls(true)
         map.controller.setZoom(15.0)
 
-        if (ActivityCompat.checkSelfPermission(
-                requireContext(), Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED ||
-            ActivityCompat.checkSelfPermission(
-                requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
+        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+            ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
         ) {
-            val fusedLocationClient =
-                LocationServices.getFusedLocationProviderClient(requireActivity())
+            val fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
             fusedLocationClient.lastLocation.addOnSuccessListener { location ->
                 if (location != null) {
                     map.controller.setCenter(GeoPoint(location.latitude, location.longitude))
@@ -106,7 +138,7 @@ class MapFragment : Fragment(R.layout.fragment_map) {
     }
 
     private fun addMarkers(points: List<Map<String, Any>>) {
-        map.overlays.clear()
+        map.overlays.removeAll { it is Marker }
 
         for (o in points) {
             val latLon: Pair<Double, Double>? = when {
@@ -140,10 +172,10 @@ class MapFragment : Fragment(R.layout.fragment_map) {
 
             marker.infoWindow = object : InfoWindow(R.layout.marker_info, map) {
                 override fun onOpen(item: Any?) {
-                    val titleView    = mView.findViewById<TextView>(R.id.title)
-                    val photoView    = mView.findViewById<ImageView>(R.id.photo)
-                    val badgeView    = mView.findViewById<ImageView>(R.id.ivValidatedBadge)
-                    val imageUrl     = (o["imageUrl"] as? String) ?: (o["image"] as? String) ?: ""
+                    val titleView = mView.findViewById<TextView>(R.id.title)
+                    val photoView = mView.findViewById<ImageView>(R.id.photo)
+                    val badgeView = mView.findViewById<ImageView>(R.id.ivValidatedBadge)
+                    val imageUrl = (o["imageUrl"] as? String) ?: (o["image"] as? String) ?: ""
 
                     titleView.text = marker.title
                     if (imageUrl.isNotEmpty()) {
@@ -156,21 +188,21 @@ class MapFragment : Fragment(R.layout.fragment_map) {
                     photoView.setOnClickListener {
                         val loc = o["location"] as? Map<*, *>
                         val state = PhotoViewerState(
-                            imageUrl              = imageUrl,
-                            family                = o["family"] as? String,
-                            genre                 = o["genre"]  as? String,
-                            specie                = o["specie"] as? String,
-                            timestamp             = formatTimestamp(o["timestamp"]),
-                            adminValidated        = o["adminValidated"] as? Boolean ?: false,
-                            pictureId             = o["id"] as? String ?: "",
-                            userRef               = o["userRef"] as? String ?: "",
-                            profilePictureUrl     = o["profilePictureUrl"] as? String,
-                            censusRef             = o["censusRef"] as? String,
-                            imageBytes            = null,   // pas disponible depuis la map
-                            latitude              = (loc?.get("latitude") as? Double) ?: lat,
-                            longitude             = (loc?.get("longitude") as? Double) ?: lon,
-                            altitude              = (loc?.get("altitude") as? Double) ?: 0.0,
-                            caller                = PicturesViewerCaller.MAP
+                            imageUrl = imageUrl,
+                            family = o["family"] as? String,
+                            genre = o["genre"] as? String,
+                            specie = o["specie"] as? String,
+                            timestamp = formatTimestamp(o["timestamp"]),
+                            adminValidated = o["adminValidated"] as? Boolean ?: false,
+                            pictureId = o["id"] as? String ?: "",
+                            userRef = o["userRef"] as? String ?: "",
+                            profilePictureUrl = o["profilePictureUrl"] as? String,
+                            censusRef = o["censusRef"] as? String,
+                            imageBytes = null,
+                            latitude = (loc?.get("latitude") as? Double) ?: lat,
+                            longitude = (loc?.get("longitude") as? Double) ?: lon,
+                            altitude = (loc?.get("altitude") as? Double) ?: 0.0,
+                            caller = PicturesViewerCaller.MAP
                         )
                         PicturesViewerFragment.show(parentFragmentManager, state)
                     }
@@ -182,13 +214,48 @@ class MapFragment : Fragment(R.layout.fragment_map) {
                 }
             }
 
-            map.overlays.add(marker)
+            map.overlays.add(0, marker)
         }
 
         map.invalidate()
     }
 
-    override fun onResume()      { super.onResume();  map.onResume() }
-    override fun onPause()       { super.onPause();   map.onPause() }
-    override fun onDestroyView() { super.onDestroyView(); map.overlays.clear() }
+    private fun addCampusOverlays(campusList: List<Campus>) {
+        map.overlays.removeAll { it is Polygon }
+        map.overlays.removeAll(campusTextOverlays)
+        campusTextOverlays.clear()
+
+        for (campus in campusList) {
+            val circle = Polygon(map).apply {
+                points = Polygon.pointsAsCircle(
+                    GeoPoint(campus.latitudeCenter, campus.longitudeCenter),
+                    campus.radius
+                )
+                fillPaint.color = Color.argb(40, 255, 179, 0)
+                outlinePaint.color = Color.argb(180, 255, 179, 0)
+                outlinePaint.strokeWidth = 3f
+                infoWindow = null
+                setOnClickListener { _, _, _ -> true }
+            }
+            map.overlays.add(0, circle)
+
+            val textOverlay = TextOverlay(GeoPoint(campus.latitudeCenter, campus.longitudeCenter), campus.name)
+            campusTextOverlays.add(textOverlay)
+            map.overlays.add(textOverlay)
+        }
+
+        map.invalidate()
+    }
+
+    override fun onResume() {
+        super.onResume(); map.onResume()
+    }
+
+    override fun onPause() {
+        super.onPause(); map.onPause()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView(); map.overlays.clear()
+    }
 }
