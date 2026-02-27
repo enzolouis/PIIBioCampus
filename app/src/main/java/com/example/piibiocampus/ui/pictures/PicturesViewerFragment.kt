@@ -24,6 +24,8 @@ class PicturesViewerFragment : DialogFragment() {
     companion object {
         private const val TAG = "PicturesViewerFragment"
         private const val ARG_STATE = "state"
+        const val RESULT_DELETED = "picture_deleted"
+        const val REQUEST_KEY    = "PicturesViewerFragment"
 
         fun show(fm: FragmentManager, state: PhotoViewerState) {
             PicturesViewerFragment().apply {
@@ -177,29 +179,27 @@ class PicturesViewerFragment : DialogFragment() {
         // --- Retour ---
         btnBack.setOnClickListener { dismiss() }
 
-        // --- Supprimer (double confirmation) ---
+        // --- Supprimer (confirmation unique) ---
         if (state.showDelete) {
             btnDelete.visibility = View.VISIBLE
             btnDelete.setOnClickListener {
                 MaterialAlertDialogBuilder(requireContext())
                     .setTitle("Supprimer la photo")
-                    .setMessage("Êtes-vous sûr de vouloir supprimer cette photo ?")
+                    .setMessage("Cette action est irréversible. Confirmer la suppression ?")
                     .setPositiveButton("Supprimer") { _, _ ->
-                        MaterialAlertDialogBuilder(requireContext())
-                            .setTitle("Confirmation finale")
-                            .setMessage("Cette action est irréversible. Confirmer ?")
-                            .setPositiveButton("Oui, supprimer") { _, _ ->
-                                PictureDao.deletePicture(state.pictureId,
-                                    onSuccess = {
-                                        Toast.makeText(requireContext(), "Photo supprimée", Toast.LENGTH_SHORT).show()
-                                        dismiss()
-                                    },
-                                    onError = { e ->
-                                        Toast.makeText(requireContext(), "Erreur : ${e.message}", Toast.LENGTH_SHORT).show()
-                                    }
+                        PictureDao.deletePicture(state.pictureId,
+                            onSuccess = {
+                                Toast.makeText(requireContext(), "Photo supprimée", Toast.LENGTH_SHORT).show()
+                                parentFragmentManager.setFragmentResult(
+                                    REQUEST_KEY,
+                                    Bundle().apply { putBoolean(RESULT_DELETED, true) }
                                 )
+                                dismiss()
+                            },
+                            onError = { e ->
+                                Toast.makeText(requireContext(), "Erreur : ${e.message}", Toast.LENGTH_SHORT).show()
                             }
-                            .setNegativeButton("Annuler", null).show()
+                        )
                     }
                     .setNegativeButton("Annuler", null).show()
             }

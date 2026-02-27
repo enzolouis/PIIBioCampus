@@ -45,8 +45,15 @@ class CensusTreeActivity : AppCompatActivity() {
     private var mode: CensusMode = CensusMode.CREATE
     private var existingPictureId: String? = null
     private var existingImageUrl: String? = null
+    private var zoomDialog: android.app.Dialog? = null
 
     private lateinit var adapter: CensusAdapter
+
+    override fun onDestroy() {
+        super.onDestroy()
+        zoomDialog?.dismiss()
+        zoomDialog = null
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -96,8 +103,9 @@ class CensusTreeActivity : AppCompatActivity() {
         previewThumbnail.setOnClickListener {
             val view = LayoutInflater.from(this).inflate(R.layout.dialog_photo_zoom, null)
             view.findViewById<PhotoView>(R.id.photoView).setImageBitmap(bmp)
-            MaterialAlertDialogBuilder(this).setView(view)
-                .setPositiveButton(android.R.string.ok, null).show()
+            zoomDialog = MaterialAlertDialogBuilder(this).setView(view)
+                .setPositiveButton(android.R.string.ok) { _, _ -> zoomDialog = null }.create()
+            zoomDialog?.show()
         }
     }
 
@@ -119,8 +127,9 @@ class CensusTreeActivity : AppCompatActivity() {
             previewThumbnail.setOnClickListener {
                 val view = LayoutInflater.from(this).inflate(R.layout.dialog_photo_zoom, null)
                 Picasso.get().load(existingImageUrl).into(view.findViewById<PhotoView>(R.id.photoView))
-                MaterialAlertDialogBuilder(this).setView(view)
-                    .setPositiveButton(android.R.string.ok, null).show()
+                zoomDialog = MaterialAlertDialogBuilder(this).setView(view)
+                    .setPositiveButton(android.R.string.ok) { _, _ -> zoomDialog = null }.create()
+                zoomDialog?.show()
             }
         }
     }
@@ -178,6 +187,9 @@ class CensusTreeActivity : AppCompatActivity() {
         }
 
         btnStop.setOnClickListener {
+            // Pour Stop : on prend l'espèce sélectionnée si dispo,
+            // sinon le dernier nœud de navigation (ex : Passeriformes),
+            // sinon null si on est encore à la racine.
             performSave(recordingStatus = false, censusRef = viewModel.stopCensusRef())
         }
 

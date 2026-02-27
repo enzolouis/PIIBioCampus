@@ -69,6 +69,17 @@ class MyProfileFragment : Fragment() {
             }
         )
 
+        // Recharge la liste si une photo a été supprimée depuis PicturesViewerFragment
+        parentFragmentManager.setFragmentResultListener(
+            com.example.piibiocampus.ui.photo.PicturesViewerFragment.REQUEST_KEY,
+            viewLifecycleOwner
+        ) { _, result ->
+            if (result.getBoolean(com.example.piibiocampus.ui.photo.PicturesViewerFragment.RESULT_DELETED)) {
+                val uid = currentUserId ?: return@setFragmentResultListener
+                setupPhotosListener(uid)
+            }
+        }
+
         loadUserDataAndListenToPhotos()
     }
 

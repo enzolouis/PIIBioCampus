@@ -150,11 +150,9 @@ class MapFragment : Fragment(R.layout.fragment_map) {
                         Picasso.get().load(Uri.parse(imageUrl)).into(photoView)
                     }
 
-                    // Badge check si adminValidated == true
                     val adminValidated = o["adminValidated"] as? Boolean ?: false
                     badgeView.visibility = if (adminValidated) View.VISIBLE else View.GONE
 
-                    // ── Clic sur la miniature → ouvre PhotoViewerActivity ──
                     photoView.setOnClickListener {
                         val loc = o["location"] as? Map<*, *>
                         val state = PhotoViewerState(
