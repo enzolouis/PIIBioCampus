@@ -1,6 +1,7 @@
 package com.example.piibiocampus.data.model
 
 data class UserProfile(
+    val uid: String = "",
     val name: String = "",
     val email: String = "",
     val description: String = "",
