@@ -8,9 +8,10 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.example.piibiocampus.pictures.PictureActivity
 import androidx.fragment.app.Fragment
-import com.example.piibiocampus.PictureActivity
 import com.example.piibiocampus.R
+import com.example.piibiocampus.news.NewsFragment
 import com.example.piibiocampus.ui.map.MapFragment
 import com.example.piibiocampus.ui.profiles.MyProfileFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -24,6 +25,7 @@ class MainActivity : AppCompatActivity() {
     // Instances réutilisées — évite de recréer les fragments à chaque navigation
     private val mapFragment     by lazy { MapFragment() }
     private val profileFragment by lazy { MyProfileFragment() }
+    private val newsFragment by lazy { NewsFragment() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,6 +36,7 @@ class MainActivity : AppCompatActivity() {
         bottomNav = findViewById(R.id.bottomNav)
         fabCamera = findViewById(R.id.fabCamera)
 
+        // Charge le fragment par défaut (Map)
         if (savedInstanceState == null) {
             showFragment(mapFragment)
             bottomNav.selectedItemId = R.id.nav_map
@@ -48,6 +51,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_bibliotheque -> { fabCamera.show(); showFragment(mapFragment); true }
                 else -> false
             }
+            true
         }
 
         fabCamera.setOnClickListener {

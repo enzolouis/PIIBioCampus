@@ -50,10 +50,13 @@
             android:name=".ui.MainActivity"
             android:exported="true" />
         <activity
-            android:name=".PictureActivity"
+            android:name=".pictures.PictureActivity"
             android:exported="true" />
         <activity
-            android:name=".PreviewPictureActivity"
+            android:name=".pictures.PreviewPictureActivity"
+            android:exported="true" />
+        <activity
+            android:name=".news.NewsFragment"
             android:exported="true" />
         <activity
             android:name=".ui.admin.PicturesAdminActivity"

@@ -1,4 +1,4 @@
-package com.example.piibiocampus
+package com.example.piibiocampus.pictures
 
 import android.Manifest
 import android.content.Intent
@@ -40,15 +40,15 @@ class PictureActivity : AppCompatActivity() {
         }
     }
 
+    // nettoyer la camera
     override fun onDestroy() {
         super.onDestroy()
-        // 🔹 Nettoyer la caméra proprement
         cleanupCamera()
     }
 
+    // stop la caméra quand l'activité se met en pause
     override fun onPause() {
         super.onPause()
-        // 🔹 CRUCIAL : Arrêter la caméra quand l'activité se met en pause
         cleanupCamera()
     }
 
@@ -109,7 +109,7 @@ class PictureActivity : AppCompatActivity() {
                         quality = 80
                     )
 
-                    // 🔹 NE PAS APPELER cleanupCamera() ici
+                    // NE PAS APPELER cleanupCamera() ici
                     // Le nettoyage se fera automatiquement dans onPause() et onDestroy()
 
                     // Lancer l'activité suivante
