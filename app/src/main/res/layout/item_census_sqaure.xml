@@ -35,7 +35,9 @@
             android:textStyle="bold"
             app:layout_constraintTop_toBottomOf="@id/imgCensus"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            app:layout_constraintEnd_toEndOf="parent"
+            android:fontFamily="@font/kg_blank_space_solid"
+            />
 
         <ImageView
             android:id="@+id/btnInfo"

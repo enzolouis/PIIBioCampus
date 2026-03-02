@@ -1,5 +1,6 @@
 package com.example.piibiocampus.ui.census
 
+import android.app.Activity
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.os.Bundle
@@ -21,10 +22,6 @@ import com.github.chrisbanes.photoview.PhotoView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.squareup.picasso.Picasso
 
-/**
- * CREATE : nouvelle photo depuis PictureActivity → crée un document Firestore
- * UPDATE : reprise depuis MyProfile → met à jour le document existant sans re-upload
- */
 enum class CensusMode { CREATE, UPDATE }
 
 class CensusTreeActivity : AppCompatActivity() {
@@ -85,20 +82,7 @@ class CensusTreeActivity : AppCompatActivity() {
         viewModel.refreshRoots(initialNodeId)
     }
 
-    // ── Navigation de retour selon le caller ──────────────────────────────────
-
-    private fun navigateBack() {
-        val intent = Intent(this, MainActivity::class.java).apply {
-            if (callerName == PicturesViewerCaller.MY_PROFILE.name) {
-                putExtra("navigateTo", "myProfile")
-            }
-            flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-        }
-        startActivity(intent)
-        finish()
-    }
-
-    // ── Setup selon le mode ───────────────────────────────────────────────────
+    // ── Setup modes ───────────────────────────────────────────────────────────
 
     private fun setupCreateMode() {
         imageBytes = intent.getByteArrayExtra("imageBytes")
@@ -114,13 +98,7 @@ class CensusTreeActivity : AppCompatActivity() {
 
         val bmp = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes!!.size)
         previewThumbnail.setImageBitmap(bmp)
-        previewThumbnail.setOnClickListener {
-            val view = LayoutInflater.from(this).inflate(R.layout.dialog_photo_zoom, null)
-            view.findViewById<PhotoView>(R.id.photoView).setImageBitmap(bmp)
-            zoomDialog = MaterialAlertDialogBuilder(this).setView(view)
-                .setPositiveButton(android.R.string.ok) { _, _ -> zoomDialog = null }.create()
-            zoomDialog?.show()
-        }
+        previewThumbnail.setOnClickListener { showZoomDialog(bmp) }
     }
 
     private fun setupUpdateMode() {
@@ -136,7 +114,6 @@ class CensusTreeActivity : AppCompatActivity() {
             Picasso.get().load(existingImageUrl)
                 .placeholder(R.drawable.ic_placeholder_image)
                 .into(previewThumbnail)
-
             previewThumbnail.setOnClickListener {
                 val view = LayoutInflater.from(this).inflate(R.layout.dialog_photo_zoom, null)
                 Picasso.get().load(existingImageUrl).into(view.findViewById<PhotoView>(R.id.photoView))
@@ -145,6 +122,14 @@ class CensusTreeActivity : AppCompatActivity() {
                 zoomDialog?.show()
             }
         }
+    }
+
+    private fun showZoomDialog(bmp: android.graphics.Bitmap) {
+        val view = LayoutInflater.from(this).inflate(R.layout.dialog_photo_zoom, null)
+        view.findViewById<PhotoView>(R.id.photoView).setImageBitmap(bmp)
+        zoomDialog = MaterialAlertDialogBuilder(this).setView(view)
+            .setPositiveButton(android.R.string.ok) { _, _ -> zoomDialog = null }.create()
+        zoomDialog?.show()
     }
 
     // ── RecyclerView ──────────────────────────────────────────────────────────
@@ -185,18 +170,18 @@ class CensusTreeActivity : AppCompatActivity() {
 
     private fun setupButtons() {
         btnBack.setOnClickListener {
-            if (viewModel.canNavigateUp()) viewModel.navigateUp() else finish()
+            if (viewModel.canNavigateUp()) viewModel.navigateUp()
+            else finish()
         }
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                if (viewModel.canNavigateUp()) viewModel.navigateUp() else navigateBack()
+                if (viewModel.canNavigateUp()) viewModel.navigateUp()
+                else finish()
             }
         })
 
-        btnCancel.setOnClickListener {
-            navigateBack()
-        }
+        btnCancel.setOnClickListener { finish() }
 
         btnStop.setOnClickListener {
             performSave(recordingStatus = false, censusRef = viewModel.stopCensusRef())
@@ -234,7 +219,18 @@ class CensusTreeActivity : AppCompatActivity() {
             onSuccess = {
                 runOnUiThread {
                     Toast.makeText(this, "Photo enregistrée", Toast.LENGTH_SHORT).show()
-                    navigateBack()
+                    // Vider toute la pile (PictureActivity + CensusTreeActivity)
+                    // et revenir sur MainActivity → onglet selon le caller
+                    val intent = Intent(this, MainActivity::class.java).apply {
+                        flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                        // Indiquer à MainActivity sur quel onglet naviguer
+                        putExtra("navigateTo", when (callerName) {
+                            PicturesViewerCaller.MY_PROFILE.name -> "myProfile"
+                            else                                  -> "map"
+                        })
+                    }
+                    startActivity(intent)
+                    finish()
                 }
             },
             onError = { e ->
@@ -254,7 +250,10 @@ class CensusTreeActivity : AppCompatActivity() {
             onSuccess = {
                 runOnUiThread {
                     Toast.makeText(this, "Recensement mis à jour", Toast.LENGTH_SHORT).show()
-                    navigateBack()
+                    // En UPDATE : finish() suffit, le censusLauncher de
+                    // PicturesViewerFragment reçoit RESULT_OK automatiquement
+                    setResult(Activity.RESULT_OK)
+                    finish()
                 }
             },
             onError = { e ->

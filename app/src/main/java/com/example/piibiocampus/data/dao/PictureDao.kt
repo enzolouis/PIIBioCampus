@@ -352,6 +352,29 @@ object PictureDao {
         )
     }
 
+    fun getPictureEnrichedById(
+        pictureId: String,
+        onSuccess: (Map<String, Any>) -> Unit,
+        onError: (Exception) -> Unit
+    ) {
+        picturesRef.document(pictureId).get()
+            .addOnSuccessListener { document ->
+                val data = document.data
+                if (data == null) {
+                    onError(Exception("Photo introuvable")); return@addOnSuccessListener
+                }
+                val map = data.toMutableMap()
+                map["id"] = document.id
+
+                // Réutiliser enrichPicturesWithCensusData sur une liste d'un seul élément
+                enrichPicturesWithCensusData(
+                    pictures  = listOf(map),
+                    onSuccess = { enriched -> onSuccess(enriched.first()) },
+                    onError   = onError
+                )
+            }
+            .addOnFailureListener(onError)
+    }
 
     private fun bytesToWebpFile(context: Context, imageBytes: ByteArray, quality: Int = 90): File {
         val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)

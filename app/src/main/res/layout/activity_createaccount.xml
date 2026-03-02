@@ -31,7 +31,9 @@
         android:text="@string/titleCreateAccount"
         android:textAlignment="center"
         android:textColor="@color/white"
-        android:textSize="30sp" />
+        android:textSize="30sp"
+        android:fontFamily="@font/kg_blank_space_sketch"
+        />
 
     <ImageView
         android:id="@+id/imageView"
@@ -55,7 +57,9 @@
         android:inputType="text"
         android:paddingStart="10dp"
         android:textColorHint="@color/grey"
-        android:textSize="20sp" />
+        android:textSize="20sp"
+        android:fontFamily="@font/gentium_plus_regular"
+        />
     <EditText
         android:id="@+id/txtMail"
         android:layout_width="207dp"
@@ -69,7 +73,9 @@
         android:inputType="text"
         android:paddingStart="10dp"
         android:textColorHint="@color/grey"
-        android:textSize="20sp" />
+        android:textSize="20sp"
+        android:fontFamily="@font/gentium_plus_regular"
+        />
 
     <EditText
         android:id="@+id/txtMdp"
@@ -84,7 +90,9 @@
         android:inputType="textPassword"
         android:paddingStart="10dp"
         android:textColorHint="@color/grey"
-        android:textSize="20sp" />
+        android:textSize="20sp"
+        android:fontFamily="@font/gentium_plus_regular"
+        />
 
     <TextView
         android:id="@+id/btnAlreadyAccount"
@@ -115,5 +123,8 @@
         android:layout_alignParentBottom="true"
         android:layout_centerInParent="true"
         android:text="@string/txtBtnCreateAccount"
-        android:theme="@style/Bouton" />
+        android:theme="@style/Bouton"
+        android:textSize="16sp"
+        android:fontFamily="@font/kg_blank_space_solid"
+        />
 </RelativeLayout>

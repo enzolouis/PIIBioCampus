@@ -135,4 +135,15 @@ object UserDao {
     }
 
 
+    suspend fun getAllUsersWithUid(): List<UserProfile> {
+        val snapshot = db.collection("users")
+            .orderBy("name")
+            .get()
+            .await()
+
+        return snapshot.documents.mapNotNull { doc ->
+            val user = doc.toObject(UserProfile::class.java)
+            user?.apply { uid = doc.id }
+        }
+    }
 }

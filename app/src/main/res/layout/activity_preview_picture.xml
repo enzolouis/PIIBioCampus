@@ -26,6 +26,8 @@
         app:layout_constraintBottom_toBottomOf="parent"
         android:layout_margin="16dp"
         android:theme="@style/Bouton"
+        android:fontFamily="@font/kg_blank_space_solid"
+        android:textSize="16sp"
         app:paddingBottomSystemWindowInsets="true"/>
 
     <Button
@@ -37,6 +39,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         android:layout_margin="16dp"
+        android:fontFamily="@font/kg_blank_space_solid"
+        android:textSize="16sp"
         android:theme="@style/Bouton"
         app:paddingBottomSystemWindowInsets="true"/>
 

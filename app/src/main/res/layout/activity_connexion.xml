@@ -31,7 +31,9 @@
         android:text="@string/titleConnexion"
         android:textAlignment="center"
         android:textColor="@color/white"
-        android:textSize="30sp" />
+        android:textSize="30sp"
+        android:fontFamily="@font/kg_blank_space_sketch"
+        />
 
     <ImageView
         android:id="@+id/imageView"
@@ -55,7 +57,9 @@
         android:inputType="text"
         android:paddingStart="10dp"
         android:textColorHint="@color/grey"
-        android:textSize="20sp" />
+        android:textSize="20sp"
+        android:fontFamily="@font/gentium_plus_regular"
+        />
 
     <EditText
         android:id="@+id/txtMdp"
@@ -70,7 +74,9 @@
         android:inputType="textPassword"
         android:paddingStart="10dp"
         android:textColorHint="@color/grey"
-        android:textSize="20sp" />
+        android:textSize="20sp"
+        android:fontFamily="@font/gentium_plus_regular"
+        />
 
     <TextView
         android:id="@+id/btnResetPassWord"
@@ -80,6 +86,7 @@
         android:layout_centerInParent="true"
         android:layout_marginTop="10dp"
         android:text="@string/txtBtnForgetPassWord"
+        android:fontFamily="@font/gentium_plus_regular"
         />
 
     <TextView
@@ -90,7 +97,9 @@
         android:layout_centerInParent="true"
         android:layout_marginTop="10dp"
         android:text="@string/txtNewAccount"
-        android:textSize="15sp" />
+        android:textSize="15sp"
+        android:fontFamily="@font/gentium_plus_regular"
+        />
 
     <Button
         android:id="@+id/btnConnexion"
@@ -98,6 +107,9 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerInParent="true"
+        android:fontFamily="@font/kg_blank_space_solid"
         android:text="@string/txtBtnConnect"
-        android:theme="@style/Bouton" />
+        android:theme="@style/Bouton"
+        android:textSize="16sp"
+        />
 </RelativeLayout>

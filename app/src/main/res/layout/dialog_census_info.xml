@@ -22,13 +22,16 @@
             android:textStyle="bold"
             android:layout_marginTop="12dp"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/kg_blank_space_solid"
+            />
 
         <TextView
             android:id="@+id/tvDescription"
             android:layout_marginTop="8dp"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/gentium_plus_bold"/>
 
     </LinearLayout>
 </ScrollView>
