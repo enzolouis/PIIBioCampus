@@ -4,27 +4,37 @@
     <item
         android:id="@+id/nav_actualite"
         android:icon="@drawable/newspaper"
-        android:title="Actualité"/>
+        android:title="Actualité"
+        android:fontFamily="@font/gentium_plus_bold"
+        />
 
     <item
         android:id="@+id/nav_recherche"
         android:icon="@drawable/search"
-        android:title="Recherche"/>
+        android:title="Recherche"
+        android:fontFamily="@font/gentium_plus_bold"
+        />
 
     <item
         android:id="@+id/nav_bibliotheque"
         android:icon="@drawable/book_open"
-        android:title="Bibliothèque"/>
+        android:title="Bibliothèque"
+        android:fontFamily="@font/gentium_plus_bold"
+        />
 
     <item
         android:id="@+id/nav_map"
         android:icon="@drawable/map"
-        android:title="Map"/>
+        android:title="Map"
+        android:fontFamily="@font/gentium_plus_bold"
+        />
 
     <item
         android:id="@+id/nav_compte"
         android:icon="@drawable/user_circle"
-        android:title="Compte"/>
+        android:title="Compte"
+        android:fontFamily="@font/gentium_plus_bold"
+        />
 
 </menu>
 
