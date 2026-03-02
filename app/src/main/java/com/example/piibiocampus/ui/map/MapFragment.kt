@@ -138,6 +138,7 @@ class MapFragment : Fragment(R.layout.fragment_map) {
     }
 
     private fun addMarkers(points: List<Map<String, Any>>) {
+        InfoWindow.closeAllInfoWindowsOn(map)
         map.overlays.removeAll { it is Marker }
 
         for (o in points) {
@@ -165,8 +166,15 @@ class MapFragment : Fragment(R.layout.fragment_map) {
 
             var isOpen = false
             marker.setOnMarkerClickListener { m, _ ->
-                if (isOpen) m.closeInfoWindow() else m.showInfoWindow()
-                isOpen = !isOpen
+                if (isOpen) {
+                    m.closeInfoWindow()
+                    isOpen = false
+                } else {
+                    // Fermer toutes les autres InfoWindows avant d'ouvrir celle-ci
+                    InfoWindow.closeAllInfoWindowsOn(map)
+                    m.showInfoWindow()
+                    isOpen = true
+                }
                 true
             }
 
@@ -245,6 +253,8 @@ class MapFragment : Fragment(R.layout.fragment_map) {
     override fun onResume() {
         super.onResume()
         map.onResume()
+        // Fermer toutes les InfoWindows orphelines avant de recharger
+        InfoWindow.closeAllInfoWindowsOn(map)
         viewModel.loadAllPictures()
     }
     override fun onPause()       { super.onPause();   map.onPause() }
