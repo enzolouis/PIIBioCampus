@@ -58,6 +58,8 @@
         <activity
             android:name=".news.NewsFragment"
             android:exported="true" />
+        <activity android:name=".ui.photo.PicturesViewerFragment"
+            android:exported="true" />
 
     </application>
 

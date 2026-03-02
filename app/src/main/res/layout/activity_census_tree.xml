@@ -8,16 +8,32 @@
     android:fitsSystemWindows="true"
     app:paddingBottomSystemWindowInsets="true">
 
-    <!-- En-tête : miniature + titre -->
+    <!-- En-tête : bouton retour arbre + miniature + titre -->
     <LinearLayout
         android:id="@+id/header"
         android:orientation="horizontal"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:padding="12dp"
+        android:gravity="center_vertical"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
+
+        <!--
+            Bouton retour dans l'arbre.
+            Visible uniquement quand on peut remonter (géré dans CensusTreeActivity).
+            Utilise ic_arrow_back (icône Material standard).
+        -->
+        <ImageButton
+            android:id="@+id/btnBackTree"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="4dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_arrow_back"
+            android:contentDescription="Niveau précédent"
+            android:visibility="gone" />
 
         <ImageView
             android:id="@+id/previewThumbnail"
@@ -33,12 +49,13 @@
             android:id="@+id/tvHeaderTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Select an order"
+            android:text="Sélectionner un ordre"
             android:textSize="16sp"
             android:textStyle="bold"
             android:layout_weight="1"
             android:ellipsize="end"
             android:maxLines="2" />
+
     </LinearLayout>
 
     <!-- RecyclerView : grille 2 colonnes -->
@@ -52,7 +69,7 @@
         app:layout_constraintTop_toBottomOf="@id/header"
         app:layout_constraintBottom_toTopOf="@id/bottomBar"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <!-- Bottom bar fixe : Annuler | Stopper | Valider -->
     <LinearLayout
@@ -65,15 +82,14 @@
         android:background="?attr/colorSurface"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        >
+        app:layout_constraintBottom_toBottomOf="parent">
 
         <Button
             android:id="@+id/btnCancel"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:text="Annuler"/>
+            android:text="Annuler" />
 
         <Button
             android:id="@+id/btnStop"
@@ -82,7 +98,7 @@
             android:layout_height="wrap_content"
             android:text="Stopper"
             android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"/>
+            android:layout_marginEnd="8dp" />
 
         <Button
             android:id="@+id/btnValidate"
@@ -90,7 +106,8 @@
             android:layout_weight="1"
             android:layout_height="wrap_content"
             android:text="Valider"
-            android:enabled="false"/>
+            android:enabled="false" />
+
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

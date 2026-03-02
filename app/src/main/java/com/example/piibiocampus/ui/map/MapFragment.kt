@@ -2,40 +2,69 @@ package com.example.piibiocampus.ui.map
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.graphics.*
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
-import android.widget.*
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import com.example.piibiocampus.R
+import com.example.piibiocampus.data.model.Campus
+import com.example.piibiocampus.ui.photo.PhotoViewerState
+import com.example.piibiocampus.ui.photo.PicturesViewerCaller
+import com.example.piibiocampus.ui.photo.PicturesViewerFragment
+import com.google.android.gms.location.LocationServices
 import com.squareup.picasso.Picasso
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.XYTileSource
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
+import org.osmdroid.views.overlay.Overlay
+import org.osmdroid.views.overlay.Polygon
 import org.osmdroid.views.overlay.infowindow.InfoWindow
-import androidx.fragment.app.viewModels
-import androidx.core.net.toUri
-import com.google.android.gms.location.LocationServices
-
+import android.widget.ImageView
+import android.widget.TextView
 
 class MapFragment : Fragment(R.layout.fragment_map) {
 
-    private val TAG = "MapFragment"
     private val viewModel: MapViewModel by viewModels()
-
     private lateinit var map: MapView
-    private lateinit var overlay: FrameLayout
-    private lateinit var zoomImage: ImageView
-    private lateinit var photoDate: TextView
-    private lateinit var photoInfos: TextView
-    private lateinit var authorButton: Button
-    private lateinit var backButton: Button
+
+    private val campusTextOverlays = mutableListOf<TextOverlay>()
+
+    private inner class TextOverlay(
+        private val position: GeoPoint,
+        private val text: String
+    ) : Overlay() {
+        override fun draw(canvas: Canvas, mapView: MapView, shadow: Boolean) {
+            if (shadow) return
+            val point = mapView.projection.toPixels(position, null)
+
+            val shadowPaint = Paint().apply {
+                color = Color.BLACK
+                textSize = 36f
+                isAntiAlias = true
+                typeface = Typeface.DEFAULT_BOLD
+                textAlign = Paint.Align.CENTER
+                maskFilter = BlurMaskFilter(4f, BlurMaskFilter.Blur.NORMAL)
+            }
+            val textPaint = Paint().apply {
+                color = Color.parseColor("#FFB300")
+                textSize = 36f
+                isAntiAlias = true
+                typeface = Typeface.DEFAULT_BOLD
+                textAlign = Paint.Align.CENTER
+            }
+
+            canvas.drawText(text, point.x.toFloat(), point.y.toFloat(), shadowPaint)
+            canvas.drawText(text, point.x.toFloat(), point.y.toFloat(), textPaint)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,23 +74,7 @@ class MapFragment : Fragment(R.layout.fragment_map) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        overlay = view.findViewById(R.id.overlay)
-        zoomImage = view.findViewById(R.id.zoomImage)
-        photoDate = view.findViewById(R.id.photoDate)
-        photoInfos = view.findViewById(R.id.photoInfos)
-        authorButton = view.findViewById(R.id.authorButton)
-        backButton = view.findViewById(R.id.backButton)
         map = view.findViewById(R.id.map)
-        backButton.setOnClickListener {
-            overlay.animate()
-                .alpha(0f)
-                .setDuration(200)
-                .withEndAction {
-                    overlay.visibility = FrameLayout.GONE
-                    overlay.alpha = 1f
-                }
-                .start()
-        }
 
         ViewCompat.setOnApplyWindowInsetsListener(view.findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -71,13 +84,15 @@ class MapFragment : Fragment(R.layout.fragment_map) {
 
         setupTileSource()
 
-        // Observe le ViewModel
         viewModel.pictures.observe(viewLifecycleOwner) { points ->
             addMarkers(points)
         }
-
-        // Charge les points (par défaut tous)
         viewModel.loadAllPictures()
+
+        viewModel.campusList.observe(viewLifecycleOwner) { campusList ->
+            addCampusOverlays(campusList)
+        }
+        viewModel.loadCampus()
     }
 
     private fun formatTimestamp(timestamp: Any?): String {
@@ -98,9 +113,7 @@ class MapFragment : Fragment(R.layout.fragment_map) {
 
     private fun setupTileSource() {
         val cartoLight = XYTileSource(
-            "CartoLight",
-            0, 20, 256,
-            ".png",
+            "CartoLight", 0, 20, 256, ".png",
             arrayOf("https://cartodb-basemaps-a.global.ssl.fastly.net/light_all/")
         )
         map.setTileSource(cartoLight)
@@ -108,141 +121,180 @@ class MapFragment : Fragment(R.layout.fragment_map) {
         map.setMultiTouchControls(true)
         map.controller.setZoom(15.0)
 
-        // Centrer sur la position actuelle de l'utilisateur (sans marker)
-        if (ActivityCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED ||
-            ActivityCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
+        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+            ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
         ) {
             val fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
             fusedLocationClient.lastLocation.addOnSuccessListener { location ->
                 if (location != null) {
                     map.controller.setCenter(GeoPoint(location.latitude, location.longitude))
                 } else {
-                    // Fallback sur Toulouse si pas de position
                     map.controller.setCenter(GeoPoint(43.562817415184526, 1.467314949845769))
                 }
             }
         } else {
-            // Fallback sur Toulouse si pas de permission
             map.controller.setCenter(GeoPoint(43.562817415184526, 1.467314949845769))
         }
     }
 
     private fun addMarkers(points: List<Map<String, Any>>) {
-        map.overlays.clear()
+        InfoWindow.closeAllInfoWindowsOn(map)
+        map.overlays.removeAll { it is Marker }
 
         for (o in points) {
             val latLon: Pair<Double, Double>? = when {
-                o["latitude"] is Double && o["longitude"] is Double -> {
+                o["latitude"] is Double && o["longitude"] is Double ->
                     Pair(o["latitude"] as Double, o["longitude"] as Double)
-                }
                 o["location"] is Map<*, *> -> {
                     val loc = o["location"] as Map<*, *>
-                    val lat = (loc["latitude"] as? Double)
-                    val lon = (loc["longitude"] as? Double)
+                    val lat = loc["latitude"] as? Double
+                    val lon = loc["longitude"] as? Double
                     if (lat != null && lon != null) Pair(lat, lon) else null
                 }
                 else -> null
             }
-
             if (latLon == null) continue
 
             val marker = Marker(map)
             val (lat, lon) = latLon
             marker.position = GeoPoint(lat, lon)
             marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-
-            // icône du marker (pinmap) — assure-toi d'avoir R.drawable.pinmap
             marker.icon = ContextCompat.getDrawable(requireContext(), R.drawable.pinmap)
 
-            // titre de marker (si présent)
             val title = (o["specie"] as? String) ?: (o["title"] as? String) ?: ""
             marker.title = title
 
             var isOpen = false
-            marker.setOnMarkerClickListener { m, mapView ->
-                if (isOpen) m.closeInfoWindow() else m.showInfoWindow()
-                isOpen = !isOpen
+            marker.setOnMarkerClickListener { m, _ ->
+                if (isOpen) {
+                    m.closeInfoWindow()
+                    isOpen = false
+                } else {
+                    // Fermer toutes les autres InfoWindows avant d'ouvrir celle-ci
+                    InfoWindow.closeAllInfoWindowsOn(map)
+                    m.showInfoWindow()
+                    isOpen = true
+                }
                 true
             }
 
             marker.infoWindow = object : InfoWindow(R.layout.marker_info, map) {
                 override fun onOpen(item: Any?) {
-                    val titleView = mView.findViewById<TextView>(R.id.title)
-                    val photoView = mView.findViewById<ImageView>(R.id.photo)
-
-                    val imageUrl = when {
-                        o["imageUrl"] is String -> o["imageUrl"] as String
-                        (o["image"] is String) -> o["image"] as String
-                        else -> null
-                    }
+                    val titleView    = mView.findViewById<TextView>(R.id.title)
+                    val photoView    = mView.findViewById<ImageView>(R.id.photo)
+                    val recordingDot = mView.findViewById<View>(R.id.ivRecordingDot)
+                    val validatedDot = mView.findViewById<View>(R.id.ivValidatedBadge)
+                    val imageUrl     = (o["imageUrl"] as? String) ?: (o["image"] as? String) ?: ""
 
                     titleView.text = marker.title
-                    if (!imageUrl.isNullOrEmpty()) {
+                    if (imageUrl.isNotEmpty()) {
                         Picasso.get().load(Uri.parse(imageUrl)).into(photoView)
-                    } else {
-                        photoView.setImageDrawable(null)
+                    }
+
+                    val adminValidated  = o["adminValidated"]  as? Boolean ?: false
+                    val recordingStatus = o["recordingStatus"] as? Boolean ?: false
+
+                    when {
+                        adminValidated -> {
+                            validatedDot.visibility = View.VISIBLE
+                            recordingDot.visibility = View.GONE
+                        }
+                        !recordingStatus -> {
+                            recordingDot.visibility = View.VISIBLE
+                            validatedDot.visibility = View.GONE
+                        }
+                        else -> {
+                            recordingDot.visibility = View.GONE
+                            validatedDot.visibility = View.GONE
+                        }
                     }
 
                     photoView.setOnClickListener {
-                        if (!imageUrl.isNullOrEmpty()) {
-                            Picasso.get().load(imageUrl.toUri()).into(zoomImage)
-                        } else {
-                            zoomImage.setImageDrawable(null)
-                        }
-
-                        photoDate.text = "Date : ${formatTimestamp(o["timestamp"])}"
-                        photoInfos.text =
-                            "Famille : ${o["family"] ?: "Non identifié"}\n" +
-                                    "Genre : ${o["genre"] ?: "Non identifié"}\n" +
-                                    "Espèce : ${o["specie"] ?: "Non identifié"}"
-
-
-                        authorButton.setOnClickListener {
-                            // todo: naviguer vers le profil de l'auteur si tu as userRef
-                        }
-
-                        overlay.apply {
-                            alpha = 0f
-                            visibility = FrameLayout.VISIBLE
-                            animate().alpha(1f).setDuration(200).start()
-                        }
+                        val loc = o["location"] as? Map<*, *>
+                        val state = PhotoViewerState(
+                            imageUrl          = imageUrl,
+                            family            = o["family"] as? String,
+                            genre             = o["genre"]  as? String,
+                            specie            = o["specie"] as? String,
+                            timestamp         = formatTimestamp(o["timestamp"]),
+                            adminValidated    = adminValidated,
+                            pictureId         = o["id"] as? String ?: "",
+                            userRef           = o["userRef"] as? String ?: "",
+                            profilePictureUrl = o["profilePictureUrl"] as? String,
+                            censusRef         = o["censusRef"] as? String,
+                            imageBytes        = null,
+                            latitude          = (loc?.get("latitude")  as? Double) ?: lat,
+                            longitude         = (loc?.get("longitude") as? Double) ?: lon,
+                            altitude          = (loc?.get("altitude")  as? Double) ?: 0.0,
+                            recordingStatus   = recordingStatus,
+                            caller            = PicturesViewerCaller.MAP
+                        )
+                        PicturesViewerFragment.show(parentFragmentManager, state)
                     }
                 }
 
                 override fun onClose() {
-                    val titleView = mView.findViewById<TextView>(R.id.title)
-                    val photoView = mView.findViewById<ImageView>(R.id.photo)
-                    titleView.text = ""
-                    photoView.setImageDrawable(null)
+                    mView.findViewById<TextView>(R.id.title).text = ""
+                    mView.findViewById<ImageView>(R.id.photo).setImageDrawable(null)
                 }
             }
 
+            // Markers ajoutés en fin de liste = premier plan, au-dessus des campus
             map.overlays.add(marker)
         }
 
         map.invalidate()
     }
 
-    // Lifecycle important pour MapView (OSMDroid)
+    fun reloadMarkers() {
+        viewModel.loadAllPictures()
+    }
+
     override fun onResume() {
         super.onResume()
         map.onResume()
+        // Fermer toutes les InfoWindows orphelines avant de recharger
+        InfoWindow.closeAllInfoWindowsOn(map)
+        viewModel.loadAllPictures()
     }
+    override fun onPause()       { super.onPause();   map.onPause() }
+    override fun onDestroyView() { super.onDestroyView(); map.overlays.clear() }
 
-    override fun onPause() {
-        super.onPause()
-        map.onPause()
-    }
+    private fun addCampusOverlays(campusList: List<Campus>) {
+        map.overlays.removeAll { it is Polygon }
+        map.overlays.removeAll(campusTextOverlays)
+        campusTextOverlays.clear()
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        // sécurité : clear overlays
-        map.overlays.clear()
+        for (campus in campusList) {
+            val circle = Polygon(map).apply {
+                points = Polygon.pointsAsCircle(
+                    GeoPoint(campus.latitudeCenter, campus.longitudeCenter),
+                    campus.radius
+                )
+                fillPaint.color = Color.argb(40, 255, 179, 0)
+                outlinePaint.color = Color.argb(180, 255, 179, 0)
+                outlinePaint.strokeWidth = 3f
+                infoWindow = null
+                setOnClickListener { _, _, _ -> true }
+            }
+            // Campus en position 0 = arrière-plan absolu
+            map.overlays.add(0, circle)
+
+            val textOverlay = TextOverlay(
+                GeoPoint(campus.latitudeCenter, campus.longitudeCenter),
+                campus.name
+            )
+            campusTextOverlays.add(textOverlay)
+            // TextOverlay juste après les Polygon, avant les Marker
+            val insertIndex = map.overlays.indexOfLast { it is Polygon } + 1
+            map.overlays.add(insertIndex, textOverlay)
+        }
+
+        // S'assurer que tous les Marker sont bien au-dessus des campus
+        val markers = map.overlays.filterIsInstance<Marker>()
+        map.overlays.removeAll { it is Marker }
+        map.overlays.addAll(markers)
+
+        map.invalidate()
     }
 }
