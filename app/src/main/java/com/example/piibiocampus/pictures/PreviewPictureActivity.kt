@@ -1,4 +1,4 @@
-package com.example.piibiocampus
+package com.example.piibiocampus.pictures
 
 import android.Manifest
 import android.content.Intent

@@ -8,8 +8,9 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.example.piibiocampus.PictureActivity
+import com.example.piibiocampus.pictures.PictureActivity
 import com.example.piibiocampus.R
+import com.example.piibiocampus.news.NewsFragment
 import com.example.piibiocampus.ui.map.MapFragment
 import com.example.piibiocampus.ui.profiles.MyProfileFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -38,7 +39,7 @@ class MainActivity : AppCompatActivity() {
 
         bottomNav.setOnItemSelectedListener { item ->
             val fragment = when (item.itemId) {
-                R.id.nav_actualite -> MapFragment() // remplace par ton fragment réel
+                R.id.nav_actualite -> NewsFragment() // remplace par ton fragment réel
                 R.id.nav_recherche -> MapFragment()
                 R.id.nav_bibliotheque -> MapFragment()
                 R.id.nav_map -> MapFragment()
