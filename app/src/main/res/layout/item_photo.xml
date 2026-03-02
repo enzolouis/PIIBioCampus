@@ -22,16 +22,14 @@
         android:background="@drawable/bg_dot_red"
         android:visibility="gone" />
 
-    <!-- Badge check en bas à droite : adminValidated == true -->
-    <ImageView
+    <!-- Point vert en haut à droite : adminValidated == true -->
+    <View
         android:id="@+id/ivValidatedBadge"
-        android:layout_width="18dp"
-        android:layout_height="18dp"
-        android:layout_gravity="bottom|end"
+        android:layout_width="12dp"
+        android:layout_height="12dp"
+        android:layout_gravity="top|end"
         android:layout_margin="6dp"
-        android:src="@drawable/ic_check"
-        android:scaleType="fitCenter"
-        android:visibility="gone"
-        android:contentDescription="Photo validée" />
+        android:background="@drawable/bg_dot_green"
+        android:visibility="gone" />
 
 </FrameLayout>

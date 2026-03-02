@@ -1,6 +1,7 @@
 package com.example.piibiocampus.ui.photo
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.view.*
 import android.widget.*
@@ -18,8 +19,8 @@ import com.squareup.picasso.Picasso
 class PicturesViewerFragment : DialogFragment() {
 
     private lateinit var state: PhotoViewerState
-    private var btnValidateRef: Button? = null
-    private var ivBadgeRef: ImageView?  = null
+    private var btnValidateRef: Button?  = null
+    private var tvStatusRef: TextView?   = null
 
     companion object {
         private const val TAG = "PicturesViewerFragment"
@@ -46,45 +47,19 @@ class PicturesViewerFragment : DialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val ivAuthorProfile  = view.findViewById<ImageView>(R.id.ivAuthorProfile)
-        val tvTitle          = view.findViewById<TextView>(R.id.tvTitle)
-        val ivValidatedBadge = view.findViewById<ImageView>(R.id.ivValidatedBadge)
-        val photoView        = view.findViewById<PhotoView>(R.id.photoView)
-        val tvDate           = view.findViewById<TextView>(R.id.tvDate)
-        val tvDescription    = view.findViewById<TextView>(R.id.tvDescription)
-        val btnResumeCensus  = view.findViewById<Button>(R.id.btnResumeCensus)
-        val btnValidate      = view.findViewById<Button>(R.id.btnValidate)
-        val btnBack          = view.findViewById<Button>(R.id.btnBack)
-        val btnDelete        = view.findViewById<Button>(R.id.btnDelete)
+        val ivAuthorProfile     = view.findViewById<ImageView>(R.id.ivAuthorProfile)
+        val tvTitle             = view.findViewById<TextView>(R.id.tvTitle)
+        val tvValidationStatus  = view.findViewById<TextView>(R.id.tvValidationStatus)
+        val photoView           = view.findViewById<PhotoView>(R.id.photoView)
+        val tvDate              = view.findViewById<TextView>(R.id.tvDate)
+        val tvDescription       = view.findViewById<TextView>(R.id.tvDescription)
+        val btnResumeCensus     = view.findViewById<Button>(R.id.btnResumeCensus)
+        val btnValidate         = view.findViewById<Button>(R.id.btnValidate)
+        val btnBack             = view.findViewById<Button>(R.id.btnBack)
+        val btnDelete           = view.findViewById<Button>(R.id.btnDelete)
 
         btnValidateRef = btnValidate
-        ivBadgeRef     = ivValidatedBadge
-
-        // ── DEBUG LOG ─────────────────────────────────────────────────────────
-        android.util.Log.d("PicturesViewer", """
-            ┌─── PhotoViewerState ───────────────────────────────
-            │ pictureId           = '${state.pictureId}'
-            │ imageUrl            = '${state.imageUrl}'
-            │ userRef             = '${state.userRef}'
-            | profilePictureUrl   = '${state.profilePictureUrl}'
-            │ adminValidated      = ${state.adminValidated}
-            │ censusRef           = '${state.censusRef}'
-            │ caller              = ${state.caller}
-            │ family              = '${state.family}'
-            │ genre               = '${state.genre}'
-            │ specie              = '${state.specie}'
-            │ timestamp           = '${state.timestamp}'
-            │ imageBytes null ?   = ${state.imageBytes == null}
-            ├─── Visibilité calculée ────────────────────────────
-            │ showAuthorProfile   = ${state.showAuthorProfile}
-            │ showResumeCensus    = ${state.showResumeCensus}
-            │ showDelete          = ${state.showDelete}
-            │ showValidate        = ${state.showValidate}
-            │ showValidatedBadge  = ${state.showValidatedBadge}
-            │ displayTitle        = '${state.displayTitle}'
-            └────────────────────────────────────────────────────
-        """.trimIndent())
-        // ─────────────────────────────────────────────────────────────────────
+        tvStatusRef    = tvValidationStatus
 
         // --- Photo principale ---
         Picasso.get().load(state.imageUrl)
@@ -106,14 +81,8 @@ class PicturesViewerFragment : DialogFragment() {
         // --- Titre ---
         tvTitle.text = state.displayTitle
 
-        // --- Badge validé ---
-        ivValidatedBadge.visibility = if (state.showValidatedBadge) View.VISIBLE else View.GONE
-        ivValidatedBadge.setOnClickListener {
-            MaterialAlertDialogBuilder(requireContext())
-                .setTitle("Photo validée ✓")
-                .setMessage("Cette photo a été vérifiée et validée par un administrateur de la plateforme.")
-                .setPositiveButton("OK", null).show()
-        }
+        // --- Statut de validation (remplace l'ancien badge check) ---
+        refreshValidationStatus(tvValidationStatus)
 
         // --- Date ---
         tvDate.text = state.timestamp
@@ -126,15 +95,15 @@ class PicturesViewerFragment : DialogFragment() {
         }
 
         // --- Bouton "Reprendre le recensement" ---
-
         if (state.showResumeCensus) {
             btnResumeCensus.visibility = View.VISIBLE
             btnResumeCensus.text = "Reprendre le recensement"
             btnResumeCensus.setOnClickListener {
                 val intent = Intent(requireContext(), CensusTreeActivity::class.java).apply {
-                    putExtra("mode",          CensusMode.UPDATE.name)
-                    putExtra("pictureId",     state.pictureId)
-                    putExtra("imageUrl",      state.imageUrl)
+                    putExtra("mode",      CensusMode.UPDATE.name)
+                    putExtra("pictureId", state.pictureId)
+                    putExtra("imageUrl",  state.imageUrl)
+                    putExtra("caller",    state.caller.name)
                     val ref = state.censusRef?.takeIf { it.isNotEmpty() && it != "null" }
                     if (ref != null) putExtra("initialNodeId", ref)
                 }
@@ -159,6 +128,7 @@ class PicturesViewerFragment : DialogFragment() {
                             onSuccess = {
                                 state = state.copy(adminValidated = newValue)
                                 refreshValidateButton()
+                                refreshValidationStatus(tvStatusRef)
                                 btnResumeCensus.visibility =
                                     if (state.showResumeCensus) View.VISIBLE else View.GONE
                                 Toast.makeText(requireContext(),
@@ -218,9 +188,30 @@ class PicturesViewerFragment : DialogFragment() {
         }
     }
 
+    // Met à jour le texte de statut selon l'état de validation/recensement
+    private fun refreshValidationStatus(tv: TextView?) {
+        tv ?: return
+        when {
+            state.adminValidated -> {
+                tv.text      = "✓ Validé par un administrateur"
+                tv.setTextColor(Color.parseColor("#4CAF50"))
+                tv.visibility = View.VISIBLE
+            }
+            !(state.recordingStatus) -> {
+                tv.text      = "● Recensement non terminé"
+                tv.setTextColor(Color.parseColor("#F44336"))
+                tv.visibility = View.VISIBLE
+            }
+            else -> {
+                tv.text      = "○ Recensement non validé par un admin"
+                tv.setTextColor(Color.parseColor("#FF9800"))
+                tv.visibility = View.VISIBLE
+            }
+        }
+    }
+
     private fun refreshValidateButton() {
-        val btn   = btnValidateRef ?: return
-        val badge = ivBadgeRef     ?: return
+        val btn = btnValidateRef ?: return
         if (state.adminValidated) {
             btn.text = "Invalider"
             btn.backgroundTintList = ContextCompat.getColorStateList(requireContext(), R.color.red)
@@ -228,6 +219,5 @@ class PicturesViewerFragment : DialogFragment() {
             btn.text = "Valider"
             btn.backgroundTintList = ContextCompat.getColorStateList(requireContext(), R.color.green)
         }
-        badge.visibility = if (state.showValidatedBadge) View.VISIBLE else View.GONE
     }
 }

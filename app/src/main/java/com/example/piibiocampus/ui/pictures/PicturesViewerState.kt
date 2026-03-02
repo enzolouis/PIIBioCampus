@@ -29,7 +29,7 @@ data class PhotoViewerState(
     val timestamp: String,          // déjà formaté en String avant de passer
     val adminValidated: Boolean,
     val pictureId: String,          // ID du document Firestore pour actions (delete, validate)
-    val userRef: String,           // UID de l'auteur (pour charger sa photo de profil)
+    val userRef: String,            // UID de l'auteur (pour charger sa photo de profil)
     val profilePictureUrl: String?,
 
     // --- Données pour "Reprendre le recensement" ---
@@ -38,6 +38,9 @@ data class PhotoViewerState(
     val latitude: Double,
     val longitude: Double,
     val altitude: Double,
+
+    // --- Statut du recensement ---
+    val recordingStatus: Boolean = false,  // true = recensement terminé, false = non terminé
 
     // --- Contexte d'appel ---
     val caller: PicturesViewerCaller
@@ -60,9 +63,9 @@ data class PhotoViewerState(
      */
     val showResumeCensus: Boolean
         get() = when (caller) {
-            PicturesViewerCaller.MY_PROFILE   -> !adminValidated
-            PicturesViewerCaller.CENSUS_TREE  -> true
-            else                           -> false
+            PicturesViewerCaller.MY_PROFILE  -> !adminValidated
+            PicturesViewerCaller.CENSUS_TREE -> true
+            else                             -> false
         }
 
     /** Bouton "Supprimer" : visible sur MY_PROFILE, ADMIN et CENSUS_TREE */

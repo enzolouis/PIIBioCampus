@@ -172,37 +172,55 @@ class MapFragment : Fragment(R.layout.fragment_map) {
 
             marker.infoWindow = object : InfoWindow(R.layout.marker_info, map) {
                 override fun onOpen(item: Any?) {
-                    val titleView = mView.findViewById<TextView>(R.id.title)
-                    val photoView = mView.findViewById<ImageView>(R.id.photo)
-                    val badgeView = mView.findViewById<ImageView>(R.id.ivValidatedBadge)
-                    val imageUrl = (o["imageUrl"] as? String) ?: (o["image"] as? String) ?: ""
+                    val titleView    = mView.findViewById<TextView>(R.id.title)
+                    val photoView    = mView.findViewById<ImageView>(R.id.photo)
+                    val recordingDot = mView.findViewById<View>(R.id.ivRecordingDot)
+                    val validatedDot = mView.findViewById<View>(R.id.ivValidatedBadge)
+                    val imageUrl     = (o["imageUrl"] as? String) ?: (o["image"] as? String) ?: ""
 
                     titleView.text = marker.title
                     if (imageUrl.isNotEmpty()) {
                         Picasso.get().load(Uri.parse(imageUrl)).into(photoView)
                     }
 
-                    val adminValidated = o["adminValidated"] as? Boolean ?: false
-                    badgeView.visibility = if (adminValidated) View.VISIBLE else View.GONE
+                    val adminValidated  = o["adminValidated"]  as? Boolean ?: false
+                    val recordingStatus = o["recordingStatus"] as? Boolean ?: false
+
+                    // Même logique que item_photo : vert prioritaire sur rouge
+                    when {
+                        adminValidated -> {
+                            validatedDot.visibility = View.VISIBLE
+                            recordingDot.visibility = View.GONE
+                        }
+                        !recordingStatus -> {
+                            recordingDot.visibility = View.VISIBLE
+                            validatedDot.visibility = View.GONE
+                        }
+                        else -> {
+                            recordingDot.visibility = View.GONE
+                            validatedDot.visibility = View.GONE
+                        }
+                    }
 
                     photoView.setOnClickListener {
                         val loc = o["location"] as? Map<*, *>
                         val state = PhotoViewerState(
-                            imageUrl = imageUrl,
-                            family = o["family"] as? String,
-                            genre = o["genre"] as? String,
-                            specie = o["specie"] as? String,
-                            timestamp = formatTimestamp(o["timestamp"]),
-                            adminValidated = o["adminValidated"] as? Boolean ?: false,
-                            pictureId = o["id"] as? String ?: "",
-                            userRef = o["userRef"] as? String ?: "",
+                            imageUrl          = imageUrl,
+                            family            = o["family"] as? String,
+                            genre             = o["genre"]  as? String,
+                            specie            = o["specie"] as? String,
+                            timestamp         = formatTimestamp(o["timestamp"]),
+                            adminValidated    = adminValidated,
+                            pictureId         = o["id"] as? String ?: "",
+                            userRef           = o["userRef"] as? String ?: "",
                             profilePictureUrl = o["profilePictureUrl"] as? String,
-                            censusRef = o["censusRef"] as? String,
-                            imageBytes = null,
-                            latitude = (loc?.get("latitude") as? Double) ?: lat,
-                            longitude = (loc?.get("longitude") as? Double) ?: lon,
-                            altitude = (loc?.get("altitude") as? Double) ?: 0.0,
-                            caller = PicturesViewerCaller.MAP
+                            censusRef         = o["censusRef"] as? String,
+                            imageBytes        = null,
+                            latitude          = (loc?.get("latitude")  as? Double) ?: lat,
+                            longitude         = (loc?.get("longitude") as? Double) ?: lon,
+                            altitude          = (loc?.get("altitude")  as? Double) ?: 0.0,
+                            recordingStatus   = recordingStatus,
+                            caller            = PicturesViewerCaller.MAP
                         )
                         PicturesViewerFragment.show(parentFragmentManager, state)
                     }
@@ -220,6 +238,19 @@ class MapFragment : Fragment(R.layout.fragment_map) {
         map.invalidate()
     }
 
+    fun reloadMarkers() {
+        viewModel.loadAllPictures()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        map.onResume()
+        // Rechargement des marqueurs à chaque retour sur la map
+        // (après ajout/modification d'une photo depuis CensusTreeActivity)
+        viewModel.loadAllPictures()
+    }
+    override fun onPause()       { super.onPause();   map.onPause() }
+    override fun onDestroyView() { super.onDestroyView(); map.overlays.clear() }
     private fun addCampusOverlays(campusList: List<Campus>) {
         map.overlays.removeAll { it is Polygon }
         map.overlays.removeAll(campusTextOverlays)
@@ -245,17 +276,5 @@ class MapFragment : Fragment(R.layout.fragment_map) {
         }
 
         map.invalidate()
-    }
-
-    override fun onResume() {
-        super.onResume(); map.onResume()
-    }
-
-    override fun onPause() {
-        super.onPause(); map.onPause()
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView(); map.overlays.clear()
     }
 }
