@@ -186,7 +186,6 @@ class MapFragment : Fragment(R.layout.fragment_map) {
                     val adminValidated  = o["adminValidated"]  as? Boolean ?: false
                     val recordingStatus = o["recordingStatus"] as? Boolean ?: false
 
-                    // Même logique que item_photo : vert prioritaire sur rouge
                     when {
                         adminValidated -> {
                             validatedDot.visibility = View.VISIBLE
@@ -232,7 +231,8 @@ class MapFragment : Fragment(R.layout.fragment_map) {
                 }
             }
 
-            map.overlays.add(0, marker)
+            // Markers ajoutés en fin de liste = premier plan, au-dessus des campus
+            map.overlays.add(marker)
         }
 
         map.invalidate()
@@ -245,12 +245,11 @@ class MapFragment : Fragment(R.layout.fragment_map) {
     override fun onResume() {
         super.onResume()
         map.onResume()
-        // Rechargement des marqueurs à chaque retour sur la map
-        // (après ajout/modification d'une photo depuis CensusTreeActivity)
         viewModel.loadAllPictures()
     }
     override fun onPause()       { super.onPause();   map.onPause() }
     override fun onDestroyView() { super.onDestroyView(); map.overlays.clear() }
+
     private fun addCampusOverlays(campusList: List<Campus>) {
         map.overlays.removeAll { it is Polygon }
         map.overlays.removeAll(campusTextOverlays)
@@ -268,12 +267,23 @@ class MapFragment : Fragment(R.layout.fragment_map) {
                 infoWindow = null
                 setOnClickListener { _, _, _ -> true }
             }
+            // Campus en position 0 = arrière-plan absolu
             map.overlays.add(0, circle)
 
-            val textOverlay = TextOverlay(GeoPoint(campus.latitudeCenter, campus.longitudeCenter), campus.name)
+            val textOverlay = TextOverlay(
+                GeoPoint(campus.latitudeCenter, campus.longitudeCenter),
+                campus.name
+            )
             campusTextOverlays.add(textOverlay)
-            map.overlays.add(textOverlay)
+            // TextOverlay juste après les Polygon, avant les Marker
+            val insertIndex = map.overlays.indexOfLast { it is Polygon } + 1
+            map.overlays.add(insertIndex, textOverlay)
         }
+
+        // S'assurer que tous les Marker sont bien au-dessus des campus
+        val markers = map.overlays.filterIsInstance<Marker>()
+        map.overlays.removeAll { it is Marker }
+        map.overlays.addAll(markers)
 
         map.invalidate()
     }
