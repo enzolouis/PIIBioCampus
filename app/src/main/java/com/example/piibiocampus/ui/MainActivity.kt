@@ -47,7 +47,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_map     -> { fabCamera.show(); showFragment(mapFragment) }
                 R.id.nav_compte  -> { fabCamera.hide(); showFragment(profileFragment) }
                 // Remplacer par les vrais fragments quand disponibles
-                R.id.nav_actualite -> { fabCamera.show(); showFragment(mapFragment) }
+                R.id.nav_actualite -> { fabCamera.show(); showFragment(newsFragment) }
                 R.id.nav_recherche,
                 R.id.nav_bibliotheque -> { fabCamera.show(); showFragment(mapFragment) }
                 else -> return@setOnItemSelectedListener false
