@@ -12,6 +12,8 @@
     <color name="background">#F7F5FA</color>
     <color name="red">#FFC107</color>
     <color name="green">#4CAF50</color>
+    <color name="green_light">#6FCF73</color>
     <color name="danger">#E74C3C</color>
+    <color name="danger_light">#EE6F61</color>
     <color name="lightborder">#dddddd</color>
 </resources>
