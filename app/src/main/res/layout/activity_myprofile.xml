@@ -36,13 +36,14 @@
                 android:orientation="horizontal"
                 android:layout_marginTop="16dp">
 
-                <ImageView
+                <com.google.android.material.imageview.ShapeableImageView
                     android:id="@+id/profilePicture"
                     android:layout_width="120dp"
                     android:layout_height="120dp"
-                    android:src="@drawable/ic_launcher_foreground"
                     android:scaleType="centerCrop"
-                    android:background="@drawable/circle_background"/>
+                    app:shapeAppearanceOverlay="@style/CircleImage"
+                    app:strokeColor="@color/light_border2"
+                    app:strokeWidth="5dp"/>
 
                 <LinearLayout
                     android:layout_width="wrap_content"
