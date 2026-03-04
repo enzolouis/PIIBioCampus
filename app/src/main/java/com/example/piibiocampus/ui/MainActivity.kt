@@ -46,7 +46,7 @@ class MainActivity : AppCompatActivity() {
             when (item.itemId) {
                 R.id.nav_map    -> { fabCamera.show(); showFragment(mapFragment);     true }
                 R.id.nav_compte -> { fabCamera.hide(); showFragment(profileFragment); true }
-                R.id.nav_actualite,
+                R.id.nav_actualite -> { fabCamera.hide(); showFragment(newsFragment); true }
                 R.id.nav_recherche,
                 R.id.nav_bibliotheque -> { fabCamera.show(); showFragment(mapFragment); true }
                 else -> false
