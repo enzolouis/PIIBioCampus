@@ -33,5 +33,7 @@
     <string name="see_more">Voir plus</string>
     <string name="enter_username">Enter username...</string>
 
+    <string name="titleProfile">Mon profil</string>
+
     <string name="actualite">Actualité</string>
 </resources>
