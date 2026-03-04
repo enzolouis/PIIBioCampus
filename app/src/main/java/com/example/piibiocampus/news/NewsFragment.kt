@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.piibiocampus.R
 import com.example.piibiocampus.data.dao.NewsDao
 import com.example.piibiocampus.data.model.ItemNews
+import com.example.piibiocampus.utils.setTopBarTitle
 import com.squareup.picasso.Picasso
 
 class NewsFragment : Fragment()  {
@@ -34,6 +35,7 @@ class NewsFragment : Fragment()  {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setTopBarTitle(R.string.actualite);
 
         recyclerView = view.findViewById(R.id.recyclerView)
         recyclerView.layoutManager = GridLayoutManager(requireContext(), 1)
