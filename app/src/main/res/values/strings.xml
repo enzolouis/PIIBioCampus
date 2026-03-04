@@ -36,4 +36,5 @@
     <string name="titleProfile">Mon profil</string>
 
     <string name="actualite">Actualité</string>
+    <string name="ban">Bannir</string>
 </resources>

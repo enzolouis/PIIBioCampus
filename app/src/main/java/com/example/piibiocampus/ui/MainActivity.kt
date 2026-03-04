@@ -14,6 +14,7 @@ import com.example.piibiocampus.R
 import com.example.piibiocampus.news.NewsFragment
 import com.example.piibiocampus.ui.map.MapFragment
 import com.example.piibiocampus.ui.profiles.MyProfileFragment
+import com.example.piibiocampus.utils.DatabaseFiller.fillUsers
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
