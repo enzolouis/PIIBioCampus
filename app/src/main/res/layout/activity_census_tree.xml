@@ -54,6 +54,7 @@
             android:textStyle="bold"
             android:layout_weight="1"
             android:ellipsize="end"
+            android:fontFamily="@font/kg_blank_space_sketch"
             android:maxLines="2" />
 
     </LinearLayout>
@@ -89,7 +90,9 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:text="Annuler" />
+            android:text="Annuler"
+            android:fontFamily="@font/kg_blank_space_solid"
+            />
 
         <Button
             android:id="@+id/btnStop"
@@ -98,7 +101,9 @@
             android:layout_height="wrap_content"
             android:text="Stopper"
             android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp" />
+            android:layout_marginEnd="8dp"
+            android:fontFamily="@font/kg_blank_space_solid"
+            />
 
         <Button
             android:id="@+id/btnValidate"
@@ -106,7 +111,9 @@
             android:layout_weight="1"
             android:layout_height="wrap_content"
             android:text="Valider"
-            android:enabled="false" />
+            android:enabled="false"
+            android:fontFamily="@font/kg_blank_space_solid"
+            />
 
     </LinearLayout>
 

@@ -10,11 +10,15 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import android.text.method.HideReturnsTransformationMethod
+import android.text.method.PasswordTransformationMethod
+import android.widget.ImageView
 import com.example.piibiocampus.R
 import com.example.piibiocampus.ui.MainActivity
 import com.example.piibiocampus.utils.Extensions.toast
 import com.example.piibiocampus.utils.Validators
 import kotlinx.coroutines.launch
+
 
 class CreateAccountActivity : AppCompatActivity() {
 
@@ -28,6 +32,27 @@ class CreateAccountActivity : AppCompatActivity() {
         val email = findViewById<EditText>(R.id.txtMail)
         val password = findViewById<EditText>(R.id.txtMdp)
         val errorZone = findViewById<TextView>(R.id.errorMsg)
+
+        val togglePassword = findViewById<ImageView>(R.id.btnTogglePassword)
+
+        var isPasswordVisible = false
+
+        togglePassword.setOnClickListener {
+            if (isPasswordVisible) {
+                // cacher le mot de passe
+                password.transformationMethod = PasswordTransformationMethod.getInstance()
+                togglePassword.setImageResource(R.drawable.eye_close)
+            } else {
+                // afficher le mot de passe
+                password.transformationMethod = HideReturnsTransformationMethod.getInstance()
+                togglePassword.setImageResource(R.drawable.eye_open)
+            }
+
+            isPasswordVisible = !isPasswordVisible
+
+            // garder le curseur à la fin
+            password.setSelection(password.text.length)
+        }
 
         findViewById<Button>(R.id.btnConnexion).setOnClickListener {
             if (!Validators.areEmailAndPasswordValid(

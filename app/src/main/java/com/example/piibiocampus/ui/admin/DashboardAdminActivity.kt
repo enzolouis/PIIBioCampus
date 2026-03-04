@@ -14,10 +14,17 @@ class DashboardAdminActivity : AppCompatActivity() {
         setContentView(R.layout.activity_dashboard_admin)
         setTopBarTitle(R.string.titleAdmin);
 
-        val btn: Button = findViewById(R.id.btnSearch);
-        btn.setOnClickListener {
+        val btnSearch: Button = findViewById(R.id.btnSearch);
+        btnSearch.setOnClickListener {
             val intent = Intent(this, SearchUsersAdminActivity::class.java)
             startActivity(intent)
         }
+
+        val btnLstCensus: Button = findViewById(R.id.btnLstCensus);
+        btnLstCensus.setOnClickListener{
+            val intent = Intent(this, PicturesAdminActivity::class.java)
+            startActivity(intent)
+        }
+
     }
 }

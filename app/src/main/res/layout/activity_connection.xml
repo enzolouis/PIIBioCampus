@@ -31,7 +31,9 @@
         android:text="@string/titleConnexion"
         android:textAlignment="center"
         android:textColor="@color/white"
-        android:textSize="30sp" />
+        android:textSize="30sp"
+        android:fontFamily="@font/kg_blank_space_sketch"
+        />
 
     <ImageView
         android:id="@+id/imageView"
@@ -55,31 +57,53 @@
         android:inputType="text"
         android:paddingStart="10dp"
         android:textColorHint="@color/grey"
-        android:textSize="20sp" />
-
-    <EditText
-        android:id="@+id/txtMdp"
+        android:textSize="20sp"
+        android:fontFamily="@font/gentium_plus_regular"
+        />
+    <RelativeLayout
+        android:id="@+id/passwordLayout"
         android:layout_width="207dp"
         android:layout_height="48dp"
         android:layout_below="@id/txtIdentifiant"
         android:layout_centerInParent="true"
         android:layout_marginTop="10dp"
-        android:background="@drawable/fields_round_border"
-        android:ems="10"
-        android:hint="@string/txtPassword"
-        android:inputType="textPassword"
-        android:paddingStart="10dp"
-        android:textColorHint="@color/grey"
-        android:textSize="20sp" />
+        android:background="@drawable/fields_round_border">
+
+        <EditText
+            android:id="@+id/txtMdp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_toStartOf="@id/btnTogglePassword"
+            android:background="@android:color/transparent"
+            android:ems="10"
+            android:hint="@string/txtPassword"
+            android:inputType="textPassword"
+            android:paddingStart="10dp"
+            android:textColorHint="@color/grey"
+            android:textSize="20sp"
+            android:fontFamily="@font/gentium_plus_regular"/>
+
+        <ImageView
+            android:id="@+id/btnTogglePassword"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="10dp"
+            android:src="@drawable/eye_close"
+            android:clickable="true"
+            android:focusable="true"/>
+    </RelativeLayout>
 
     <TextView
         android:id="@+id/btnResetPassWord"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/txtMdp"
+        android:layout_below="@id/passwordLayout"
         android:layout_centerInParent="true"
         android:layout_marginTop="10dp"
         android:text="@string/txtBtnForgetPassWord"
+        android:fontFamily="@font/gentium_plus_regular"
         />
 
     <TextView
@@ -90,14 +114,19 @@
         android:layout_centerInParent="true"
         android:layout_marginTop="10dp"
         android:text="@string/txtNewAccount"
-        android:textSize="15sp" />
+        android:textSize="15sp"
+        android:fontFamily="@font/gentium_plus_regular"
+        />
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btnConnexion"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerInParent="true"
         android:text="@string/txtBtnConnect"
-        android:theme="@style/Bouton" />
+        app:layout_constraintEnd_toEndOf="parent"
+        style="@style/ButtonPrimary"/>
+
+
 </RelativeLayout>

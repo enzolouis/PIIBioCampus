@@ -8,10 +8,10 @@ import kotlinx.parcelize.Parcelize
  * Cela permet de contrôler dynamiquement la visibilité des boutons et la taille de la vue.
  */
 enum class PicturesViewerCaller {
-    MAP,            // Appelé depuis la carte → FAB + BottomNav visibles → taille réduite
-    MY_PROFILE,     // Appelé depuis le profil perso → pas de FAB → taille intermédiaire
-    ADMIN,          // Appelé depuis la vue admin → plein écran
-    CENSUS_TREE     // Appelé depuis la gestion de recensement
+    MAP,
+    MY_PROFILE,
+    ADMIN,
+    CENSUS_TREE
 }
 
 /**
@@ -65,6 +65,7 @@ data class PhotoViewerState(
         get() = when (caller) {
             PicturesViewerCaller.MY_PROFILE  -> !adminValidated
             PicturesViewerCaller.CENSUS_TREE -> true
+            PicturesViewerCaller.ADMIN       -> true
             else                             -> false
         }
 

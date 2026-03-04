@@ -3,11 +3,17 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="primary">#43125F</color>
+    <color name="primary_light">#8E44AD</color>
+    <color name="primary_whitelike">#EFE6F5</color>
+    <color name="light_border2">#e3e3e4</color>
     <color name="secondary">#FFB300</color>
+    <color name="secondary_light">#FFD966</color>
     <color name="grey">#888888</color>
     <color name="background">#F7F5FA</color>
     <color name="red">#FFC107</color>
     <color name="green">#4CAF50</color>
+    <color name="green_light">#6FCF73</color>
     <color name="danger">#E74C3C</color>
+    <color name="danger_light">#EE6F61</color>
     <color name="lightborder">#dddddd</color>
 </resources>

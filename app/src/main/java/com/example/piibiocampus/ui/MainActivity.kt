@@ -22,7 +22,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var fabCamera: FloatingActionButton
     private lateinit var bottomNav: BottomNavigationView
 
-    // Instances réutilisées — évite de recréer les fragments à chaque clic
+    // Instances réutilisées — évite de recréer les fragments à chaque navigation
     private val mapFragment     by lazy { MapFragment() }
     private val profileFragment by lazy { MyProfileFragment() }
     private val newsFragment by lazy { NewsFragment() }
@@ -44,13 +44,12 @@ class MainActivity : AppCompatActivity() {
 
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
-                R.id.nav_map     -> { fabCamera.show(); showFragment(mapFragment) }
-                R.id.nav_compte  -> { fabCamera.hide(); showFragment(profileFragment) }
-                // Remplacer par les vrais fragments quand disponibles
-                R.id.nav_actualite -> { fabCamera.show(); showFragment(newsFragment) }
+                R.id.nav_map    -> { fabCamera.show(); showFragment(mapFragment);     true }
+                R.id.nav_compte -> { fabCamera.hide(); showFragment(profileFragment); true }
+                R.id.nav_actualite,
                 R.id.nav_recherche,
-                R.id.nav_bibliotheque -> { fabCamera.show(); showFragment(mapFragment) }
-                else -> return@setOnItemSelectedListener false
+                R.id.nav_bibliotheque -> { fabCamera.show(); showFragment(mapFragment); true }
+                else -> false
             }
             true
         }
@@ -59,47 +58,45 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, PictureActivity::class.java))
         }
 
-        // Gérer le retour depuis CensusTreeActivity uniquement si l'extra est présent.
-        // On diffère via post() pour que le fragment soit attaché avant d'appeler reload.
-        if (intent?.hasExtra("navigateTo") == true) {
-            window.decorView.post { handleNavigationIntent(intent) }
-        }
+        // Gérer un éventuel navigateTo passé à la création
+        // (cas où MainActivity n'existait pas encore dans la pile)
+        handleNavigationIntent(intent)
     }
 
-    // Appelé quand MainActivity est déjà en vie (FLAG_ACTIVITY_SINGLE_TOP)
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        setIntent(intent)
-        // Même protection : on attend que la vue soit prête
-        window.decorView.post { handleNavigationIntent(intent) }
+        // FLAG_ACTIVITY_SINGLE_TOP → l'instance existante reçoit onNewIntent
+        // C'est le cas normal après CREATE depuis CensusTreeActivity
+        handleNavigationIntent(intent)
     }
 
-    /**
-     * Redirige vers le bon onglet et force le rechargement
-     * selon l'extra "navigateTo" passé par CensusTreeActivity.
-     */
-    private fun handleNavigationIntent(intent: Intent?) {
-        val navigateTo = intent?.getStringExtra("navigateTo") ?: return
+    // ── Navigation + reload ───────────────────────────────────────────────────
 
-        when (navigateTo) {
+    private fun handleNavigationIntent(intent: Intent) {
+        val target = intent.getStringExtra("navigateTo") ?: return
+
+        when (target) {
             "myProfile" -> {
                 bottomNav.selectedItemId = R.id.nav_compte
                 fabCamera.hide()
                 showFragment(profileFragment)
-                profileFragment.reloadPhotos()
+                // Le listener Firestore de MyProfileFragment se relance dans onResume()
+                // → pas besoin d'appel explicite
             }
-            else -> {
-                // Retour sur la map après CREATE
+            "map" -> {
                 bottomNav.selectedItemId = R.id.nav_map
                 fabCamera.show()
                 showFragment(mapFragment)
-                mapFragment.reloadMarkers()
+                // Recharger les marqueurs après ajout d'une nouvelle photo
+                // Différé d'un frame pour s'assurer que le fragment est attaché
+                window.decorView.post {
+                    mapFragment.reloadMarkers()
+                }
             }
         }
-
-        // Consommer l'extra pour ne pas re-déclencher
-        intent.removeExtra("navigateTo")
     }
+
+    // ── Fragments ─────────────────────────────────────────────────────────────
 
     private fun showFragment(fragment: Fragment) {
         supportFragmentManager.beginTransaction()
@@ -107,10 +104,11 @@ class MainActivity : AppCompatActivity() {
             .commit()
     }
 
-    private fun askLocationPermission() {
-        val fine   = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)  == PackageManager.PERMISSION_GRANTED
-        val coarse = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+    // ── Permissions ───────────────────────────────────────────────────────────
 
+    private fun askLocationPermission() {
+        val fine   = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)   == PackageManager.PERMISSION_GRANTED
+        val coarse = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
         if (!fine && !coarse) {
             ActivityCompat.requestPermissions(
                 this,
@@ -126,11 +124,8 @@ class MainActivity : AppCompatActivity() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == 100) {
-            val granted = grantResults.any { it == PackageManager.PERMISSION_GRANTED }
-            if (!granted) {
-                Toast.makeText(this, "Permission localisation refusée", Toast.LENGTH_SHORT).show()
-            }
+        if (requestCode == 100 && grantResults.none { it == PackageManager.PERMISSION_GRANTED }) {
+            Toast.makeText(this, "Permission localisation refusée", Toast.LENGTH_SHORT).show()
         }
     }
 }

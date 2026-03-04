@@ -53,6 +53,8 @@
         android:textColor="@color/black"
         android:maxLines="2"
         android:ellipsize="end"
-        android:text="—" />
+        android:text="—"
+        android:fontFamily="@font/kg_blank_space_solid"
+        />
 
 </LinearLayout>
