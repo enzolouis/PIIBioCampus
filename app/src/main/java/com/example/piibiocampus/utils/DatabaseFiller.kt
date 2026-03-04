@@ -24,4 +24,19 @@ object DatabaseFiller {
             db.collection("pictures").add(data)
         }
     }
+
+    fun fillUsers() {
+        val db = FirebaseFirestore.getInstance()
+        for (i in 20..40) {
+            val data = hashMapOf(
+                "description" to "Je déteste les abeilles",
+                "email" to "user$i@gmail.com",
+                "name" to "User$i",
+                "profilePictureUrl" to "https://firebasestorage.googleapis.com/v0/b/piibiocampus-c8f50.firebasestorage.app/o/hippo.jpg?alt=media&token=b7cb1564-951d-4e3c-b5b9-80034165c0ea",
+                "role" to if (i % 2 == 0) "ADMIN" else "USER"
+            )
+
+            db.collection("users").add(data)
+        }
+    }
 }

@@ -31,7 +31,7 @@
         android:text="Ember"
         android:textSize="18sp"
         android:textStyle="bold"
-        android:fontFamily="@font/flow_b"
+        android:fontFamily="@font/gentium_plus_bold"
         android:textColor="@color/black"
         app:layout_constraintStart_toEndOf="@id/userAvatar"
         app:layout_constraintTop_toTopOf="@id/userAvatar"
@@ -42,31 +42,14 @@
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"/>
 
-    <!-- Bouton Voir le profil -->
-    <!--<com.google.android.material.button.MaterialButton
-        android:id="@+id/btnSeeProfile"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Profil"
-        android:layout_marginEnd="8dp"
-        app:layout_constraintEnd_toStartOf="@id/btnBan"
-        app:layout_constraintTop_toTopOf="@id/userAvatar"
-        app:layout_constraintBottom_toBottomOf="@id/userAvatar"
-        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-        android:textSize="14sp"/>
-    -->
     <!-- Ban button -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnBan"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Bannir"
-        android:fontFamily="@font/flow_b"
+        android:text="@string/ban"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/userAvatar"
         app:layout_constraintBottom_toBottomOf="@id/userAvatar"
-        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-        android:textSize="14sp"
-        android:backgroundTint="@color/danger"
-        android:textColor="@color/white"/>
+        style="@style/ButtonSmallDanger"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

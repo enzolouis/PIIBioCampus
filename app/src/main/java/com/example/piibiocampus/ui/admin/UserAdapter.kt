@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.piibiocampus.R
 import com.example.piibiocampus.data.model.UserProfile
 import com.google.android.material.button.MaterialButton
+import com.squareup.picasso.Picasso
 
 class UserAdapter(
     private val users: MutableList<UserProfile>,
@@ -30,6 +31,8 @@ class UserAdapter(
     override fun onBindViewHolder(holder: UserViewHolder, position: Int) {
         val user = users[position]
         holder.pseudo.text = user.name
+        // load image du user
+        Picasso.get().load(user.profilePictureUrl).placeholder(R.drawable.ic_placeholder_image).fit().centerCrop().into(holder.avatar)
 
         holder.btnBan.setOnClickListener {
             onBan(user)
