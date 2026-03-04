@@ -154,8 +154,7 @@ object UserDao {
             .await()
 
         return snapshot.documents.mapNotNull { doc ->
-            val user = doc.toObject(UserProfile::class.java)
-            user?.apply { uid = doc.id }
+            doc.toObject(UserProfile::class.java)?.copy(uid = doc.id)
         }
     }
 }
