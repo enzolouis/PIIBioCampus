@@ -3,6 +3,7 @@ package com.example.piibiocampus.ui.admin
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.lifecycleScope
@@ -38,7 +39,29 @@ class SearchUsersAdminActivity : AppCompatActivity() {
         searchEditText = findViewById(R.id.searchEditText)
 
         adapter = UserAdapter(users) { user ->
-            Toast.makeText(this, "Bannir ${user.name}", Toast.LENGTH_SHORT).show()
+            AlertDialog.Builder(this)
+                .setTitle("Bannir l'utilisateur")
+                .setMessage("Voulez-vous vraiment bannir ${user.name} ?")
+                .setPositiveButton("Bannir") { _, _ ->
+                    lifecycleScope.launch {
+                        try {
+                            UserDao.banUser(user.uid)
+                            Toast.makeText(
+                                this@SearchUsersAdminActivity,
+                                "${user.name} a été banni.",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        } catch (e: Exception) {
+                            Toast.makeText(
+                                this@SearchUsersAdminActivity,
+                                "Erreur : ${e.message}",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                }
+                .setNegativeButton("Annuler", null)
+                .show()
         }
 
         recyclerView.layoutManager = LinearLayoutManager(this)

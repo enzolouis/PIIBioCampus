@@ -71,37 +71,37 @@ object UserDao {
         return snapshot.toObject(UserProfile::class.java)
     }
 
+
     suspend fun getUsersPage(limit: Long): List<UserProfile> {
         val snapshot = db.collection("users")
+            .whereEqualTo("role", "USER")
             .orderBy("name")
             .limit(limit)
             .get()
             .await()
 
-        return snapshot.documents.mapNotNull {
-            it.toObject(UserProfile::class.java)
+        return snapshot.documents.mapNotNull { doc ->
+            doc.toObject(UserProfile::class.java)?.copy(uid = doc.id)
         }
     }
 
-    suspend fun getUsersPageAfter(
-        lastName: String,
-        limit: Long
-    ): List<UserProfile> {
-
+    suspend fun getUsersPageAfter(lastName: String, limit: Long): List<UserProfile> {
         val snapshot = db.collection("users")
+            .whereEqualTo("role", "USER")
             .orderBy("name")
             .startAfter(lastName)
             .limit(limit)
             .get()
             .await()
 
-        return snapshot.documents.mapNotNull {
-            it.toObject(UserProfile::class.java)
+        return snapshot.documents.mapNotNull { doc ->
+            doc.toObject(UserProfile::class.java)?.copy(uid = doc.id)
         }
     }
 
     suspend fun searchUsers(query: String, limit: Long): List<UserProfile> {
         val snapshot = db.collection("users")
+            .whereEqualTo("role", "USER")
             .orderBy("name")
             .startAt(query)
             .endAt(query + "\uf8ff")
@@ -109,18 +109,14 @@ object UserDao {
             .get()
             .await()
 
-        return snapshot.documents.mapNotNull {
-            it.toObject(UserProfile::class.java)
+        return snapshot.documents.mapNotNull { doc ->
+            doc.toObject(UserProfile::class.java)?.copy(uid = doc.id)
         }
     }
 
-    suspend fun searchUsersAfter(
-        query: String,
-        lastName: String,
-        limit: Long
-    ): List<UserProfile> {
-
+    suspend fun searchUsersAfter(query: String, lastName: String, limit: Long): List<UserProfile> {
         val snapshot = db.collection("users")
+            .whereEqualTo("role", "USER")
             .orderBy("name")
             .startAt(query)
             .endAt(query + "\uf8ff")
@@ -129,9 +125,25 @@ object UserDao {
             .get()
             .await()
 
-        return snapshot.documents.mapNotNull {
-            it.toObject(UserProfile::class.java)
+        return snapshot.documents.mapNotNull { doc ->
+            doc.toObject(UserProfile::class.java)?.copy(uid = doc.id)
         }
+    }
+
+    suspend fun banUser(uid: String) {
+        val pictures = db.collection("pictures")
+            .whereEqualTo("userRef", uid)
+            .get()
+            .await()
+
+        for (doc in pictures.documents) {
+            doc.reference.delete().await()
+        }
+
+        db.collection("users")
+            .document(uid)
+            .delete()
+            .await()
     }
 
 
