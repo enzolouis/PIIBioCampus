@@ -1,5 +1,7 @@
 package com.example.piibiocampus.news
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -72,6 +74,14 @@ class NewsFragment : Fragment()  {
             Picasso.get()
                 .load(item.imageUrl)
                 .into(holder.image)
+
+            holder.itemView.setOnClickListener {
+
+                val intent = Intent(Intent.ACTION_VIEW)
+                intent.data = Uri.parse(item.source)
+
+                holder.itemView.context.startActivity(intent)
+            }
         }
 
         override fun getItemCount() = items.size
