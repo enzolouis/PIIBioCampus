@@ -70,9 +70,6 @@ class PicturesAdminViewModel : ViewModel() {
             onSuccess = { list ->
                 _allPictures.postValue(list)
                 _isLoading.postValue(false)
-                // Affichage immédiat trié sans attendre campus (async)
-                // Si des filtres sont déjà actifs on les réapplique,
-                // sinon on poste directement la liste triée
                 val hasActiveFilters = filterUserId != null || filterCampusId != null ||
                         filterValidated != null || filterDateFrom != null
                 if (hasActiveFilters) {
@@ -90,6 +87,20 @@ class PicturesAdminViewModel : ViewModel() {
                 _isLoading.postValue(false)
             }
         )
+    }
+
+    /**
+     * Met à jour le champ adminValidated d'une photo directement en mémoire
+     * sans refaire d'appel réseau, puis ré-applique les filtres.
+     */
+    fun updateValidationInPlace(pictureId: String, validated: Boolean) {
+        val updated = (_allPictures.value ?: return).map { photo ->
+            if (photo["id"] == pictureId)
+                photo.toMutableMap().apply { put("adminValidated", validated) }
+            else photo
+        }
+        _allPictures.postValue(updated)
+        applyFilters()
     }
 
     fun toggleSortOrder() {

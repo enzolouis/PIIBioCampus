@@ -55,9 +55,17 @@ class PicturesAdminActivity : AppCompatActivity() {
         supportFragmentManager.setFragmentResultListener(
             PicturesViewerFragment.REQUEST_KEY, this
         ) { _, bundle ->
-            val updated = bundle.getBoolean("census_updated", false)
-            val deleted = bundle.getBoolean(PicturesViewerFragment.RESULT_DELETED, false)
-            if (updated || deleted) viewModel.loadAll()
+            val validatedId    = bundle.getString("validated_picture_id")
+            val validatedValue = bundle.getBoolean("validated_value", false)
+            val deleted        = bundle.getBoolean(PicturesViewerFragment.RESULT_DELETED, false)
+            val updated        = bundle.getBoolean("census_updated", false)
+
+            when {
+                // Validation / invalidation : mise à jour en mémoire, sans appel réseau
+                validatedId != null -> viewModel.updateValidationInPlace(validatedId, validatedValue)
+                // Suppression ou retour de recensement : rechargement complet
+                deleted || updated  -> viewModel.loadAll()
+            }
         }
 
         viewModel.loadAll()
