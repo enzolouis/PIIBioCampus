@@ -164,7 +164,17 @@ class PicturesViewerFragment : DialogFragment() {
                                 refreshValidationStatus(tvStatusRef)
                                 btnResumeCensus.visibility =
                                     if (state.showResumeCensus) View.VISIBLE else View.GONE
-                                notifyParent()
+
+                                // Notifier le parent avec l'ID et la nouvelle valeur
+                                // pour une mise à jour en mémoire sans rechargement réseau
+                                parentFragmentManager.setFragmentResult(
+                                    REQUEST_KEY,
+                                    Bundle().apply {
+                                        putString("validated_picture_id", state.pictureId)
+                                        putBoolean("validated_value", newValue)
+                                    }
+                                )
+
                                 Toast.makeText(requireContext(),
                                     if (newValue) "Photo validée" else "Photo invalidée",
                                     Toast.LENGTH_SHORT).show()
