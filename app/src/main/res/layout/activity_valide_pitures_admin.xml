@@ -36,8 +36,7 @@
                 android:text="Utilisateur"
                 style="@style/Widget.MaterialComponents.Chip.Filter"
                 android:checkable="false"
-                android:fontFamily="@font/gentium_plus_bold"
-                />
+                android:fontFamily="@font/gentium_plus_bold" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipFilterCampus"
@@ -46,8 +45,7 @@
                 android:text="Campus"
                 style="@style/Widget.MaterialComponents.Chip.Filter"
                 android:checkable="false"
-                android:fontFamily="@font/gentium_plus_bold"
-                />
+                android:fontFamily="@font/gentium_plus_bold" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipFilterValidated"
@@ -56,8 +54,7 @@
                 android:text="Validé"
                 style="@style/Widget.MaterialComponents.Chip.Filter"
                 android:checkable="true"
-                android:fontFamily="@font/gentium_plus_bold"
-                />
+                android:fontFamily="@font/gentium_plus_bold" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipFilterNotValidated"
@@ -66,8 +63,7 @@
                 android:text="Non validé"
                 style="@style/Widget.MaterialComponents.Chip.Filter"
                 android:checkable="true"
-                android:fontFamily="@font/gentium_plus_bold"
-                />
+                android:fontFamily="@font/gentium_plus_bold" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipFilterDate"
@@ -76,8 +72,7 @@
                 android:text="Date"
                 style="@style/Widget.MaterialComponents.Chip.Filter"
                 android:checkable="false"
-                android:fontFamily="@font/gentium_plus_bold"
-                />
+                android:fontFamily="@font/gentium_plus_bold" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipReset"
@@ -91,13 +86,13 @@
         </LinearLayout>
     </HorizontalScrollView>
 
-    <!-- Résumé filtres actifs + compteur -->
+    <!-- Résumé filtres actifs + compteur + tri -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:paddingHorizontal="16dp"
-        android:paddingTop="8dp"
+        android:paddingTop="6dp"
         android:paddingBottom="4dp"
         android:gravity="center_vertical">
 
@@ -117,7 +112,18 @@
             android:textSize="12sp"
             android:textStyle="bold"
             android:textColor="@color/primary"
-            android:text="0 photo(s)" />
+            android:text="0 photo(s)"
+            android:layout_marginEnd="8dp" />
+
+        <!-- Bouton tri par date : icône + label -->
+        <ImageButton
+            android:id="@+id/btnSortOrder"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:src="@drawable/ic_sort_desc"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Ordre de tri"
+            android:scaleType="fitCenter" />
 
     </LinearLayout>
 
@@ -127,7 +133,7 @@
         android:layout_height="1dp"
         android:background="#CCCCCC" />
 
-    <!-- Grille de photos (même RecyclerView que MyProfile) -->
+    <!-- Grille de photos -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/photosRecycler"
         android:layout_width="match_parent"
