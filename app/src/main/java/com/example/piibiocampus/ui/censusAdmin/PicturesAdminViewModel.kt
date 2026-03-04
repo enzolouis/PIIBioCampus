@@ -99,7 +99,7 @@ class PicturesAdminViewModel : ViewModel() {
                 photo.toMutableMap().apply { put("adminValidated", validated) }
             else photo
         }
-        _allPictures.postValue(updated)
+        _allPictures.value = updated
         applyFilters()
     }
 
