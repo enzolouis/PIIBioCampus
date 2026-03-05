@@ -112,16 +112,16 @@
             android:focusable="true"/>
     </RelativeLayout>
 
-    <TextView
+
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btnAlreadyAccount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/passwordLayout"
         android:layout_centerInParent="true"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="5dp"
         android:text="@string/txtAlreadyAccount"
-        android:fontFamily="@font/flow_b"
-        android:textSize="15sp" />
+        style="@style/ButtonLink"/>
 
     <TextView
         android:id="@+id/errorMsg"

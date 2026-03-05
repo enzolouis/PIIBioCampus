@@ -3,8 +3,8 @@
     <string name="titleConnexion">Connexion</string>
     <string name="txtName">Pseudo</string>
     <string name="txtPassword">Mot de passe</string>
-    <string name="txtNewAccount">Vous n\'avez pas de compte, Cliquez-ici</string>
-    <string name="txtAlreadyAccount">Vous avez déjà un compte, Cliquez-ici</string>
+    <string name="txtNewAccount"><u>Vous n\'avez pas de compte, Cliquez-ici</u></string>
+    <string name="txtAlreadyAccount"><u>Vous avez déjà un compte, Cliquez-ici</u></string>
     <string name="titleCreateAccount">Création de compte</string>
     <string name="txtMail">Adresse e-mail</string>
     <string name="txtBtnConnect">Se connecter</string>
@@ -17,7 +17,7 @@
     <string name="titleCensus">Arbre de recensement</string>
     <string name="titleListAdmin">Liste des admins</string>
     <string name="titleListCensus">Liste des recensements</string>
-    <string name="txtBtnForgetPassWord">Mot de passe oublié, Cliquez-ici</string>
+    <string name="txtBtnForgetPassWord"><u>Mot de passe oublié, Cliquez-ici</u></string>
     <string name="titleMotDePasseOublie">Mot de passe oublié</string>
     <string name="txtBtnReinitaliserMotDePasse">Envoyer</string>
     <string name="txtWarningMail">Le mail que vous allez recevoir peut se trouver dans vos spams.</string>

@@ -27,8 +27,8 @@ class ConnectionActivity : AppCompatActivity() {
     private lateinit var pseudoZone: EditText
     private lateinit var passwordZone: EditText
     private lateinit var connectBtn: Button
-    private lateinit var createAccountBtn: TextView
-    private lateinit var resetPassWordBtn: TextView
+    private lateinit var createAccountBtn: Button
+    private lateinit var resetPassWordBtn: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,7 +37,7 @@ class ConnectionActivity : AppCompatActivity() {
         pseudoZone = findViewById(R.id.txtIdentifiant)
         passwordZone = findViewById(R.id.txtMdp)
         connectBtn = findViewById(R.id.btnConnexion)
-        createAccountBtn = findViewById(R.id.btnAlreadyAccount)
+        createAccountBtn = findViewById(R.id.btnNoAccount)
         resetPassWordBtn = findViewById(R.id.btnResetPassWord)
 
         val togglePassword = findViewById<ImageView>(R.id.btnTogglePassword)

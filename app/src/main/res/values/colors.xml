@@ -16,4 +16,5 @@
     <color name="danger">#E74C3C</color>
     <color name="danger_light">#EE6F61</color>
     <color name="lightborder">#dddddd</color>
+    <color name="link">#5495ff</color>
 </resources>

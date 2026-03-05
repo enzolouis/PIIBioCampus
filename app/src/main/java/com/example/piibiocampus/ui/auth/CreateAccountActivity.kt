@@ -31,7 +31,12 @@ class CreateAccountActivity : AppCompatActivity() {
         val username = findViewById<EditText>(R.id.txtIdentifiant)
         val email = findViewById<EditText>(R.id.txtMail)
         val password = findViewById<EditText>(R.id.txtMdp)
+        val connectionBtn = findViewById<Button>(R.id.btnAlreadyAccount)
         val errorZone = findViewById<TextView>(R.id.errorMsg)
+
+        connectionBtn.setOnClickListener {
+            startActivity(Intent(this, ConnectionActivity::class.java))
+        }
 
         val togglePassword = findViewById<ImageView>(R.id.btnTogglePassword)
 
