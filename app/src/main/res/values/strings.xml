@@ -10,17 +10,17 @@
     <string name="txtBtnConnect">Se connecter</string>
     <string name="txtBtnCreateAccount">Créer un compte</string>
 
-    <string name="titleAdmin">Tableau de bord administrateur</string>
-    <string name="titleActu">Les actu\'</string>
+    <string name="titleAdmin">Tableau de bord admin</string>
+    <string name="titleActu">Les actus</string>
     <string name="titleExport">Exportation de données</string>
-    <string name="titleSearchUser">Rechercher un utilisateur</string>
-    <string name="titleCensus">Arbre de rencemsent</string>
-    <string name="titleListAdmin">Liste des administrateurs</string>
+    <string name="titleSearchUser">Rechercher un·e utilisateur·rice</string>
+    <string name="titleCensus">Arbre de recensement</string>
+    <string name="titleListAdmin">Liste des admins</string>
     <string name="titleListCensus">Liste des recensements</string>
     <string name="txtBtnForgetPassWord">Mot de passe oublié, Cliquez-ici</string>
     <string name="titleMotDePasseOublie">Mot de passe oublié</string>
     <string name="txtBtnReinitaliserMotDePasse">Envoyer</string>
-    <string name="txtWarningMail">Le mail que vous allez reçevoir peut se trouver dans vos spams.</string>
+    <string name="txtWarningMail">Le mail que vous allez recevoir peut se trouver dans vos spams.</string>
 
     <string name="txtBtnBack">Retour</string>
     <string name="txtBtnWatchProfile">Profil de l\'auteur</string>
@@ -28,10 +28,10 @@
     <string name="txtConfirm">Confirmer</string>
     <string name="txtCancel">Annuler</string>
 
-    <string name="txtSearchAdmin">Recherche d\'utilisateur</string>
+    <string name="txtSearchAdmin">Recherche d\'utilisateur·rice</string>
     <string name="logo_admin">Logo Admin</string>
     <string name="see_more">Voir plus</string>
-    <string name="enter_username">Enter username...</string>
+    <string name="enter_username">Entrez un pseudo...</string>
 
     <string name="titleProfile">Mon profil</string>
 
