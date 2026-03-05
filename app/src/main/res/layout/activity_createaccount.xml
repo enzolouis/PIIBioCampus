@@ -120,6 +120,7 @@
         android:layout_centerInParent="true"
         android:layout_marginTop="10dp"
         android:text="@string/txtAlreadyAccount"
+        android:fontFamily="@font/flow_b"
         android:textSize="15sp" />
 
     <TextView
@@ -134,15 +135,13 @@
         android:textColor="@android:color/holo_red_dark"
         android:textSize="13sp" />
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btnConnexion"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerInParent="true"
         android:text="@string/txtBtnCreateAccount"
-        android:theme="@style/Bouton"
-        android:textSize="16sp"
-        android:fontFamily="@font/kg_blank_space_solid"
+        style="@style/ButtonPrimary"
         />
 </RelativeLayout>
