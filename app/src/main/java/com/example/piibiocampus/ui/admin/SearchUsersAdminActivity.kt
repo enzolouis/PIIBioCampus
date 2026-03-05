@@ -1,5 +1,12 @@
 package com.example.piibiocampus.ui.admin
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.AnimatorSet
+import android.animation.ArgbEvaluator
+import android.animation.ObjectAnimator
+import android.animation.ValueAnimator
+import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
@@ -13,32 +20,30 @@ import com.example.piibiocampus.R
 import com.example.piibiocampus.data.dao.UserDao
 import com.example.piibiocampus.data.model.UserProfile
 import com.example.piibiocampus.utils.setTopBarTitle
-import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import kotlinx.coroutines.launch
 
 class SearchUsersAdminActivity : AppCompatActivity() {
 
     private lateinit var adapter: UserAdapter
-    private val users = mutableListOf<UserProfile>()
+    private lateinit var recyclerView: RecyclerView
 
-    private var lastName: String? = null
+    private val allUsers = mutableListOf<UserProfile>()  // cache local complet
+    private val displayedUsers = mutableListOf<UserProfile>()  // ce qu'on affiche
+
     private var currentQuery: String = ""
-    private val pageSize = 20L
 
-    private lateinit var btnLoadMore: MaterialButton
     private lateinit var searchEditText: TextInputEditText
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_searchusers_admin)
-        setTopBarTitle(R.string.txtSearchAdmin);
+        setTopBarTitle(R.string.txtSearchAdmin)
 
-        val recyclerView = findViewById<RecyclerView>(R.id.resultsRecyclerView)
-        btnLoadMore = findViewById(R.id.btnLoadMore)
+        recyclerView = findViewById(R.id.resultsRecyclerView)
         searchEditText = findViewById(R.id.searchEditText)
 
-        adapter = UserAdapter(users) { user ->
+        adapter = UserAdapter(displayedUsers) { user, position ->
             AlertDialog.Builder(this)
                 .setTitle("Bannir l'utilisateur")
                 .setMessage("Voulez-vous vraiment bannir ${user.name} ?")
@@ -46,6 +51,8 @@ class SearchUsersAdminActivity : AppCompatActivity() {
                     lifecycleScope.launch {
                         try {
                             UserDao.banUser(user.uid)
+                            allUsers.remove(user)  // retire du cache aussi
+                            animateBanAndRemove(position)
                             Toast.makeText(
                                 this@SearchUsersAdminActivity,
                                 "${user.name} a été banni.",
@@ -67,72 +74,81 @@ class SearchUsersAdminActivity : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
 
-        loadFirstPage()
+        loadAllUsers()
 
         searchEditText.addTextChangedListener {
             val query = it.toString()
             if (query != currentQuery) {
                 currentQuery = query
-                resetAndSearch()
+                applyFilter()
             }
-        }
-
-        btnLoadMore.setOnClickListener {
-            loadNextPage()
         }
     }
 
-    // initial load
-    private fun loadFirstPage() {
+    private fun loadAllUsers() {
         lifecycleScope.launch {
-            val result = UserDao.getUsersPage(pageSize)
-            users.clear()
-            users.addAll(result)
-            adapter.notifyDataSetChanged()
-
-            lastName = users.lastOrNull()?.name
-            btnLoadMore.visibility = if (result.size < pageSize) View.GONE else View.VISIBLE
+            try {
+                val result = UserDao.getAllUsers()
+                allUsers.clear()
+                allUsers.addAll(result)
+                applyFilter()
+            } catch (e: Exception) {
+                Toast.makeText(
+                    this@SearchUsersAdminActivity,
+                    "Erreur de chargement : ${e.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
         }
     }
 
-    // reset when search change
-    private fun resetAndSearch() {
-        lifecycleScope.launch {
-            users.clear()
-            adapter.notifyDataSetChanged()
-            lastName = null
-
-            if (currentQuery.isBlank()) {
-                loadFirstPage()
-                return@launch
-            }
-
-            val result = UserDao.searchUsers(currentQuery, pageSize)
-            users.addAll(result)
-            adapter.notifyDataSetChanged()
-
-            lastName = users.lastOrNull()?.name
-            btnLoadMore.visibility = if (result.size < pageSize) View.GONE else View.VISIBLE
+    private fun applyFilter() {
+        val filtered = if (currentQuery.isBlank()) {
+            allUsers.toMutableList()
+        } else {
+            allUsers.filter {
+                it.name?.lowercase()?.contains(currentQuery.lowercase()) == true
+            }.toMutableList()
         }
+
+        displayedUsers.clear()
+        displayedUsers.addAll(filtered)
+        adapter.notifyDataSetChanged()
     }
 
-    // paginating (see more)
-    private fun loadNextPage() {
-        val cursor = lastName ?: return
-
-        lifecycleScope.launch {
-            val result = if (currentQuery.isBlank()) {
-                UserDao.getUsersPageAfter(cursor, pageSize)
-            } else {
-                UserDao.searchUsersAfter(currentQuery, cursor, pageSize)
+    private fun animateBanAndRemove(position: Int) {
+        val viewHolder = recyclerView.findViewHolderForAdapterPosition(position) ?: run {
+            if (position < displayedUsers.size) {
+                displayedUsers.removeAt(position)
+                adapter.notifyItemRemoved(position)
             }
+            return
+        }
 
-            val start = users.size
-            users.addAll(result)
-            adapter.notifyItemRangeInserted(start, result.size)
+        val itemView = viewHolder.itemView
 
-            lastName = users.lastOrNull()?.name
-            btnLoadMore.visibility = if (result.size < pageSize) View.GONE else View.VISIBLE
+        val colorAnim = ValueAnimator.ofObject(ArgbEvaluator(), Color.parseColor("#FFCDD2"), Color.TRANSPARENT).apply {
+            duration = 700L
+            addUpdateListener { itemView.setBackgroundColor(it.animatedValue as Int) }
+        }
+
+        val fadeOut = ObjectAnimator.ofFloat(itemView, "alpha", 1f, 0f).apply {
+            duration = 400L
+            startDelay = 400L
+        }
+
+        AnimatorSet().apply {
+            playTogether(colorAnim, fadeOut)
+            addListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    itemView.alpha = 1f
+                    if (position < displayedUsers.size) {
+                        displayedUsers.removeAt(position)
+                        adapter.notifyItemRemoved(position)
+                    }
+                }
+            })
+            start()
         }
     }
 }

@@ -13,7 +13,7 @@ import com.squareup.picasso.Picasso
 
 class UserAdapter(
     private val users: MutableList<UserProfile>,
-    private val onBan: (UserProfile) -> Unit
+    private val onBan: (UserProfile, Int) -> Unit
 ) : RecyclerView.Adapter<UserAdapter.UserViewHolder>() {
 
     class UserViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -31,19 +31,19 @@ class UserAdapter(
     override fun onBindViewHolder(holder: UserViewHolder, position: Int) {
         val user = users[position]
         holder.pseudo.text = user.name
-        // load image du user
-        Picasso.get().load(user.profilePictureUrl).placeholder(R.drawable.ic_placeholder_image).fit().centerCrop().into(holder.avatar)
+
+        Picasso.get().cancelRequest(holder.avatar)
+        Picasso.get()
+            .load(user.profilePictureUrl)
+            .placeholder(R.drawable.ic_placeholder_image)
+            .fit()
+            .centerCrop()
+            .into(holder.avatar)
 
         holder.btnBan.setOnClickListener {
-            onBan(user)
+            onBan(user, holder.adapterPosition)
         }
     }
 
     override fun getItemCount() = users.size
-
-    fun addMore(newUsers: List<UserProfile>) {
-        val start = users.size
-        users.addAll(newUsers)
-        notifyItemRangeInserted(start, newUsers.size)
-    }
 }

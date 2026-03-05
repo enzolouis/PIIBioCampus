@@ -71,65 +71,6 @@ object UserDao {
         return snapshot.toObject(UserProfile::class.java)
     }
 
-
-    suspend fun getUsersPage(limit: Long): List<UserProfile> {
-        val snapshot = db.collection("users")
-            .whereEqualTo("role", "USER")
-            .orderBy("name")
-            .limit(limit)
-            .get()
-            .await()
-
-        return snapshot.documents.mapNotNull { doc ->
-            doc.toObject(UserProfile::class.java)?.copy(uid = doc.id)
-        }
-    }
-
-    suspend fun getUsersPageAfter(lastName: String, limit: Long): List<UserProfile> {
-        val snapshot = db.collection("users")
-            .whereEqualTo("role", "USER")
-            .orderBy("name")
-            .startAfter(lastName)
-            .limit(limit)
-            .get()
-            .await()
-
-        return snapshot.documents.mapNotNull { doc ->
-            doc.toObject(UserProfile::class.java)?.copy(uid = doc.id)
-        }
-    }
-
-    suspend fun searchUsers(query: String, limit: Long): List<UserProfile> {
-        val snapshot = db.collection("users")
-            .whereEqualTo("role", "USER")
-            .orderBy("name")
-            .startAt(query)
-            .endAt(query + "\uf8ff")
-            .limit(limit)
-            .get()
-            .await()
-
-        return snapshot.documents.mapNotNull { doc ->
-            doc.toObject(UserProfile::class.java)?.copy(uid = doc.id)
-        }
-    }
-
-    suspend fun searchUsersAfter(query: String, lastName: String, limit: Long): List<UserProfile> {
-        val snapshot = db.collection("users")
-            .whereEqualTo("role", "USER")
-            .orderBy("name")
-            .startAt(query)
-            .endAt(query + "\uf8ff")
-            .startAfter(lastName)
-            .limit(limit)
-            .get()
-            .await()
-
-        return snapshot.documents.mapNotNull { doc ->
-            doc.toObject(UserProfile::class.java)?.copy(uid = doc.id)
-        }
-    }
-
     suspend fun banUser(uid: String) {
         val pictures = db.collection("pictures")
             .whereEqualTo("userRef", uid)
@@ -149,6 +90,18 @@ object UserDao {
 
     suspend fun getAllUsersWithUid(): List<UserProfile> {
         val snapshot = db.collection("users")
+            .orderBy("name")
+            .get()
+            .await()
+
+        return snapshot.documents.mapNotNull { doc ->
+            doc.toObject(UserProfile::class.java)?.copy(uid = doc.id)
+        }
+    }
+
+    suspend fun getAllUsers(): List<UserProfile> {
+        val snapshot = db.collection("users")
+            .whereEqualTo("role", "USER")
             .orderBy("name")
             .get()
             .await()
