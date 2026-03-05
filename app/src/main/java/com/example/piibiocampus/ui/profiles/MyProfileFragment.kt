@@ -116,10 +116,17 @@ class MyProfileFragment : Fragment() {
             photos.addAll(enrichedPhotos)
 
             val badgeRes = when {
-                enrichedPhotos.size >= 50 -> R.drawable.diamond
-                enrichedPhotos.size >= 20 -> R.drawable.gold
-                enrichedPhotos.size >= 10 -> R.drawable.silver
-                enrichedPhotos.size >= 2  -> R.drawable.bronze
+                enrichedPhotos.size >= 100 -> R.drawable.ic_badge_cerf_erudit
+                enrichedPhotos.size >= 90 -> R.drawable.ic_badge_chouette_savante
+                enrichedPhotos.size >= 80 -> R.drawable.ic_badge_renard_ruse
+                enrichedPhotos.size >= 70 -> R.drawable.ic_badge_sanglier_chercheur
+                enrichedPhotos.size >= 60 -> R.drawable.ic_badge_pie_futee
+                enrichedPhotos.size >= 50 -> R.drawable.ic_badge_ecureuil_eclaire
+                enrichedPhotos.size >= 40 -> R.drawable.ic_badge_blaireau_fouineur
+                enrichedPhotos.size >= 30 -> R.drawable.ic_badge_herisson_debrouillard
+                enrichedPhotos.size >= 20 -> R.drawable.ic_badge_lapin_malin
+                enrichedPhotos.size >= 10 -> R.drawable.ic_badge_scarabe_astucieux
+                enrichedPhotos.size >= 1  -> R.drawable.ic_badge_abeille_curieuse
                 else                      -> R.drawable.norank
             }
             badge.setImageResource(badgeRes)
