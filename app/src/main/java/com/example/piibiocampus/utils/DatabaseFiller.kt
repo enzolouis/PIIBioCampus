@@ -39,4 +39,47 @@ object DatabaseFiller {
             db.collection("users").add(data)
         }
     }
+
+    fun updatePicturesWithRealPictures() {
+        val db = FirebaseFirestore.getInstance()
+
+        val imageUrls = listOf(
+            "https://cdnfiles2.biolovision.net/www.faune-france.org/pdffiles/news/Calliste_septicolorMichel_Clament-7640.jpg",
+            "https://c.pxhere.com/photos/6f/4e/fleurs_canon_europe_midi_prairies_ext_rieur_printemps_plantes-169157.jpg!s2",
+            "https://parcsaintecroix.com/wp-content/uploads/2022/09/daim-cp-morgane-bricard-69-scaled-767x767-58ee83f4d76f.jpg",
+            "https://img.freepik.com/photos-gratuite/antenne-couleur-verte-abeille-blanche_1172-439.jpg?semt=ais_hybrid&w=740&q=80",
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSDxop2VZ9bWpdpl1hpicpbmb_5HgjTu_eTTw&s"
+        )
+
+        db.collection("pictures").get().addOnSuccessListener { documents ->
+            for (doc in documents) {
+
+                val randomUrl = imageUrls.random()
+
+                doc.reference.update(
+                    "imageUrl", randomUrl
+                )
+            }
+        }
+    }
+
+    fun updateUsersProfilePictures() {
+        val db = FirebaseFirestore.getInstance()
+
+        val profilePictures = listOf(
+            "https://img.freepik.com/free-vector/cute-panda-with-bamboo_138676-3053.jpg?semt=ais_rp_progressive&w=740&q=80",
+            "https://external-preview.redd.it/8S-3pnTO-r8xHjq3pq41C2cSEG9tFc6A1mmwqVJttJU.jpg?width=640&crop=smart&auto=webp&s=ef1c2501b3cce461bd4412566199dc8fef2686b9",
+        )
+
+        db.collection("users").get().addOnSuccessListener { documents ->
+            for (doc in documents) {
+
+                val randomUrl = profilePictures.random()
+
+                doc.reference.update(
+                    "profilePictureUrl", randomUrl
+                )
+            }
+        }
+    }
 }

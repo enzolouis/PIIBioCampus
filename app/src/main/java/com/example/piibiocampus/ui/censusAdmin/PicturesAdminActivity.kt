@@ -18,6 +18,7 @@ import com.example.piibiocampus.R
 import com.example.piibiocampus.ui.photo.PhotoViewerState
 import com.example.piibiocampus.ui.photo.PicturesViewerCaller
 import com.example.piibiocampus.ui.photo.PicturesViewerFragment
+import com.example.piibiocampus.utils.setTopBarTitle
 import com.google.android.material.chip.Chip
 import com.squareup.picasso.Picasso
 import java.text.SimpleDateFormat
@@ -67,6 +68,8 @@ class PicturesAdminActivity : AppCompatActivity() {
                 deleted || updated  -> viewModel.loadAll()
             }
         }
+
+        setTopBarTitle("Gestion des recensements")
 
         viewModel.loadAll()
     }
