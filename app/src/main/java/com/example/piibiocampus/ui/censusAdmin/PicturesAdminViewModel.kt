@@ -103,6 +103,16 @@ class PicturesAdminViewModel : ViewModel() {
         applyFilters()
     }
 
+    /**
+     * Supprime une photo directement en mémoire sans refaire d'appel réseau,
+     * puis ré-applique les filtres. Appelé après la fin de l'animation de suppression.
+     */
+    fun deleteInPlace(pictureId: String) {
+        val updated = (_allPictures.value ?: return).filter { it["id"] != pictureId }
+        _allPictures.value = updated
+        applyFilters()
+    }
+
     fun toggleSortOrder() {
         _sortOrder.value = if (_sortOrder.value == SortOrder.DESC) SortOrder.ASC else SortOrder.DESC
         applyFilters()

@@ -49,7 +49,7 @@ class MyProfileFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setTopBarTitle(R.string.titleProfile);
+        setTopBarTitle(R.string.titleProfile)
 
         recyclerView   = view.findViewById(R.id.photosRecycler)
         pseudoText     = view.findViewById(R.id.pseudoText)
@@ -72,19 +72,19 @@ class MyProfileFragment : Fragment() {
             }
         )
 
-        // Recharge la liste si une photo a été supprimée depuis PicturesViewerFragment
+        // Résultat du viewer (suppression, mise à jour de recensement)
         parentFragmentManager.setFragmentResultListener(
-            com.example.piibiocampus.ui.photo.PicturesViewerFragment.REQUEST_KEY,
+            PicturesViewerFragment.REQUEST_KEY,
             viewLifecycleOwner
-        ) { _, result ->
-            if (result.getBoolean(com.example.piibiocampus.ui.photo.PicturesViewerFragment.RESULT_DELETED)) {
-                val uid = currentUserId ?: return@setFragmentResultListener
-                setupPhotosListener(uid)
-            }
+        ) { _, _ ->
+            val uid = currentUserId ?: return@setFragmentResultListener
+            setupPhotosListener(uid)
         }
 
         loadUserDataAndListenToPhotos()
     }
+
+    // ── Chargement ────────────────────────────────────────────────────────────
 
     private fun loadUserDataAndListenToPhotos() {
         viewLifecycleOwner.lifecycleScope.launch {
@@ -117,17 +117,17 @@ class MyProfileFragment : Fragment() {
 
             val badgeRes = when {
                 enrichedPhotos.size >= 100 -> R.drawable.ic_badge_cerf_erudit
-                enrichedPhotos.size >= 90 -> R.drawable.ic_badge_chouette_savante
-                enrichedPhotos.size >= 80 -> R.drawable.ic_badge_renard_ruse
-                enrichedPhotos.size >= 70 -> R.drawable.ic_badge_sanglier_chercheur
-                enrichedPhotos.size >= 60 -> R.drawable.ic_badge_pie_futee
-                enrichedPhotos.size >= 50 -> R.drawable.ic_badge_ecureuil_eclaire
-                enrichedPhotos.size >= 40 -> R.drawable.ic_badge_blaireau_fouineur
-                enrichedPhotos.size >= 30 -> R.drawable.ic_badge_herisson_debrouillard
-                enrichedPhotos.size >= 20 -> R.drawable.ic_badge_lapin_malin
-                enrichedPhotos.size >= 10 -> R.drawable.ic_badge_scarabe_astucieux
-                enrichedPhotos.size >= 1  -> R.drawable.ic_badge_abeille_curieuse
-                else                      -> R.drawable.norank
+                enrichedPhotos.size >= 90  -> R.drawable.ic_badge_chouette_savante
+                enrichedPhotos.size >= 80  -> R.drawable.ic_badge_renard_ruse
+                enrichedPhotos.size >= 70  -> R.drawable.ic_badge_sanglier_chercheur
+                enrichedPhotos.size >= 60  -> R.drawable.ic_badge_pie_futee
+                enrichedPhotos.size >= 50  -> R.drawable.ic_badge_ecureuil_eclaire
+                enrichedPhotos.size >= 40  -> R.drawable.ic_badge_blaireau_fouineur
+                enrichedPhotos.size >= 30  -> R.drawable.ic_badge_herisson_debrouillard
+                enrichedPhotos.size >= 20  -> R.drawable.ic_badge_lapin_malin
+                enrichedPhotos.size >= 10  -> R.drawable.ic_badge_scarabe_astucieux
+                enrichedPhotos.size >= 1   -> R.drawable.ic_badge_abeille_curieuse
+                else                       -> R.drawable.norank
             }
             badge.setImageResource(badgeRes)
             adapter.notifyDataSetChanged()
@@ -141,8 +141,7 @@ class MyProfileFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        // Relance le listener si on revient depuis CensusTreeActivity
-        // (modification d'un recensement existant)
+        setTopBarTitle(R.string.titleProfile)
         val uid = currentUserId ?: return
         setupPhotosListener(uid)
     }
@@ -152,13 +151,15 @@ class MyProfileFragment : Fragment() {
         firestoreListener?.remove()
     }
 
+    // ── Adapter ───────────────────────────────────────────────────────────────
+
     inner class PhotoAdapter(private val items: List<Map<String, Any>>) :
         RecyclerView.Adapter<PhotoAdapter.PhotoViewHolder>() {
 
         inner class PhotoViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-            val image: ImageView       = view.findViewById(R.id.photoItem)
-            val recordingDot: View     = view.findViewById(R.id.ivRecordingDot)
-            val validatedDot: View     = view.findViewById(R.id.ivValidatedBadge)
+            val image: ImageView   = view.findViewById(R.id.photoItem)
+            val recordingDot: View = view.findViewById(R.id.ivRecordingDot)
+            val validatedDot: View = view.findViewById(R.id.ivValidatedBadge)
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PhotoViewHolder {
@@ -173,7 +174,6 @@ class MyProfileFragment : Fragment() {
             val photo    = items[position]
             val imageUrl = photo["imageUrl"] as? String ?: ""
 
-            // --- Photo ---
             Picasso.get()
                 .load(imageUrl)
                 .placeholder(R.drawable.photo_placeholder)
@@ -185,9 +185,8 @@ class MyProfileFragment : Fragment() {
             val recordingStatus = photo["recordingStatus"] as? Boolean ?: false
             val adminValidated  = photo["adminValidated"]  as? Boolean ?: false
 
-            // Priorité : vert (validé) > rouge (recensement non terminé) > rien
             when {
-                adminValidated  -> {
+                adminValidated -> {
                     holder.validatedDot.visibility = View.VISIBLE
                     holder.recordingDot.visibility = View.GONE
                 }
@@ -201,47 +200,39 @@ class MyProfileFragment : Fragment() {
                 }
             }
 
-            // --- Clic → ouvre le viewer ---
-            holder.image.setOnClickListener {
-                openPhotoViewer(photo)
-            }
+            holder.image.setOnClickListener { openPhotoViewer(photo) }
         }
 
-        private fun formatTimestamp(timestamp: Any?): String {
-            return when (timestamp) {
-                is com.google.firebase.Timestamp ->
-                    SimpleDateFormat("dd/MM/yyyy à HH:mm", Locale.FRENCH).format(timestamp.toDate())
-                is java.util.Date ->
-                    SimpleDateFormat("dd/MM/yyyy à HH:mm", Locale.FRENCH).format(timestamp)
-                is String -> timestamp
-                else      -> "Date inconnue"
-            }
+        private fun formatTimestamp(timestamp: Any?): String = when (timestamp) {
+            is com.google.firebase.Timestamp ->
+                SimpleDateFormat("dd/MM/yyyy à HH:mm", Locale.FRENCH).format(timestamp.toDate())
+            is java.util.Date ->
+                SimpleDateFormat("dd/MM/yyyy à HH:mm", Locale.FRENCH).format(timestamp)
+            is String -> timestamp
+            else      -> "Date inconnue"
         }
 
         private fun openPhotoViewer(photo: Map<String, Any>) {
             val loc = photo["location"] as? Map<*, *>
-
             val state = PhotoViewerState(
-                imageUrl                = photo["imageUrl"] as? String ?: "",
-                family                  = photo["family"] as? String,
-                genre                   = photo["genre"]  as? String,
-                specie                  = photo["specie"] as? String,
-                timestamp               = formatTimestamp(photo["timestamp"]),
-                adminValidated          = photo["adminValidated"] as? Boolean ?: false,
-                pictureId               = photo["id"] as? String ?: "",
-                userRef                 = currentUserId ?: "",
-                profilePictureUrl       = null,   // MY_PROFILE : pas de profil auteur
-                censusRef               = photo["censusRef"] as? String,
-                imageBytes              = null,
-                latitude                = (loc?.get("latitude")  as? Double) ?: 0.0,
-                longitude               = (loc?.get("longitude") as? Double) ?: 0.0,
-                altitude                = (loc?.get("altitude")  as? Double) ?: 0.0,
-                caller                  = PicturesViewerCaller.MY_PROFILE,
-                recordingStatus         = photo["recordingStatus"] as? Boolean ?: false
+                imageUrl          = photo["imageUrl"] as? String ?: "",
+                family            = photo["family"]   as? String,
+                genre             = photo["genre"]    as? String,
+                specie            = photo["specie"]   as? String,
+                timestamp         = formatTimestamp(photo["timestamp"]),
+                adminValidated    = photo["adminValidated"]  as? Boolean ?: false,
+                pictureId         = photo["id"]              as? String  ?: "",
+                userRef           = currentUserId            ?: "",
+                profilePictureUrl = null,
+                censusRef         = photo["censusRef"]       as? String,
+                imageBytes        = null,
+                latitude          = (loc?.get("latitude")  as? Double) ?: 0.0,
+                longitude         = (loc?.get("longitude") as? Double) ?: 0.0,
+                altitude          = (loc?.get("altitude")  as? Double) ?: 0.0,
+                caller            = PicturesViewerCaller.MY_PROFILE,
+                recordingStatus   = photo["recordingStatus"] as? Boolean ?: false
             )
-
             PicturesViewerFragment.show(parentFragmentManager, state)
         }
     }
-
 }

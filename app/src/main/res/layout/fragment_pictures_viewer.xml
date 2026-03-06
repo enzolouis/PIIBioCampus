@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/bg_rounded_white"
@@ -90,7 +91,7 @@
             android:textColor="@color/black"
             android:lineSpacingExtra="3dp"
             android:layout_marginBottom="14dp"
-            android:text="Famille : —\nGenre : —\nEspèce : —"
+            android:text="@string/famille_genre_espece"
             android:fontFamily="@font/gentium_plus_bold"
             />
 
@@ -99,12 +100,11 @@
             android:id="@+id/btnResumeCensus"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Reprendre le recensement"
-            android:fontFamily="@font/kg_blank_space_solid"
+            android:text="@string/reprendre_le_recensement"
+            style="@style/ButtonPrimaryOutlined"
             android:textAllCaps="false"
             android:layout_marginBottom="12dp"
-            android:visibility="gone"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+            android:visibility="gone" />
 
         <!-- Ligne 6 : Valider | Retour | Supprimer -->
         <LinearLayout
@@ -116,43 +116,43 @@
 
             <Button
                 android:id="@+id/btnValidate"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Valider"
+                android:text="@string/valider"
                 android:textAllCaps="false"
                 android:textSize="13sp"
                 android:layout_marginEnd="4dp"
                 android:fontFamily="@font/kg_blank_space_solid"
                 android:visibility="gone"
-                style="@style/Widget.MaterialComponents.Button" />
+                style="@style/ButtonSuccess" />
 
             <Button
                 android:id="@+id/btnBack"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Retour"
+                android:text="@string/retour"
                 android:textAllCaps="false"
                 android:textSize="13sp"
                 android:fontFamily="@font/kg_blank_space_solid"
                 android:layout_marginHorizontal="4dp"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+                style="@style/ButtonPrimary" />
 
             <Button
                 android:id="@+id/btnDelete"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Supprimer"
+                android:text="@string/supprimer"
                 android:textAllCaps="false"
-                android:textSize="13sp"
                 android:layout_marginStart="4dp"
-                android:backgroundTint="@color/red"
-                android:textColor="@android:color/white"
                 android:visibility="gone"
-                android:fontFamily="@font/kg_blank_space_solid"
-                style="@style/Widget.MaterialComponents.Button" />
+                style="@style/ButtonDanger"
+                android:maxLines="1"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMinTextSize="8sp"
+                app:autoSizeMaxTextSize="13sp" />
 
         </LinearLayout>
 

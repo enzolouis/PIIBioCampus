@@ -202,9 +202,14 @@ class PicturesViewerFragment : DialogFragment() {
                         PictureDao.deletePicture(state.pictureId,
                             onSuccess = {
                                 Toast.makeText(requireContext(), "Photo supprimée", Toast.LENGTH_SHORT).show()
+                                // On envoie l'ID de la photo supprimée pour que l'activité
+                                // puisse animer et retirer l'item sans rechargement réseau
                                 parentFragmentManager.setFragmentResult(
                                     REQUEST_KEY,
-                                    Bundle().apply { putBoolean(RESULT_DELETED, true) }
+                                    Bundle().apply {
+                                        putBoolean(RESULT_DELETED, true)
+                                        putString("deleted_picture_id", state.pictureId)
+                                    }
                                 )
                                 dismiss()
                             },

@@ -1,6 +1,13 @@
 package com.example.piibiocampus.ui.admin
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.AnimatorSet
+import android.animation.ArgbEvaluator
+import android.animation.ObjectAnimator
+import android.animation.ValueAnimator
 import android.app.DatePickerDialog
+import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -11,7 +18,6 @@ import android.widget.*
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.piibiocampus.R
@@ -58,14 +64,16 @@ class PicturesAdminActivity : AppCompatActivity() {
         ) { _, bundle ->
             val validatedId    = bundle.getString("validated_picture_id")
             val validatedValue = bundle.getBoolean("validated_value", false)
-            val deleted        = bundle.getBoolean(PicturesViewerFragment.RESULT_DELETED, false)
+            val deletedId      = bundle.getString("deleted_picture_id")
             val updated        = bundle.getBoolean("census_updated", false)
 
             when {
                 // Validation / invalidation : mise à jour en mémoire, sans appel réseau
                 validatedId != null -> viewModel.updateValidationInPlace(validatedId, validatedValue)
-                // Suppression ou retour de recensement : rechargement complet
-                deleted || updated  -> viewModel.loadAll()
+                // Suppression : animation puis retrait en mémoire
+                deletedId != null   -> animateDeleteAndRemove(deletedId)
+                // Retour de recensement : rechargement complet
+                updated             -> viewModel.loadAll()
             }
         }
 
@@ -118,6 +126,56 @@ class PicturesAdminActivity : AppCompatActivity() {
                 if (order == SortOrder.DESC) R.drawable.ic_sort_desc
                 else                         R.drawable.ic_sort_asc
             )
+        }
+    }
+
+    // ── Animation suppression ─────────────────────────────────────────────────
+
+    /**
+     * Retrouve la position de la photo dans la liste affichée par son ID,
+     * joue l'animation rouge → fondu, puis demande au ViewModel de la supprimer
+     * en mémoire (ce qui déclenche l'observer et rafraîchit la liste).
+     */
+    private fun animateDeleteAndRemove(pictureId: String) {
+        val position = photos.indexOfFirst { it["id"] == pictureId }
+
+        // Si l'item n'est pas visible (hors écran ou déjà absent), on supprime directement
+        val viewHolder = if (position >= 0) recyclerView.findViewHolderForAdapterPosition(position) else null
+        if (viewHolder == null) {
+            viewModel.deleteInPlace(pictureId)
+            return
+        }
+
+        val itemView = viewHolder.itemView
+
+        // Flash rouge qui revient transparent
+        val colorAnim = ValueAnimator.ofObject(
+            ArgbEvaluator(),
+            Color.parseColor("#FFCDD2"),
+            Color.TRANSPARENT
+        ).apply {
+            duration = 700L
+            addUpdateListener { itemView.setBackgroundColor(it.animatedValue as Int) }
+        }
+
+        // Fondu sortant
+        val fadeOut = ObjectAnimator.ofFloat(itemView, "alpha", 1f, 0f).apply {
+            duration = 400L
+            startDelay = 400L
+        }
+
+        AnimatorSet().apply {
+            playTogether(colorAnim, fadeOut)
+            addListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    // Réinitialiser l'état visuel de la vue avant qu'elle soit recyclée
+                    itemView.alpha = 1f
+                    itemView.setBackgroundColor(Color.TRANSPARENT)
+                    // Mettre à jour le ViewModel → l'observer rafraîchit la liste
+                    viewModel.deleteInPlace(pictureId)
+                }
+            })
+            start()
         }
     }
 

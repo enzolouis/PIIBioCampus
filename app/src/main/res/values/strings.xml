@@ -37,4 +37,12 @@
 
     <string name="actualite">Actualité</string>
     <string name="ban">Bannir</string>
+    <string name="titleMap">Carte</string>
+    <string name="reprendre_le_recensement">Reprendre le recensement</string>
+    <string name="famille_genre_espece">Famille : —\nGenre : —\nEspèce : —</string>
+    <string name="valider">Valider</string>
+    <string name="retour">Retour</string>
+    <string name="supprimer">Supprimer</string>
+    <string name="stopper">Stopper</string>
+    <string name="annuler">Annuler</string>
 </resources>

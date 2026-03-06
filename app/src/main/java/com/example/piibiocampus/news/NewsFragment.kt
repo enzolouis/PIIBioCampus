@@ -86,4 +86,9 @@ class NewsFragment : Fragment()  {
 
         override fun getItemCount() = items.size
     }
+
+    override fun onResume() {
+        super.onResume()
+        setTopBarTitle(R.string.actualite)
+    }
 }

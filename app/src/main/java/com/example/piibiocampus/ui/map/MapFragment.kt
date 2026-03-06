@@ -29,6 +29,7 @@ import org.osmdroid.views.overlay.Polygon
 import org.osmdroid.views.overlay.infowindow.InfoWindow
 import android.widget.ImageView
 import android.widget.TextView
+import com.example.piibiocampus.utils.setTopBarTitle
 
 class MapFragment : Fragment(R.layout.fragment_map) {
 
@@ -69,6 +70,7 @@ class MapFragment : Fragment(R.layout.fragment_map) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Configuration.getInstance().userAgentValue = requireContext().packageName
+        setTopBarTitle(R.string.titleMap)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -253,6 +255,7 @@ class MapFragment : Fragment(R.layout.fragment_map) {
     override fun onResume() {
         super.onResume()
         map.onResume()
+        setTopBarTitle(R.string.titleMap)
         // Fermer toutes les InfoWindows orphelines avant de recharger
         InfoWindow.closeAllInfoWindowsOn(map)
         viewModel.loadAllPictures()
