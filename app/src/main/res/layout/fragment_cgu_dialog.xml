@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_rounded_white"
+    android:padding="16dp">
+
+    <!-- Titre -->
+    <TextView
+        android:id="@+id/tvCguTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Conditions Générales d'Utilisation"
+        android:textSize="17sp"
+        android:textStyle="bold"
+        android:textColor="@color/black"
+        android:gravity="center"
+        android:paddingBottom="12dp"
+        android:fontFamily="@font/kg_blank_space_solid"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Séparateur -->
+    <View
+        android:id="@+id/dividerCgu"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:background="@color/grey"
+        app:layout_constraintTop_toBottomOf="@id/tvCguTitle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Indication de scroll -->
+    <TextView
+        android:id="@+id/tvScrollHint"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="↓ Faites défiler jusqu'en bas pour accepter"
+        android:textSize="12sp"
+        android:textColor="?attr/colorPrimary"
+        android:gravity="center"
+        android:paddingTop="6dp"
+        android:paddingBottom="6dp"
+        android:fontFamily="@font/gentium_plus_italic"
+        app:layout_constraintTop_toBottomOf="@id/dividerCgu"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Contenu scrollable -->
+    <ScrollView
+        android:id="@+id/scrollViewCgu"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:scrollbarStyle="insideOverlay"
+        app:layout_constraintTop_toBottomOf="@id/tvScrollHint"
+        app:layout_constraintBottom_toTopOf="@id/dividerBottom"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp">
+
+            <TextView
+                android:id="@+id/tvCguContent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="13sp"
+                android:textColor="@color/black"
+                android:lineSpacingExtra="3dp"
+                android:fontFamily="@font/gentium_plus_regular"
+                android:text="@string/cgu_full_text" />
+
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- Séparateur bas -->
+    <View
+        android:id="@+id/dividerBottom"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:background="@color/grey"
+        app:layout_constraintBottom_toTopOf="@id/btnRow"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Boutons -->
+    <LinearLayout
+        android:id="@+id/btnRow"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="12dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <Button
+            android:id="@+id/btnDeclineCgu"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="6dp"
+            android:text="Je refuse"
+            android:textAllCaps="false"
+            style="@style/ButtonDanger" />
+
+        <Button
+            android:id="@+id/btnAcceptCgu"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="6dp"
+            android:text="J'accepte"
+            android:textAllCaps="false"
+            android:enabled="false"
+            style="@style/ButtonSuccess" />
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
