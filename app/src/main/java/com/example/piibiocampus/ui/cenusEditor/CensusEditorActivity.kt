@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.piibiocampus.R
+import com.example.piibiocampus.utils.setTopBarTitle
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class CensusEditorActivity : AppCompatActivity() {
@@ -37,7 +38,7 @@ class CensusEditorActivity : AppCompatActivity() {
         setupRecyclerView()
         setupButtons()
         observeViewModel()
-
+        setTopBarTitle(getString(R.string.arbre_de_recensement))
         viewModel.loadTree()
     }
 

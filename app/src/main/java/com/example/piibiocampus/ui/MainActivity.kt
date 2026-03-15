@@ -12,6 +12,7 @@ import com.example.piibiocampus.pictures.PictureActivity
 import androidx.fragment.app.Fragment
 import com.example.piibiocampus.R
 import com.example.piibiocampus.news.NewsFragment
+import com.example.piibiocampus.ui.library.LibraryFragment
 import com.example.piibiocampus.ui.map.MapFragment
 import com.example.piibiocampus.ui.profiles.MyProfileFragment
 import com.example.piibiocampus.utils.DatabaseFiller.fillUsers
@@ -27,6 +28,7 @@ class MainActivity : AppCompatActivity() {
     private val mapFragment     by lazy { MapFragment() }
     private val profileFragment by lazy { MyProfileFragment() }
     private val newsFragment by lazy { NewsFragment() }
+    private val libraryFragment by lazy { LibraryFragment() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,7 +51,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_compte -> { fabCamera.hide(); showFragment(profileFragment); true }
                 R.id.nav_actualite -> { fabCamera.hide(); showFragment(newsFragment); true }
                 R.id.nav_recherche,
-                R.id.nav_bibliotheque -> { fabCamera.show(); showFragment(mapFragment); true }
+                R.id.nav_bibliotheque -> { fabCamera.hide(); showFragment(libraryFragment); true }
                 else -> false
             }
             true

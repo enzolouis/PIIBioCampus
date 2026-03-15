@@ -7,7 +7,17 @@
     android:fitsSystemWindows="true"
     app:paddingBottomSystemWindowInsets="true">
 
-    <!-- En-tête : bouton retour + titre -->
+    <!-- TopBar -->
+    <include
+        android:id="@+id/topBar"
+        layout="@layout/view_top_bar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- En-tête : bouton retour + titre — contraint SOUS la topBar -->
     <LinearLayout
         android:id="@+id/header"
         android:layout_width="0dp"
@@ -16,7 +26,7 @@
         android:gravity="center_vertical"
         android:padding="12dp"
         android:background="?attr/colorSurface"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/topBar"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 

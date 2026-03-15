@@ -392,4 +392,23 @@ object PictureDao {
                 cos(Math.toRadians(lat1)) * cos(Math.toRadians(lat2)) * sin(dLon / 2).pow(2)
         return 2 * R * atan2(sqrt(a), sqrt(1 - a))
     }
+
+    fun getAllRecordedPictures(
+        onSuccess: (List<Map<String, Any>>) -> Unit,
+        onError:   (Exception) -> Unit
+    ) {
+        picturesRef
+            .whereEqualTo("recordingStatus", true)
+            .get()
+            .addOnSuccessListener { snapshot ->
+                val pictures = snapshot.documents.mapNotNull { doc ->
+                    val data = doc.data ?: return@mapNotNull null
+                    val map  = data.toMutableMap()
+                    map["id"] = doc.id
+                    map
+                }
+                onSuccess(pictures)
+            }
+            .addOnFailureListener { e -> onError(e) }
+    }
 }
