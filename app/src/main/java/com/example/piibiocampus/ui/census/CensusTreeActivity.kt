@@ -26,13 +26,14 @@ enum class CensusMode { CREATE, UPDATE }
 
 class CensusTreeActivity : AppCompatActivity() {
 
-    private lateinit var recyclerView: RecyclerView
+    private lateinit var recyclerView:    RecyclerView
     private lateinit var previewThumbnail: ImageView
-    private lateinit var tvHeaderTitle: TextView
-    private lateinit var btnBack: ImageButton
-    private lateinit var btnCancel: Button
-    private lateinit var btnStop: Button
-    private lateinit var btnValidate: Button
+    private lateinit var tvHeaderTitle:   TextView
+    private lateinit var btnBack:         ImageButton
+    private lateinit var btnCancel:       Button
+    private lateinit var btnStop:         Button
+    private lateinit var btnValidate:     Button
+    private lateinit var tvEmptyLevel:    TextView   // ← message niveau vide
 
     private val viewModel: CensusViewModel by viewModels { CensusViewModelFactory() }
 
@@ -64,6 +65,7 @@ class CensusTreeActivity : AppCompatActivity() {
         btnCancel        = findViewById(R.id.btnCancel)
         btnStop          = findViewById(R.id.btnStop)
         btnValidate      = findViewById(R.id.btnValidate)
+        tvEmptyLevel     = findViewById(R.id.tvEmptyLevel)
 
         mode       = CensusMode.valueOf(intent.getStringExtra("mode") ?: CensusMode.CREATE.name)
         callerName = intent.getStringExtra("caller") ?: PicturesViewerCaller.MAP.name
@@ -139,8 +141,15 @@ class CensusTreeActivity : AppCompatActivity() {
             items          = emptyList(),
             selectedNodeId = null,
             onItemClick    = { node, _ ->
-                if (node.children.isNotEmpty()) viewModel.navigateTo(node)
-                else viewModel.selectNode(node)
+                when {
+                    // Espèce (feuille) → sélection
+                    node.type == CensusType.SPECIES -> viewModel.selectNode(node)
+                    // Nœud avec enfants → navigation normale
+                    node.children.isNotEmpty()      -> viewModel.navigateTo(node)
+                    // Nœud vide (pas encore rempli par les admins) → on entre quand même
+                    // pour afficher le message explicatif
+                    else                            -> viewModel.navigateTo(node)
+                }
             },
             onInfoClick = { node -> showInfoDialog(node) }
         )
@@ -154,9 +163,26 @@ class CensusTreeActivity : AppCompatActivity() {
         viewModel.currentNodes.observe(this, Observer { nodes ->
             adapter.update(nodes, viewModel.selectedNodeId.value)
             updateHeaderTitle()
-            val atSpecies = nodes.firstOrNull()?.type == CensusType.SPECIES
+
+            val atSpecies  = nodes.firstOrNull()?.type == CensusType.SPECIES
+            val levelEmpty = nodes.isEmpty() && viewModel.canNavigateUp()
+
+            // Bouton Valider : visible seulement au niveau espèce
             btnValidate.visibility = if (atSpecies) View.VISIBLE else View.GONE
+
+            // Bouton retour arbre
             btnBack.visibility = if (viewModel.canNavigateUp()) View.VISIBLE else View.GONE
+
+            // Grille vs message niveau vide
+            if (levelEmpty) {
+                recyclerView.visibility = View.GONE
+                tvEmptyLevel.visibility = View.VISIBLE
+                // On ne peut pas continuer → désactive Valider et Stop (sans censusRef utile)
+                btnValidate.visibility  = View.GONE
+            } else {
+                recyclerView.visibility = View.VISIBLE
+                tvEmptyLevel.visibility = View.GONE
+            }
         })
 
         viewModel.selectedNodeId.observe(this, Observer { selId ->
@@ -219,11 +245,8 @@ class CensusTreeActivity : AppCompatActivity() {
             onSuccess = {
                 runOnUiThread {
                     Toast.makeText(this, "Photo enregistrée", Toast.LENGTH_SHORT).show()
-                    // Vider toute la pile (PictureActivity + CensusTreeActivity)
-                    // et revenir sur MainActivity → onglet selon le caller
                     val intent = Intent(this, MainActivity::class.java).apply {
                         flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-                        // Indiquer à MainActivity sur quel onglet naviguer
                         putExtra("navigateTo", when (callerName) {
                             PicturesViewerCaller.MY_PROFILE.name -> "myProfile"
                             else                                  -> "map"
@@ -250,8 +273,6 @@ class CensusTreeActivity : AppCompatActivity() {
             onSuccess = {
                 runOnUiThread {
                     Toast.makeText(this, "Recensement mis à jour", Toast.LENGTH_SHORT).show()
-                    // En UPDATE : finish() suffit, le censusLauncher de
-                    // PicturesViewerFragment reçoit RESULT_OK automatiquement
                     setResult(Activity.RESULT_OK)
                     finish()
                 }

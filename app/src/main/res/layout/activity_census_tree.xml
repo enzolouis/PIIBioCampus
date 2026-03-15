@@ -20,11 +20,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <!--
-            Bouton retour dans l'arbre.
-            Visible uniquement quand on peut remonter (géré dans CensusTreeActivity).
-            Utilise ic_arrow_back (icône Material standard).
-        -->
         <ImageButton
             android:id="@+id/btnBackTree"
             android:layout_width="40dp"
@@ -72,6 +67,27 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
+    <!--
+        Message affiché quand le niveau courant est vide (aucun enfant).
+        Indique à l'utilisateur·ice qu'iel peut stopper et reprendre plus tard.
+    -->
+    <TextView
+        android:id="@+id/tvEmptyLevel"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:gravity="center"
+        android:padding="24dp"
+        android:textSize="15sp"
+        android:textColor="?attr/colorOnSurface"
+        android:lineSpacingExtra="4dp"
+        android:fontFamily="@font/gentium_plus_regular"
+        android:text="Ce niveau de l'arbre n'a pas encore été renseigné par les administrateur·ices.\n\nVous pouvez stopper le recensement ici et le reprendre plus tard, une fois l'arbre mis à jour."
+        app:layout_constraintTop_toBottomOf="@id/header"
+        app:layout_constraintBottom_toTopOf="@id/bottomBar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <!-- Bottom bar fixe : Annuler | Stopper | Valider -->
     <LinearLayout
         android:id="@+id/bottomBar"
@@ -91,8 +107,7 @@
             android:layout_weight="1"
             android:layout_height="wrap_content"
             android:text="@string/annuler"
-            style="@style/ButtonDanger"
-            />
+            style="@style/ButtonDanger" />
 
         <Button
             android:id="@+id/btnStop"
@@ -102,8 +117,7 @@
             android:text="@string/stopper"
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
-            style="@style/ButtonPrimary"
-            />
+            style="@style/ButtonPrimary" />
 
         <Button
             android:id="@+id/btnValidate"
@@ -112,8 +126,7 @@
             android:layout_height="wrap_content"
             android:text="@string/valider"
             android:enabled="false"
-            style="@style/ButtonSuccess"
-            />
+            style="@style/ButtonSuccess" />
 
     </LinearLayout>
 

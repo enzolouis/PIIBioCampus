@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import com.example.piibiocampus.R
+import com.example.piibiocampus.ui.census.CensusEditorActivity
 import com.example.piibiocampus.utils.DatabaseFiller.fillUsers
 import com.example.piibiocampus.utils.setTopBarTitle
 
@@ -23,6 +24,12 @@ class DashboardAdminActivity : AppCompatActivity() {
         val btnLstCensus: Button = findViewById(R.id.btnLstCensus);
         btnLstCensus.setOnClickListener{
             val intent = Intent(this, PicturesAdminActivity::class.java)
+            startActivity(intent)
+        }
+
+        val btnCensusEdit: Button = findViewById(R.id.btnTree);
+        btnCensusEdit.setOnClickListener{
+            val intent = Intent(this, CensusEditorActivity::class.java)
             startActivity(intent)
         }
 

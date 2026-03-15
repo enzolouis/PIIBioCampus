@@ -17,6 +17,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.net.URL
 import java.util.Date
+import java.util.UUID
 import kotlin.math.*
 
 object PictureDao {
@@ -28,12 +29,10 @@ object PictureDao {
     }
 
     private val picturesRef = firestore.collection("pictures")
-    private val storageRef = storage.reference
+    private val storageRef  = storage.reference
 
     /**
      * Télécharge une image depuis son URL Firebase Storage et retourne ses bytes.
-     * À appeler dans un thread background (coroutine ou executor).
-     * Utilisé pour "Reprendre le recensement" depuis MyProfile où imageBytes est null.
      */
     fun downloadImageBytes(
         imageUrl: String,
@@ -59,17 +58,14 @@ object PictureDao {
             .orderBy("timestamp", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
-                    onUpdate(emptyList())
-                    return@addSnapshotListener
+                    onUpdate(emptyList()); return@addSnapshotListener
                 }
-
                 val pictures = snapshot?.documents?.mapNotNull { document ->
                     val data = document.data ?: return@mapNotNull null
-                    val map = data.toMutableMap()
+                    val map  = data.toMutableMap()
                     map["id"] = document.id
                     map
                 } ?: emptyList()
-
                 enrichPicturesWithCensusData(
                     pictures,
                     onSuccess = { onUpdate(it) },
@@ -86,7 +82,7 @@ object PictureDao {
             .addOnSuccessListener { snapshot ->
                 val pictures = snapshot.documents.mapNotNull { document ->
                     val data = document.data ?: return@mapNotNull null
-                    val map = data.toMutableMap()
+                    val map  = data.toMutableMap()
                     map["id"] = document.id
                     map
                 }
@@ -105,10 +101,10 @@ object PictureDao {
         picturesRef.get()
             .addOnSuccessListener { snapshot ->
                 val result = snapshot.documents.mapNotNull { document ->
-                    val data = document.data ?: return@mapNotNull null
+                    val data     = document.data ?: return@mapNotNull null
                     val location = data["location"] as? Map<*, *> ?: return@mapNotNull null
-                    val lat = location["latitude"] as? Double ?: return@mapNotNull null
-                    val lon = location["longitude"] as? Double ?: return@mapNotNull null
+                    val lat      = location["latitude"]  as? Double ?: return@mapNotNull null
+                    val lon      = location["longitude"] as? Double ?: return@mapNotNull null
                     if (distanceInMeters(centerLat, centerLon, lat, lon) <= radiusMeters) {
                         val map = data.toMutableMap()
                         map["id"] = document.id
@@ -187,14 +183,6 @@ object PictureDao {
         }
     }
 
-    /**
-     * Met à jour uniquement les champs de recensement d'un document existant.
-     * L'image n'est PAS re-uploadée (elle est déjà sur Storage).
-     *
-     * @param pictureId       ID du document Firestore à mettre à jour
-     * @param censusRef       Nouveau nœud sélectionné dans l'arbre taxonomique
-     * @param recordingStatus true si le recensement est terminé (Valider), false si stoppé
-     */
     fun updatePictureCensus(
         pictureId: String,
         censusRef: String?,
@@ -206,7 +194,6 @@ object PictureDao {
             "censusRef"       to (censusRef ?: ""),
             "recordingStatus" to recordingStatus
         )
-
         picturesRef.document(pictureId)
             .update(updates)
             .addOnSuccessListener { onSuccess() }
@@ -236,6 +223,56 @@ object PictureDao {
             .addOnFailureListener { e -> onError(e) }
     }
 
+    // ── Upload image pour l'arbre de recensement ──────────────────────────────
+
+    /**
+     * Convertit [imageBytes] en WebP, l'upload dans Storage sous
+     * `census_images/{uuid}.webp` et retourne l'URL de téléchargement.
+     * Aucun document Firestore n'est créé (usage exclusif pour les nœuds de recensement).
+     */
+    fun uploadImageForCensus(
+        context: Context,
+        imageBytes: ByteArray,
+        onSuccess: (String) -> Unit,
+        onError: (Exception) -> Unit
+    ) {
+        try {
+            val currentUser = FirebaseAuth.getInstance().currentUser
+                ?: run { onError(IllegalStateException("Utilisateur non connecté.")); return }
+
+            val webpFile = bytesToWebpFile(context, imageBytes)
+            val imageId  = UUID.randomUUID().toString()
+            val ref      = storageRef.child("$imageId.webp")
+
+            val metadata = StorageMetadata.Builder()
+                .setContentType("image/webp")
+                .setCustomMetadata("userRef",    currentUser.uid)
+                .setCustomMetadata("uploadDate", Date().toString())
+                .build()
+
+            ref.putFile(Uri.fromFile(webpFile), metadata)
+                .addOnSuccessListener {
+                    ref.downloadUrl
+                        .addOnSuccessListener { uri ->
+                            webpFile.delete()
+                            onSuccess(uri.toString())
+                        }
+                        .addOnFailureListener { e ->
+                            webpFile.delete()
+                            onError(e)
+                        }
+                }
+                .addOnFailureListener { e ->
+                    webpFile.delete()
+                    onError(e)
+                }
+        } catch (e: Exception) {
+            onError(e)
+        }
+    }
+
+    // ── Enrichissement ────────────────────────────────────────────────────────
+
     private data class TaxonomyInfo(
         val ordre: String   = "Non identifié",
         val famille: String = "Non identifié",
@@ -249,54 +286,34 @@ object PictureDao {
         onSuccess: (List<Map<String, Any>>) -> Unit,
         onError: (Exception) -> Unit
     ) {
-        if (pictures.isEmpty()) {
-            onSuccess(emptyList())
-            return
-        }
+        if (pictures.isEmpty()) { onSuccess(emptyList()); return }
 
         CensusDao.fetchCensusTree(
             onComplete = { censusNodes ->
-
                 val taxonomyMap = mutableMapOf<String, TaxonomyInfo>()
                 censusNodes.forEach { ordre ->
                     taxonomyMap[ordre.id] = TaxonomyInfo(ordre = ordre.name, type = "ORDER")
                     ordre.children.forEach { famille ->
                         taxonomyMap[famille.id] = TaxonomyInfo(
-                            ordre = ordre.name,
-                            famille = famille.name,
-                            type = "FAMILY"
-                        )
+                            ordre = ordre.name, famille = famille.name, type = "FAMILY")
                         famille.children.forEach { genre ->
                             taxonomyMap[genre.id] = TaxonomyInfo(
-                                ordre = ordre.name,
-                                famille = famille.name,
-                                genre = genre.name,
-                                type = "GENUS"
-                            )
+                                ordre = ordre.name, famille = famille.name,
+                                genre = genre.name, type = "GENUS")
                             genre.children.forEach { espece ->
                                 taxonomyMap[espece.id] = TaxonomyInfo(
-                                    ordre = ordre.name,
-                                    famille = famille.name,
-                                    genre = genre.name,
-                                    espece = espece.name,
-                                    type = "SPECIES"
-                                )
+                                    ordre = ordre.name, famille = famille.name,
+                                    genre = genre.name, espece = espece.name, type = "SPECIES")
                             }
                         }
                     }
                 }
-                val userIds = pictures.mapNotNull {
-                    it["userRef"] as? String
-                }.distinct()
 
-                if (userIds.isEmpty()) {
-                    onSuccess(pictures)
-                    return@fetchCensusTree
-                }
+                val userIds = pictures.mapNotNull { it["userRef"] as? String }.distinct()
+                if (userIds.isEmpty()) { onSuccess(pictures); return@fetchCensusTree }
 
                 val userProfileMap = mutableMapOf<String, String>()
-
-                val chunks = userIds.chunked(10)
+                val chunks   = userIds.chunked(10)
                 var completed = 0
 
                 chunks.forEach { chunk ->
@@ -304,46 +321,28 @@ object PictureDao {
                         .whereIn("__name__", chunk)
                         .get()
                         .addOnSuccessListener { snapshot ->
-
                             snapshot.documents.forEach { doc ->
-                                val uid = doc.id
-                                val profileUrl = doc.getString("profilePictureUrl") ?: ""
-                                userProfileMap[uid] = profileUrl
+                                userProfileMap[doc.id] = doc.getString("profilePictureUrl") ?: ""
                             }
-
                             completed++
                             if (completed == chunks.size) {
-
                                 val enriched = pictures.map { picture ->
                                     val map = picture.toMutableMap()
-
-                                    if (!map.containsKey("adminValidated"))
-                                        map["adminValidated"] = false
-
-                                    if (!map.containsKey("recordingStatus"))
-                                        map["recordingStatus"] = false
-
-                                    val uid = map["userRef"] as? String ?: ""
-                                    map["profilePictureUrl"] =
-                                        userProfileMap[uid] ?: ""
-
-                                    val censusRef = picture["censusRef"] as? String
-                                    val taxonomy =
-                                        if (!censusRef.isNullOrEmpty() && censusRef != "null")
-                                            taxonomyMap[censusRef]
-                                        else null
-
+                                    if (!map.containsKey("adminValidated"))  map["adminValidated"]  = false
+                                    if (!map.containsKey("recordingStatus")) map["recordingStatus"] = false
+                                    val uid        = map["userRef"] as? String ?: ""
+                                    map["profilePictureUrl"] = userProfileMap[uid] ?: ""
+                                    val censusRef  = picture["censusRef"] as? String
+                                    val taxonomy   = if (!censusRef.isNullOrEmpty() && censusRef != "null")
+                                        taxonomyMap[censusRef] else null
                                     map["ordre"]  = taxonomy?.ordre   ?: "Non identifié"
                                     map["family"] = taxonomy?.famille ?: "Non identifié"
                                     map["genre"]  = taxonomy?.genre   ?: "Non identifié"
                                     map["specie"] = taxonomy?.espece  ?: "Non identifié"
-
                                     map
                                 }
-
                                 onSuccess(enriched)
                             }
-
                         }
                         .addOnFailureListener(onError)
                 }
@@ -360,13 +359,9 @@ object PictureDao {
         picturesRef.document(pictureId).get()
             .addOnSuccessListener { document ->
                 val data = document.data
-                if (data == null) {
-                    onError(Exception("Photo introuvable")); return@addOnSuccessListener
-                }
-                val map = data.toMutableMap()
+                if (data == null) { onError(Exception("Photo introuvable")); return@addOnSuccessListener }
+                val map  = data.toMutableMap()
                 map["id"] = document.id
-
-                // Réutiliser enrichPicturesWithCensusData sur une liste d'un seul élément
                 enrichPicturesWithCensusData(
                     pictures  = listOf(map),
                     onSuccess = { enriched -> onSuccess(enriched.first()) },
@@ -375,6 +370,8 @@ object PictureDao {
             }
             .addOnFailureListener(onError)
     }
+
+    // ── Helpers privés ────────────────────────────────────────────────────────
 
     private fun bytesToWebpFile(context: Context, imageBytes: ByteArray, quality: Int = 90): File {
         val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
