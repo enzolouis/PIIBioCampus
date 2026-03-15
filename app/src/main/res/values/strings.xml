@@ -226,5 +226,10 @@ Site web : https://fneb.fr
 
 Document soumis au droit français — Loi n° 78-17 du 6 janvier 1978 modifiée et RGPD (UE) 2016/679.
 </string>
+    <string name="actualite">Actualité</string>
+    <string name="recherche">Recherche</string>
+    <string name="map">Map</string>
+    <string name="bibliotheque">Bibliothèque</string>
+    <string name="compte">Compte</string>
 
 </resources>
