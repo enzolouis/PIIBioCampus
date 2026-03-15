@@ -16,16 +16,16 @@
         />
 
     <item
-        android:id="@+id/nav_bibliotheque"
-        android:icon="@drawable/book_open"
-        android:title="Bibliothèque"
+        android:id="@+id/nav_map"
+        android:icon="@drawable/map"
+        android:title="Map"
         android:fontFamily="@font/gentium_plus_bold"
         />
 
     <item
-        android:id="@+id/nav_map"
-        android:icon="@drawable/map"
-        android:title="Map"
+        android:id="@+id/nav_bibliotheque"
+        android:icon="@drawable/book_open"
+        android:title="Bibliothèque"
         android:fontFamily="@font/gentium_plus_bold"
         />
 
