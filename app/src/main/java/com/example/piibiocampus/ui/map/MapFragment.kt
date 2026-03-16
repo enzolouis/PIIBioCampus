@@ -8,8 +8,6 @@ import android.os.Bundle
 import android.view.View
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.example.piibiocampus.R
@@ -45,7 +43,6 @@ class MapFragment : Fragment(R.layout.fragment_map) {
         override fun draw(canvas: Canvas, mapView: MapView, shadow: Boolean) {
             if (shadow) return
             val point = mapView.projection.toPixels(position, null)
-
             val shadowPaint = Paint().apply {
                 color = Color.BLACK
                 textSize = 36f
@@ -61,7 +58,6 @@ class MapFragment : Fragment(R.layout.fragment_map) {
                 typeface = Typeface.DEFAULT_BOLD
                 textAlign = Paint.Align.CENTER
             }
-
             canvas.drawText(text, point.x.toFloat(), point.y.toFloat(), shadowPaint)
             canvas.drawText(text, point.x.toFloat(), point.y.toFloat(), textPaint)
         }
@@ -70,19 +66,19 @@ class MapFragment : Fragment(R.layout.fragment_map) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Configuration.getInstance().userAgentValue = requireContext().packageName
-        setTopBarTitle(R.string.titleMap)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        map = view.findViewById(R.id.map)
+        // ── Suppression du listener sur R.id.main ──────────────────────────────
+        // Ce listener ajoutait systemBars.top comme padding sur le layout racine,
+        // ce qui poussait la toolbar encore plus bas — conflit avec fitsSystemWindows
+        // de la toolbar. La toolbar gère maintenant ses propres insets via
+        // fitsSystemWindows="true" dans view_top_bar.xml.
+        // ──────────────────────────────────────────────────────────────────────
 
-        ViewCompat.setOnApplyWindowInsetsListener(view.findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
+        map = view.findViewById(R.id.map)
 
         setupTileSource()
 
@@ -100,9 +96,8 @@ class MapFragment : Fragment(R.layout.fragment_map) {
     private fun formatTimestamp(timestamp: Any?): String {
         return when (timestamp) {
             is com.google.firebase.Timestamp -> {
-                val date = timestamp.toDate()
                 val format = java.text.SimpleDateFormat("dd/MM/yyyy à HH:mm", java.util.Locale.FRENCH)
-                format.format(date)
+                format.format(timestamp.toDate())
             }
             is java.util.Date -> {
                 val format = java.text.SimpleDateFormat("dd/MM/yyyy à HH:mm", java.util.Locale.FRENCH)
@@ -172,7 +167,6 @@ class MapFragment : Fragment(R.layout.fragment_map) {
                     m.closeInfoWindow()
                     isOpen = false
                 } else {
-                    // Fermer toutes les autres InfoWindows avant d'ouvrir celle-ci
                     InfoWindow.closeAllInfoWindowsOn(map)
                     m.showInfoWindow()
                     isOpen = true
@@ -241,7 +235,6 @@ class MapFragment : Fragment(R.layout.fragment_map) {
                 }
             }
 
-            // Markers ajoutés en fin de liste = premier plan, au-dessus des campus
             map.overlays.add(marker)
         }
 
@@ -256,10 +249,10 @@ class MapFragment : Fragment(R.layout.fragment_map) {
         super.onResume()
         map.onResume()
         setTopBarTitle(R.string.titleMap)
-        // Fermer toutes les InfoWindows orphelines avant de recharger
         InfoWindow.closeAllInfoWindowsOn(map)
         viewModel.loadAllPictures()
     }
+
     override fun onPause()       { super.onPause();   map.onPause() }
     override fun onDestroyView() { super.onDestroyView(); map.overlays.clear() }
 
@@ -274,13 +267,12 @@ class MapFragment : Fragment(R.layout.fragment_map) {
                     GeoPoint(campus.latitudeCenter, campus.longitudeCenter),
                     campus.radius
                 )
-                fillPaint.color = Color.argb(40, 255, 179, 0)
+                fillPaint.color    = Color.argb(40,  255, 179, 0)
                 outlinePaint.color = Color.argb(180, 255, 179, 0)
                 outlinePaint.strokeWidth = 3f
                 infoWindow = null
                 setOnClickListener { _, _, _ -> true }
             }
-            // Campus en position 0 = arrière-plan absolu
             map.overlays.add(0, circle)
 
             val textOverlay = TextOverlay(
@@ -288,12 +280,10 @@ class MapFragment : Fragment(R.layout.fragment_map) {
                 campus.name
             )
             campusTextOverlays.add(textOverlay)
-            // TextOverlay juste après les Polygon, avant les Marker
             val insertIndex = map.overlays.indexOfLast { it is Polygon } + 1
             map.overlays.add(insertIndex, textOverlay)
         }
 
-        // S'assurer que tous les Marker sont bien au-dessus des campus
         val markers = map.overlays.filterIsInstance<Marker>()
         map.overlays.removeAll { it is Marker }
         map.overlays.addAll(markers)

@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.appbar.MaterialToolbar xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.appbar.MaterialToolbar
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/topAppBar"
     android:layout_width="match_parent"
-    android:layout_height="80dp"
+    android:layout_height="wrap_content"
+    android:maxHeight="56dp"
     android:background="@color/primary"
-    android:paddingTop="15dp">
+    android:paddingTop="40dp">
 
     <ImageView
         android:id="@+id/topBarLogo"
@@ -22,7 +24,6 @@
         android:textColor="@color/white"
         android:textSize="18sp"
         android:textStyle="bold"
-        android:fontFamily="@font/kg_blank_space_sketch"
-        android:layout_marginTop="25dp" />
+        android:fontFamily="@font/kg_blank_space_sketch" />
 
 </com.google.android.material.appbar.MaterialToolbar>

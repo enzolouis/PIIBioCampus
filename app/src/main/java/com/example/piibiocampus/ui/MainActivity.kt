@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.WindowCompat
 import com.example.piibiocampus.pictures.PictureActivity
 import androidx.fragment.app.Fragment
 import com.example.piibiocampus.R
@@ -15,7 +16,6 @@ import com.example.piibiocampus.news.NewsFragment
 import com.example.piibiocampus.ui.library.LibraryFragment
 import com.example.piibiocampus.ui.map.MapFragment
 import com.example.piibiocampus.ui.profiles.MyProfileFragment
-import com.example.piibiocampus.utils.DatabaseFiller.fillUsers
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
@@ -24,13 +24,15 @@ class MainActivity : AppCompatActivity() {
     private lateinit var fabCamera: FloatingActionButton
     private lateinit var bottomNav: BottomNavigationView
 
-    // Instances réutilisées — évite de recréer les fragments à chaque navigation
     private val mapFragment     by lazy { MapFragment() }
     private val profileFragment by lazy { MyProfileFragment() }
-    private val newsFragment by lazy { NewsFragment() }
+    private val newsFragment    by lazy { NewsFragment() }
     private val libraryFragment by lazy { LibraryFragment() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        window.statusBarColor = ContextCompat.getColor(this, R.color.primary)
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
@@ -39,7 +41,6 @@ class MainActivity : AppCompatActivity() {
         bottomNav = findViewById(R.id.bottomNav)
         fabCamera = findViewById(R.id.fabCamera)
 
-        // Charge le fragment par défaut (Map)
         if (savedInstanceState == null) {
             showFragment(mapFragment)
             bottomNav.selectedItemId = R.id.nav_map
@@ -47,10 +48,9 @@ class MainActivity : AppCompatActivity() {
 
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
-                R.id.nav_map    -> { fabCamera.show(); showFragment(mapFragment);     true }
-                R.id.nav_compte -> { fabCamera.hide(); showFragment(profileFragment); true }
-                R.id.nav_actualite -> { fabCamera.hide(); showFragment(newsFragment); true }
-                R.id.nav_recherche,
+                R.id.nav_map          -> { fabCamera.show(); showFragment(mapFragment);     true }
+                R.id.nav_compte       -> { fabCamera.hide(); showFragment(profileFragment); true }
+                R.id.nav_actualite    -> { fabCamera.hide(); showFragment(newsFragment);    true }
                 R.id.nav_bibliotheque -> { fabCamera.hide(); showFragment(libraryFragment); true }
                 else -> false
             }
@@ -61,53 +61,36 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, PictureActivity::class.java))
         }
 
-        // Gérer un éventuel navigateTo passé à la création
-        // (cas où MainActivity n'existait pas encore dans la pile)
         handleNavigationIntent(intent)
     }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        // FLAG_ACTIVITY_SINGLE_TOP → l'instance existante reçoit onNewIntent
-        // C'est le cas normal après CREATE depuis CensusTreeActivity
         handleNavigationIntent(intent)
     }
 
-    // ── Navigation + reload ───────────────────────────────────────────────────
-
     private fun handleNavigationIntent(intent: Intent) {
         val target = intent.getStringExtra("navigateTo") ?: return
-
         when (target) {
             "myProfile" -> {
                 bottomNav.selectedItemId = R.id.nav_compte
                 fabCamera.hide()
                 showFragment(profileFragment)
-                // Le listener Firestore de MyProfileFragment se relance dans onResume()
-                // → pas besoin d'appel explicite
             }
             "map" -> {
                 bottomNav.selectedItemId = R.id.nav_map
                 fabCamera.show()
                 showFragment(mapFragment)
-                // Recharger les marqueurs après ajout d'une nouvelle photo
-                // Différé d'un frame pour s'assurer que le fragment est attaché
-                window.decorView.post {
-                    mapFragment.reloadMarkers()
-                }
+                window.decorView.post { mapFragment.reloadMarkers() }
             }
         }
     }
-
-    // ── Fragments ─────────────────────────────────────────────────────────────
 
     private fun showFragment(fragment: Fragment) {
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragment_container, fragment)
             .commit()
     }
-
-    // ── Permissions ───────────────────────────────────────────────────────────
 
     private fun askLocationPermission() {
         val fine   = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)   == PackageManager.PERMISSION_GRANTED
