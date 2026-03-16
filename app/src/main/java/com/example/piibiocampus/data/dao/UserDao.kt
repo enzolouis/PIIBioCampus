@@ -71,6 +71,16 @@ object UserDao {
         return snapshot.toObject(UserProfile::class.java)
     }
 
+    suspend fun getUserProfileById(userId: String): UserProfile? {
+        val snapshot = db.collection("users")
+            .document(userId)
+            .get()
+            .await()
+
+        return snapshot.toObject(UserProfile::class.java)?.copy(uid = snapshot.id)
+    }
+
+
     suspend fun banUser(uid: String) {
         val pictures = db.collection("pictures")
             .whereEqualTo("userRef", uid)

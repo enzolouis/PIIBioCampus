@@ -19,6 +19,7 @@ import java.net.URL
 import java.util.Date
 import java.util.UUID
 import kotlin.math.*
+import kotlinx.coroutines.tasks.await
 
 object PictureDao {
 
@@ -369,6 +370,44 @@ object PictureDao {
                 )
             }
             .addOnFailureListener(onError)
+    }
+
+    suspend fun getPicturesByUserEnrichedSortedByDate(userId: String): List<Map<String, Any>> {
+        return try {
+            val snapshot = firestore.collection("pictures")
+                .whereEqualTo("userRef", userId)
+                .orderBy("timestamp", Query.Direction.DESCENDING)
+                .get()
+                .await()
+
+            android.util.Log.d("PictureDao", "Photos trouvées pour $userId : ${snapshot.documents.size}")
+
+            val pictures = snapshot.documents.mapNotNull { document ->
+                val data = document.data ?: return@mapNotNull null
+                val map  = data.toMutableMap()
+                map["id"] = document.id
+                map
+            }
+
+            val deferred = kotlinx.coroutines.CompletableDeferred<List<Map<String, Any>>>()
+
+            enrichPicturesWithCensusData(
+                pictures  = pictures,
+                onSuccess = {
+                    android.util.Log.d("PictureDao", "Enrichissement OK : ${it.size} photos")
+                    deferred.complete(it)
+                },
+                onError   = {
+                    android.util.Log.e("PictureDao", "Erreur enrichissement : ${it.message}")
+                    deferred.complete(pictures)
+                }
+            )
+
+            deferred.await()
+        } catch (e: Exception) {
+            android.util.Log.e("PictureDao", "Exception : ${e.message}")
+            emptyList()
+        }
     }
 
     // ── Helpers privés ────────────────────────────────────────────────────────

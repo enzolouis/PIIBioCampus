@@ -14,6 +14,7 @@ import com.example.piibiocampus.R
 import com.example.piibiocampus.data.dao.PictureDao
 import com.example.piibiocampus.ui.census.CensusMode
 import com.example.piibiocampus.ui.census.CensusTreeActivity
+import com.example.piibiocampus.ui.profiles.UserProfileFragment
 import com.github.chrisbanes.photoview.PhotoView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.squareup.picasso.Picasso
@@ -190,6 +191,16 @@ class PicturesViewerFragment : DialogFragment() {
 
         // Retour
         btnBack.setOnClickListener { dismiss() }
+
+        // Aller sur l'auteur
+        ivAuthorProfile.setOnClickListener {
+            dismiss()
+            val fragment = UserProfileFragment.newInstance(state.userRef)
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, fragment)
+                .addToBackStack(null)
+                .commit()
+        }
 
         // Supprimer
         if (state.showDelete) {
