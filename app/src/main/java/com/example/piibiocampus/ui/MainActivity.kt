@@ -16,6 +16,7 @@ import com.example.piibiocampus.news.NewsFragment
 import com.example.piibiocampus.ui.library.LibraryFragment
 import com.example.piibiocampus.ui.map.MapFragment
 import com.example.piibiocampus.ui.profiles.MyProfileFragment
+import com.example.piibiocampus.ui.searchUsers.SearchUsersFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
@@ -28,6 +29,7 @@ class MainActivity : AppCompatActivity() {
     private val profileFragment by lazy { MyProfileFragment() }
     private val newsFragment    by lazy { NewsFragment() }
     private val libraryFragment by lazy { LibraryFragment() }
+    private val searchUsersFragment by lazy { SearchUsersFragment() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -48,10 +50,11 @@ class MainActivity : AppCompatActivity() {
 
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
-                R.id.nav_map          -> { fabCamera.show(); showFragment(mapFragment);     true }
-                R.id.nav_compte       -> { fabCamera.hide(); showFragment(profileFragment); true }
-                R.id.nav_actualite    -> { fabCamera.hide(); showFragment(newsFragment);    true }
-                R.id.nav_bibliotheque -> { fabCamera.hide(); showFragment(libraryFragment); true }
+                R.id.nav_map          -> { fabCamera.show(); showFragment(mapFragment);         true }
+                R.id.nav_compte       -> { fabCamera.hide(); showFragment(profileFragment);     true }
+                R.id.nav_actualite    -> { fabCamera.hide(); showFragment(newsFragment);        true }
+                R.id.nav_bibliotheque -> { fabCamera.hide(); showFragment(libraryFragment);     true }
+                R.id.nav_recherche    -> { fabCamera.hide(); showFragment(searchUsersFragment); true }
                 else -> false
             }
             true

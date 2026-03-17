@@ -45,5 +45,5 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        tools:listitem="@layout/item_user_admin" />
+        tools:listitem="@layout/item_user" />
 </androidx.constraintlayout.widget.ConstraintLayout>

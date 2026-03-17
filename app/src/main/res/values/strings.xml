@@ -29,6 +29,7 @@
     <string name="txtCancel">Annuler</string>
 
     <string name="txtSearchAdmin">Recherche d\'utilisateur·rice</string>
+    <string name="txtSearchUsers">Recherche d\'utilisateur·rice</string>
     <string name="logo_admin">Logo Admin</string>
     <string name="see_more">Voir plus</string>
     <string name="enter_username">Entrez un pseudo...</string>
