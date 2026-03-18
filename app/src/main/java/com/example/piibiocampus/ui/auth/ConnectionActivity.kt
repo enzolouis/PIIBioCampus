@@ -2,6 +2,7 @@ package com.example.piibiocampus.ui.auth
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.ViewGroup
 import android.text.method.HideReturnsTransformationMethod
 import android.text.method.PasswordTransformationMethod
 import android.widget.Button
@@ -9,6 +10,8 @@ import android.widget.EditText
 import android.widget.ImageView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.piibiocampus.R
 import com.example.piibiocampus.ui.MainActivity
@@ -30,6 +33,14 @@ class ConnectionActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_connection)
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.btnConnexion)) { view, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val extraPadding = (20 * resources.displayMetrics.density).toInt()
+            (view.layoutParams as ViewGroup.MarginLayoutParams).bottomMargin =
+                systemBars.bottom + extraPadding
+            insets
+        }
 
         pseudoZone       = findViewById(R.id.txtIdentifiant)
         passwordZone     = findViewById(R.id.txtMdp)

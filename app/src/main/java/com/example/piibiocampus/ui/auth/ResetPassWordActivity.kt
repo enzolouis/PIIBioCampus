@@ -2,10 +2,13 @@ package com.example.piibiocampus.ui.auth
 
 import ResetPasswordViewModel
 import android.os.Bundle
+import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -26,6 +29,14 @@ class ResetPassWordActivity : AppCompatActivity() {
 
         pseudoZone = findViewById(R.id.txtIdentifiant)
         sendBtn = findViewById(R.id.btnReinitialiserMotDePasse)
+
+        ViewCompat.setOnApplyWindowInsetsListener(sendBtn) { view, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val extraPadding = (20 * resources.displayMetrics.density).toInt()
+            (view.layoutParams as ViewGroup.MarginLayoutParams).bottomMargin =
+                systemBars.bottom + extraPadding
+            insets
+        }
 
         sendBtn.setOnClickListener {
             val email = pseudoZone.text.toString().trim()
