@@ -16,6 +16,7 @@ import androidx.lifecycle.lifecycleScope
 import com.example.piibiocampus.R
 import com.example.piibiocampus.ui.MainActivity
 import com.example.piibiocampus.ui.admin.DashboardAdminActivity
+import com.example.piibiocampus.ui.common.LoadingDialog
 import com.example.piibiocampus.utils.Extensions.toast
 import com.example.piibiocampus.utils.Validators
 import kotlinx.coroutines.launch
@@ -81,9 +82,13 @@ class ConnectionActivity : AppCompatActivity() {
             }
 
             if (isCguAccepted()) {
+                LoadingDialog.show(supportFragmentManager, "Connexion en cours…")
                 viewModel.login(email, password)
             } else {
-                showCguDialog(onAccepted = { viewModel.login(email, password) })
+                showCguDialog(onAccepted = {
+                    LoadingDialog.show(supportFragmentManager, "Connexion en cours…")
+                    viewModel.login(email, password)
+                })
             }
         }
 
@@ -92,6 +97,7 @@ class ConnectionActivity : AppCompatActivity() {
             viewModel.uiState.collect { state ->
                 when (state) {
                     is AuthUiState.Authenticated -> {
+                        LoadingDialog.hide(supportFragmentManager)
                         when (state.role) {
                             "USER" -> startActivity(
                                 Intent(this@ConnectionActivity, MainActivity::class.java)
@@ -104,6 +110,7 @@ class ConnectionActivity : AppCompatActivity() {
                         finish()
                     }
                     is AuthUiState.Error -> {
+                        LoadingDialog.hide(supportFragmentManager)
                         toast(
                             "Erreur de connexion : ${state.throwable.message}",
                             android.widget.Toast.LENGTH_LONG

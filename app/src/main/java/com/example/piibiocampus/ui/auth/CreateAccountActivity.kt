@@ -16,6 +16,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.piibiocampus.R
 import com.example.piibiocampus.ui.MainActivity
+import com.example.piibiocampus.ui.common.LoadingDialog
 import com.example.piibiocampus.utils.Extensions.toast
 import com.example.piibiocampus.utils.Validators
 import kotlinx.coroutines.launch
@@ -72,11 +73,15 @@ class CreateAccountActivity : AppCompatActivity() {
             }
 
             if (isCguAccepted()) {
+                LoadingDialog.show(supportFragmentManager, "Création du compte…")
                 viewModel.register(emailStr, passwordStr, usernameStr)
             } else {
                 CguDialogFragment.show(
                     fm         = supportFragmentManager,
-                    onAccepted = { viewModel.register(emailStr, passwordStr, usernameStr) },
+                    onAccepted = {
+                        LoadingDialog.show(supportFragmentManager, "Création du compte…")
+                        viewModel.register(emailStr, passwordStr, usernameStr)
+                    },
                     onDeclined = { toast("Vous devez accepter les CGU pour créer un compte") }
                 )
             }
@@ -85,15 +90,19 @@ class CreateAccountActivity : AppCompatActivity() {
         lifecycleScope.launch {
             viewModel.uiState.collect { state ->
                 when (state) {
-                    is AuthUiState.Loading -> { /* afficher un loader si besoin */ }
+                    is AuthUiState.Loading -> {
+                        // Le LoadingDialog est déjà affiché au clic
+                    }
 
                     is AuthUiState.Registered -> {
+                        LoadingDialog.hide(supportFragmentManager)
                         toast("Compte créé avec succès !")
                         startActivity(Intent(this@CreateAccountActivity, MainActivity::class.java))
                         finish()
                     }
 
                     is AuthUiState.Error -> {
+                        LoadingDialog.hide(supportFragmentManager)
                         errorZone.text =
                             state.throwable.message ?: "Erreur lors de la création du compte"
                     }

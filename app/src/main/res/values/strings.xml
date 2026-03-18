@@ -232,5 +232,6 @@ Document soumis au droit français — Loi n° 78-17 du 6 janvier 1978 modifiée
     <string name="bibliotheque">Bibliothèque</string>
     <string name="compte">Compte</string>
     <string name="arbre_de_recensement">Arbre de recensement</string>
+    <string name="chargement">Chargement…</string>
 
 </resources>
