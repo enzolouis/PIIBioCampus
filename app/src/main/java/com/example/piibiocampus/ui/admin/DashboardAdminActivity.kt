@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import com.example.piibiocampus.R
+import com.example.piibiocampus.data.dao.NewsDao
 import com.example.piibiocampus.utils.DatabaseFiller.fillUsers
 import com.example.piibiocampus.utils.setTopBarTitle
 
@@ -26,5 +27,10 @@ class DashboardAdminActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        val btnNews: Button = findViewById(R.id.btnNews);
+        btnNews.setOnClickListener {
+            val intent = Intent(this, NewsListAdminActivity::class.java)
+            startActivity(intent)
+        }
     }
 }

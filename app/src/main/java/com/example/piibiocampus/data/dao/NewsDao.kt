@@ -2,6 +2,7 @@ package com.example.piibiocampus.data.dao
 
 import com.example.piibiocampus.data.model.ItemNews
 import com.google.firebase.FirebaseApp
+import com.google.firebase.firestore.FieldPath.documentId
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 
@@ -19,12 +20,38 @@ object NewsDao {
         onSuccess: (List<ItemNews>) -> Unit,
         onError: (Exception) -> Unit
     ) {
-        newsRef
-            .get()
+        newsRef.get()
             .addOnSuccessListener { snapshot ->
-                val newsList = snapshot.toObjects(ItemNews::class.java)
+                val newsList = snapshot.documents.map { doc ->
+                    ItemNews(
+                        id = doc.id,
+                        titre = doc.getString("titre") ?: "",
+                        imageUrl = doc.getString("imageUrl") ?: "",
+                        source = doc.getString("source") ?: ""
+                    )
+                }
                 onSuccess(newsList)
             }
+            .addOnFailureListener(onError)
+    }
+
+    fun updateNews(
+        newsId: String,
+        title: String,
+        source: String,
+        imageUrl: String,
+        onSuccess: () -> Unit,
+        onError: (Exception) -> Unit
+    ) {
+        newsRef.document(newsId)
+            .update(
+                mapOf(
+                    "titre" to title,
+                    "source" to source,
+                    "imageUrl" to imageUrl
+                )
+            )
+            .addOnSuccessListener { onSuccess() }
             .addOnFailureListener(onError)
     }
 }
