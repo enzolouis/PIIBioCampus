@@ -131,11 +131,6 @@ class PicturesAdminActivity : AppCompatActivity() {
 
     // ── Animation suppression ─────────────────────────────────────────────────
 
-    /**
-     * Retrouve la position de la photo dans la liste affichée par son ID,
-     * joue l'animation rouge → fondu, puis demande au ViewModel de la supprimer
-     * en mémoire (ce qui déclenche l'observer et rafraîchit la liste).
-     */
     private fun animateDeleteAndRemove(pictureId: String) {
         val position = photos.indexOfFirst { it["id"] == pictureId }
 
