@@ -54,6 +54,7 @@ class SearchUsersFragment : Fragment() {
 
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         recyclerView.adapter = adapter
+        recyclerView.clipToPadding = false
 
         loadAllUsers()
 

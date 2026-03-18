@@ -4,11 +4,15 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.view.View
+import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import com.example.piibiocampus.pictures.PictureActivity
 import androidx.fragment.app.Fragment
 import com.example.piibiocampus.R
@@ -42,6 +46,27 @@ class MainActivity : AppCompatActivity() {
 
         bottomNav = findViewById(R.id.bottomNav)
         fabCamera = findViewById(R.id.fabCamera)
+        val fragmentContainer = findViewById<FrameLayout>(R.id.fragment_container)
+
+        ViewCompat.setOnApplyWindowInsetsListener(fragmentContainer) { view, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val ime        = insets.getInsets(WindowInsetsCompat.Type.ime())
+            val imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
+
+            if (imeVisible) {
+                bottomNav.visibility = View.GONE
+                fabCamera.hide()
+                view.setPadding(0, 0, 0, ime.bottom)
+            } else {
+                bottomNav.visibility = View.VISIBLE
+                if (bottomNav.selectedItemId == R.id.nav_map) fabCamera.show()
+                // Padding = hauteur réelle de la bottomNav (inclut déjà les system bars via fitsSystemWindows)
+                view.post {
+                    view.setPadding(0, 0, 0, bottomNav.height)
+                }
+            }
+            insets
+        }
 
         if (savedInstanceState == null) {
             showFragment(mapFragment)

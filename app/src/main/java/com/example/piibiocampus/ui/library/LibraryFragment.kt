@@ -79,6 +79,7 @@ class LibraryFragment : Fragment() {
         }
         recyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
         recyclerView.adapter = adapter
+        recyclerView.clipToPadding = false
     }
 
     // ── Recherche en temps réel ───────────────────────────

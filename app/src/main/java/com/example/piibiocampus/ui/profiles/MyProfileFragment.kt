@@ -60,6 +60,7 @@ class MyProfileFragment : Fragment() {
         recyclerView.layoutManager = GridLayoutManager(requireContext(), 3)
         adapter = PhotoAdapter(photos)
         recyclerView.adapter = adapter
+        recyclerView.clipToPadding = false
 
         // Bouton retour système → retour vers MainActivity
         requireActivity().onBackPressedDispatcher.addCallback(

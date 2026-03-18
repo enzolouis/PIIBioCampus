@@ -41,6 +41,7 @@ class NewsFragment : Fragment()  {
 
         recyclerView = view.findViewById(R.id.recyclerView)
         recyclerView.layoutManager = GridLayoutManager(requireContext(), 1)
+        recyclerView.clipToPadding = false
 
         NewsDao.getAllNews(
             onSuccess = { items ->
