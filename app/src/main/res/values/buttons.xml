@@ -87,7 +87,25 @@
     <!-- Success -->
     <style name="ButtonSuccess" parent="ButtonLarge">
         <item name="android:textColor">@color/white</item>
-        <item name="android:background">@drawable/fade_buttonsuccess</item>
+        <item name="android:background">@drawable/fade_buttonsuccess_selector</item>
+    </style>
+
+    <!-- Small Primary -->
+    <style name="ButtonSmallPrimary" parent="ButtonSmall">
+        <item name="android:textColor">@color/white</item>
+        <item name="android:background">@drawable/fade_buttonprimary</item>
+    </style>
+
+    <!-- Small Secondary -->
+    <style name="ButtonSmallSecondary" parent="ButtonSmall">
+        <item name="android:textColor">@color/white</item>
+        <item name="android:background">@drawable/fade_buttonsecondary</item>
+    </style>
+
+    <!-- Small Success -->
+    <style name="ButtonSmallSuccess" parent="ButtonSmall">
+        <item name="android:textColor">@color/white</item>
+        <item name="android:background">@drawable/fade_buttonsuccess_selector</item>
     </style>
 
     <!-- Danger -->

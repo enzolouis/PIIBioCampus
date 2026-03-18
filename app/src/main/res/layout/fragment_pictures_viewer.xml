@@ -125,7 +125,7 @@
                 android:layout_marginEnd="4dp"
                 android:fontFamily="@font/kg_blank_space_solid"
                 android:visibility="gone"
-                style="@style/ButtonSuccess" />
+                style="@style/ButtonSmallSuccess" />
 
             <Button
                 android:id="@+id/btnBack"
@@ -137,7 +137,7 @@
                 android:textSize="13sp"
                 android:fontFamily="@font/kg_blank_space_solid"
                 android:layout_marginHorizontal="4dp"
-                style="@style/ButtonPrimary" />
+                style="@style/ButtonSmallPrimary" />
 
             <Button
                 android:id="@+id/btnDelete"
@@ -148,7 +148,7 @@
                 android:textAllCaps="false"
                 android:layout_marginStart="4dp"
                 android:visibility="gone"
-                style="@style/ButtonDanger"
+                style="@style/ButtonSmallDanger"
                 android:maxLines="1"
                 app:autoSizeTextType="uniform"
                 app:autoSizeMinTextSize="8sp"
