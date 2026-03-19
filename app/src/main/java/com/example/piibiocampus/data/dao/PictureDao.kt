@@ -412,7 +412,7 @@ object PictureDao {
 
     // ── Helpers privés ────────────────────────────────────────────────────────
 
-    private fun bytesToWebpFile(context: Context, imageBytes: ByteArray, quality: Int = 90): File {
+    fun bytesToWebpFile(context: Context, imageBytes: ByteArray, quality: Int = 90): File {
         val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
         val file   = File.createTempFile("picture_", ".webp", context.cacheDir)
         FileOutputStream(file).use { out ->

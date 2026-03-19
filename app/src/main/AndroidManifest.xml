@@ -64,6 +64,13 @@
             android:name=".ui.admin.PicturesAdminActivity"
             android:exported="true" />
         <activity
+            android:name=".ui.admin.NewsListAdminActivity"
+            android:exported="true" />
+        <activity
+            android:name=".ui.admin.UpdateNewsAdminActivity"
+            android:exported="true" />
+
+        <activity
             android:name=".ui.census.CensusEditorActivity"
             android:exported="true" />
         <activity android:name="ui.library.LibraryFragment"

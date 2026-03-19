@@ -9,7 +9,6 @@ import androidx.core.view.WindowInsetsCompat
 import android.widget.GridLayout
 import com.example.piibiocampus.R
 import com.example.piibiocampus.ui.census.CensusEditorActivity
-import com.example.piibiocampus.utils.DatabaseFiller.fillUsers
 import com.example.piibiocampus.utils.setTopBarTitle
 
 class DashboardAdminActivity : AppCompatActivity() {
@@ -49,5 +48,10 @@ class DashboardAdminActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        val btnNews: Button = findViewById(R.id.btnNews);
+        btnNews.setOnClickListener {
+            val intent = Intent(this, NewsListAdminActivity::class.java)
+            startActivity(intent)
+        }
     }
 }
