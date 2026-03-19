@@ -15,6 +15,8 @@ import android.widget.*
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.piibiocampus.R
@@ -52,9 +54,18 @@ class ExportDataActivity : AppCompatActivity() {
         observeViewModel()
         setTopBarTitle("Exportation des données")
 
-        // Applique le label du chip dès le départ (défaut = ONLY_VALIDATED dans le ViewModel)
+        ViewCompat.setOnApplyWindowInsetsListener(btnExportCsv) { view, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val extraPadding = (20 * resources.displayMetrics.density).toInt()
+            (view.layoutParams as ViewGroup.MarginLayoutParams).bottomMargin =
+                systemBars.bottom + extraPadding
+            insets
+        }
+
+        // Chip validation initialisé sur ONLY_VALIDATED par défaut
         updateValidationChipLabel()
 
+        // Chargement — applyFilters() sera appelé automatiquement quand isLoading passe à false
         viewModel.loadAll()
     }
 
@@ -77,9 +88,15 @@ class ExportDataActivity : AppCompatActivity() {
     }
 
     private fun observeViewModel() {
+        var wasLoading = false
         viewModel.isLoading.observe(this) { loading ->
             progressBar.visibility = if (loading) View.VISIBLE else View.GONE
             btnExportCsv.isEnabled = !loading
+            // Applique le filtre "Validé uniquement" dès que le chargement initial est terminé
+            if (wasLoading && !loading) {
+                viewModel.applyFilters()
+            }
+            wasLoading = loading
         }
 
         viewModel.filteredCount.observe(this) { count ->
@@ -102,7 +119,6 @@ class ExportDataActivity : AppCompatActivity() {
         chipFilterCampus.setOnClickListener { showCampusDialog() }
         chipFilterDate.setOnClickListener   { showDateRangeDialog() }
 
-        // Cycle : ONLY_VALIDATED et VALIDATED_AND_NOT
         chipFilterValidation.setOnClickListener {
             viewModel.filterValidation = when (viewModel.filterValidation) {
                 ValidationFilter.ONLY_VALIDATED    -> ValidationFilter.VALIDATED_AND_NOT
@@ -113,7 +129,7 @@ class ExportDataActivity : AppCompatActivity() {
         }
 
         chipReset.setOnClickListener {
-            viewModel.resetFilters()                       // remet filterValidation = ONLY_VALIDATED
+            viewModel.resetFilters()
             chipFilterCampus.text      = "Campus"; chipFilterCampus.isChecked = false
             chipFilterDate.text        = "Date";   chipFilterDate.isChecked   = false
             updateValidationChipLabel()
@@ -122,9 +138,7 @@ class ExportDataActivity : AppCompatActivity() {
         btnExportCsv.setOnClickListener { exportCsv() }
     }
 
-    /** Synchronise le label et l'état visuel du chip avec le ViewModel. */
     private fun updateValidationChipLabel() {
-        // Le chip est toujours "checked" puisqu'il n'y a plus d'état "Tout"
         chipFilterValidation.isChecked = true
         chipFilterValidation.text = when (viewModel.filterValidation) {
             ValidationFilter.ONLY_VALIDATED    -> "Validé uniquement"
@@ -269,7 +283,6 @@ class ExportDataActivity : AppCompatActivity() {
 
             colWidthsDp.forEachIndexed { index, widthDp ->
                 if (index > 0) {
-                    // Séparateur vertical entre colonnes
                     rowLayout.addView(View(parent.context).apply {
                         layoutParams = ViewGroup.LayoutParams(1, ViewGroup.LayoutParams.MATCH_PARENT)
                         setBackgroundColor(Color.parseColor("#CCCCCC"))
@@ -291,12 +304,10 @@ class ExportDataActivity : AppCompatActivity() {
         override fun onBindViewHolder(holder: VH, position: Int) {
             val row = rows[position]
 
-            // Fond de ligne alterné
             holder.container.setBackgroundColor(
                 if (position % 2 == 0) Color.WHITE else Color.parseColor("#F5F5F5")
             )
 
-            // Récupère uniquement les TextView (les View séparateurs sont ignorés)
             val cells = (0 until holder.container.childCount)
                 .map { holder.container.getChildAt(it) }
                 .filterIsInstance<TextView>()
