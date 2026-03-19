@@ -106,8 +106,23 @@ object NewsDao {
             "source" to source
         )
 
-        firestore.collection("news")
+        newsRef
             .add(itemNews)
+            .addOnSuccessListener {
+                onSuccess()
+            }
+            .addOnFailureListener { e ->
+                onError(e)
+            }
+    }
+
+    fun deleteNews(
+        newsId: String,
+        onSuccess: () -> Unit,
+        onError: (Exception) -> Unit
+    ) {
+        newsRef.document(newsId)
+            .delete()
             .addOnSuccessListener {
                 onSuccess()
             }

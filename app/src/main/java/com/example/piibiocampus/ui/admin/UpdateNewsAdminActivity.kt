@@ -5,6 +5,8 @@ import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
 import android.util.Log
+import android.view.View
+import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
@@ -12,6 +14,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.marginStart
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.piibiocampus.R
@@ -39,6 +42,7 @@ class UpdateNewsAdminActivity : AppCompatActivity() {
 
         val btnValidateUpdate = findViewById<Button>(R.id.btnValideUpdate)
         val btnChangeImage = findViewById<Button>(R.id.btnChangeImage)
+        val btnSuppr = findViewById<Button>(R.id.btnSuppr)
         val titleView = findViewById<EditText>(R.id.titleNews)
         imageView = findViewById<ImageView>(R.id.pictureNews)
         val sourceView = findViewById<EditText>(R.id.sourceNews)
@@ -68,10 +72,29 @@ class UpdateNewsAdminActivity : AppCompatActivity() {
             btnValidateUpdate.text = "Créer"
             btnChangeImage.text = "Choisir une image"
 
+            btnSuppr.visibility = View.GONE
+            val params = btnChangeImage.layoutParams as ViewGroup.MarginLayoutParams
+            params.marginStart = 24
+            btnSuppr.layoutParams = params
         }
 
         btnChangeImage.setOnClickListener {
             pickImageLauncher.launch("image/*")
+        }
+
+        btnSuppr.setOnClickListener {
+            NewsDao.deleteNews(
+                newsId = idNews.toString(),
+                onSuccess = {
+                    Toast.makeText(this, "Suppression effectuée", Toast.LENGTH_SHORT).show()
+                    val intent = Intent(this, NewsListAdminActivity::class.java)
+                    this.startActivity(intent)
+                },
+                onError = { e ->
+                    Toast.makeText(this, "Erreur : ${e.message}", Toast.LENGTH_LONG).show()
+                    Log.e("FIREBASE_ERROR", "Erreur lors de la suppression", e)
+                }
+            )
         }
 
         btnValidateUpdate.setOnClickListener{
