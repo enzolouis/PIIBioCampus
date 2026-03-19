@@ -1,3 +1,6 @@
+# protect google key
+/app/google-services.json
+
 *.iml
 .gradle
 /local.properties
