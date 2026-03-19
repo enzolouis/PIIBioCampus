@@ -8,6 +8,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.piibiocampus.R
 import com.example.piibiocampus.data.model.UserProfile
+import com.example.piibiocampus.ui.searchUsers.SearchUserAdapter.ViewHolder
 import com.google.android.material.button.MaterialButton
 import com.squareup.picasso.Picasso
 
@@ -33,13 +34,17 @@ class UserAdapter(
         holder.pseudo.text = user.name
 
         Picasso.get().cancelRequest(holder.avatar)
-        Picasso.get()
-            .load(user.profilePictureUrl)
-            .placeholder(R.drawable.ic_placeholder_image)
-            .fit()
-            .centerCrop()
-            .into(holder.avatar)
 
+        if (!user.profilePictureUrl.isNullOrEmpty()) {
+            Picasso.get()
+                .load(user.profilePictureUrl)
+                .placeholder(R.drawable.ic_placeholder_image)
+                .fit()
+                .centerCrop()
+                .into(holder.avatar)
+        } else {
+            holder.avatar.setImageResource(R.drawable.photo_placeholder)
+        }
         holder.btnBan.setOnClickListener {
             onBan(user, holder.adapterPosition)
         }

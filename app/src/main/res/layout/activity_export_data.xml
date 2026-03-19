@@ -1,0 +1,381 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F4F4F4">
+
+    <!-- Top Bar -->
+    <include
+        android:id="@+id/topBar"
+        layout="@layout/view_top_bar" />
+
+    <!-- Filtres scrollables horizontalement -->
+    <HorizontalScrollView
+        android:id="@+id/filtersScrollView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="none"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="10dp"
+        android:background="@android:color/white"
+        android:elevation="2dp">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            >
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipFilterCampus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Campus"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:checkable="false"
+                android:fontFamily="@font/gentium_plus_bold" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipFilterDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Date"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:checkable="false"
+                android:fontFamily="@font/gentium_plus_bold" />
+
+            <!--
+                Filtre Validation : 2 états cycliques (toggle)
+                Défaut : "Validé uniquement"
+                Cycle  : ONLY_VALIDATED ↔ VALIDATED_AND_NOT
+            -->
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipFilterValidation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Validé uniquement"
+                android:checked="true"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:checkable="false"
+                android:fontFamily="@font/gentium_plus_bold" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipReset"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Réinitialiser"
+                style="@style/Widget.MaterialComponents.Chip.Action"
+                app:chipBackgroundColor="@color/red"
+                android:textColor="@color/white" />
+
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <!-- Compteur -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="6dp"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/tvActiveFilters"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="11sp"
+            android:textColor="@color/grey"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/tvResultCount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:textColor="@color/primary"
+            android:text="0 photo(s)" />
+
+    </LinearLayout>
+
+    <!-- Séparateur -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#CCCCCC" />
+
+    <!-- Zone centrale scrollable : aperçu tableau + états -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="12dp">
+
+            <!-- Titre section aperçu -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Aperçu — 4 premières lignes"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textColor="@color/grey"
+                android:layout_marginBottom="6dp" />
+
+            <!--
+                Tableau avec scroll horizontal pour accommoder les 10 colonnes.
+                Les en-têtes et les lignes de données partagent exactement
+                les mêmes largeurs de colonne : modifie-les ici ET dans
+                item_preview_row.xml de façon synchronisée.
+            -->
+            <HorizontalScrollView
+                android:id="@+id/tableScrollView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="horizontal"
+                android:fadeScrollbars="false">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <!-- ── En-têtes ── -->
+                    <LinearLayout
+                        android:id="@+id/tableHeader"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:orientation="horizontal"
+                        android:background="@color/primary">
+
+                        <!-- Validé : 76dp -->
+                        <TextView
+                            android:layout_width="76dp"
+                            android:layout_height="match_parent"
+                            android:text="Validé"
+                            android:gravity="center"
+                            android:textSize="11sp"
+                            android:textStyle="bold"
+                            android:textColor="@android:color/white"
+                            android:paddingHorizontal="4dp" />
+
+                        <View
+                            android:layout_width="1dp"
+                            android:layout_height="match_parent"
+                            android:background="#FFFFFF44" />
+
+                        <!-- Altitude : 80dp -->
+                        <TextView
+                            android:layout_width="80dp"
+                            android:layout_height="match_parent"
+                            android:text="Altitude"
+                            android:gravity="center"
+                            android:textSize="11sp"
+                            android:textStyle="bold"
+                            android:textColor="@android:color/white"
+                            android:paddingHorizontal="4dp" />
+
+                        <View
+                            android:layout_width="1dp"
+                            android:layout_height="match_parent"
+                            android:background="#FFFFFF44" />
+
+                        <!-- Longitude : 100dp -->
+                        <TextView
+                            android:layout_width="100dp"
+                            android:layout_height="match_parent"
+                            android:text="Longitude"
+                            android:gravity="center"
+                            android:textSize="11sp"
+                            android:textStyle="bold"
+                            android:textColor="@android:color/white"
+                            android:paddingHorizontal="4dp" />
+
+                        <View
+                            android:layout_width="1dp"
+                            android:layout_height="match_parent"
+                            android:background="#FFFFFF44" />
+
+                        <!-- Latitude : 100dp -->
+                        <TextView
+                            android:layout_width="100dp"
+                            android:layout_height="match_parent"
+                            android:text="Latitude"
+                            android:gravity="center"
+                            android:textSize="11sp"
+                            android:textStyle="bold"
+                            android:textColor="@android:color/white"
+                            android:paddingHorizontal="4dp" />
+
+                        <View
+                            android:layout_width="1dp"
+                            android:layout_height="match_parent"
+                            android:background="#FFFFFF44" />
+
+                        <!-- Date : 130dp -->
+                        <TextView
+                            android:layout_width="130dp"
+                            android:layout_height="match_parent"
+                            android:text="Date"
+                            android:gravity="center"
+                            android:textSize="11sp"
+                            android:textStyle="bold"
+                            android:textColor="@android:color/white"
+                            android:paddingHorizontal="4dp" />
+
+                        <View
+                            android:layout_width="1dp"
+                            android:layout_height="match_parent"
+                            android:background="#FFFFFF44" />
+
+                        <!-- Niveau : 80dp -->
+                        <TextView
+                            android:layout_width="80dp"
+                            android:layout_height="match_parent"
+                            android:text="Niveau"
+                            android:gravity="center"
+                            android:textSize="11sp"
+                            android:textStyle="bold"
+                            android:textColor="@android:color/white"
+                            android:paddingHorizontal="4dp" />
+
+                        <View
+                            android:layout_width="1dp"
+                            android:layout_height="match_parent"
+                            android:background="#FFFFFF44" />
+
+                        <!-- Ordre : 110dp -->
+                        <TextView
+                            android:layout_width="110dp"
+                            android:layout_height="match_parent"
+                            android:text="Ordre"
+                            android:gravity="center"
+                            android:textSize="11sp"
+                            android:textStyle="bold"
+                            android:textColor="@android:color/white"
+                            android:paddingHorizontal="4dp" />
+
+                        <View
+                            android:layout_width="1dp"
+                            android:layout_height="match_parent"
+                            android:background="#FFFFFF44" />
+
+                        <!-- Famille : 110dp -->
+                        <TextView
+                            android:layout_width="110dp"
+                            android:layout_height="match_parent"
+                            android:text="Famille"
+                            android:gravity="center"
+                            android:textSize="11sp"
+                            android:textStyle="bold"
+                            android:textColor="@android:color/white"
+                            android:paddingHorizontal="4dp" />
+
+                        <View
+                            android:layout_width="1dp"
+                            android:layout_height="match_parent"
+                            android:background="#FFFFFF44" />
+
+                        <!-- Genre : 110dp -->
+                        <TextView
+                            android:layout_width="110dp"
+                            android:layout_height="match_parent"
+                            android:text="Genre"
+                            android:gravity="center"
+                            android:textSize="11sp"
+                            android:textStyle="bold"
+                            android:textColor="@android:color/white"
+                            android:paddingHorizontal="4dp" />
+
+                        <View
+                            android:layout_width="1dp"
+                            android:layout_height="match_parent"
+                            android:background="#FFFFFF44" />
+
+                        <!-- Espèce : 110dp -->
+                        <TextView
+                            android:layout_width="110dp"
+                            android:layout_height="match_parent"
+                            android:text="Espèce"
+                            android:gravity="center"
+                            android:textSize="11sp"
+                            android:textStyle="bold"
+                            android:textColor="@android:color/white"
+                            android:paddingHorizontal="4dp" />
+
+                    </LinearLayout>
+
+                    <!-- Séparateur header / lignes -->
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/primary" />
+
+                    <!--
+                        RecyclerView des 4 premières lignes.
+                        nestedScrollingEnabled="false" pour qu'il s'étale
+                        entièrement dans le ScrollView parent.
+                        Chaque item est gonflé depuis item_preview_row.xml
+                        (à créer — voir commentaire dans ExportDataActivity).
+                    -->
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/previewRecycler"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:nestedScrollingEnabled="false"
+                        android:overScrollMode="never"
+                        android:background="@android:color/white" />
+
+                </LinearLayout>
+            </HorizontalScrollView>
+
+            <!-- Message aucune photo -->
+            <TextView
+                android:id="@+id/tvEmpty"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Aucune photo correspondant aux filtres."
+                android:gravity="center"
+                android:textSize="13sp"
+                android:textColor="@color/red"
+                android:layout_marginTop="20dp"
+                android:visibility="gone" />
+
+            <!-- ProgressBar centré pendant le chargement -->
+            <ProgressBar
+                android:id="@+id/progressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="32dp"
+                android:visibility="gone" />
+
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- Bouton export -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnExportCsv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:text="Exporter en CSV"
+        android:textAllCaps="false"
+        android:textSize="15sp"
+        app:icon="@android:drawable/stat_sys_download"
+        app:iconGravity="textStart"
+        style="@style/ButtonPrimary" />
+
+</LinearLayout>

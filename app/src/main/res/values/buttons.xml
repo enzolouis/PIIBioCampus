@@ -70,6 +70,18 @@
         <item name="android:textSize">12sp</item>
     </style>
 
+    <!-- Round Icon Button -->
+    <style name="ButtonRound" parent="ButtonBase">
+        <item name="android:layout_width">56dp</item>
+        <item name="android:layout_height">56dp</item>
+        <item name="cornerRadius">28dp</item>
+        <item name="android:padding">0dp</item>
+        <item name="android:minWidth">0dp</item>
+        <item name="android:minHeight">0dp</item>
+        <item name="iconGravity">textStart</item>
+        <item name="iconPadding">0dp</item>
+    </style>
+
     <!-- Types de boutons pleins -->
 
     <!-- Primary -->
@@ -154,5 +166,12 @@
         <item name="backgroundTint">@android:color/transparent</item>
         <item name="android:background">@android:color/transparent</item>
         <item name="android:fontFamily">@font/flow_b</item>
+    </style>
+
+
+    <!-- Round Primary -->
+    <style name="ButtonRoundPrimary" parent="ButtonRound">
+        <item name="android:textColor">@color/white</item>
+        <item name="android:background">@drawable/fade_buttonprimary</item>
     </style>
 </resources>
