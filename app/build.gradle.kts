@@ -9,13 +9,13 @@ plugins {
 }
 
 android {
-    namespace = "com.example.piibiocampus"
+    namespace = "com.fneb.piibiocampus"
     compileSdk {
         version = release(36)
     }
 
     defaultConfig {
-        applicationId = "com.example.piibiocampus"
+        applicationId = "com.fneb.piibiocampus"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
