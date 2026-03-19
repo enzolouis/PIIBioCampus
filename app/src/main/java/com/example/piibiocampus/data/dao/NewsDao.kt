@@ -1,5 +1,7 @@
 package com.example.piibiocampus.data.dao
 
+import android.content.Context
+import android.net.Uri
 import com.example.piibiocampus.data.model.ItemNews
 import com.google.firebase.FirebaseApp
 import com.google.firebase.firestore.FieldPath.documentId
@@ -53,5 +55,42 @@ object NewsDao {
             )
             .addOnSuccessListener { onSuccess() }
             .addOnFailureListener(onError)
+    }
+
+    fun uploadNewsImage(
+        context: Context,
+        imageUri: Uri,
+        onSuccess: (String) -> Unit,
+        onError: (Exception) -> Unit
+    ) {
+        try {
+            // convertir en bytes
+            val inputStream = context.contentResolver.openInputStream(imageUri)
+                ?: throw Exception("Impossible d'ouvrir l'image")
+
+            val bytes = inputStream.readBytes()
+            inputStream.close()
+
+            // réutilise ta compression existante
+            val file = PictureDao.bytesToWebpFile(context, bytes)
+
+            val fileName = "news_${System.currentTimeMillis()}.webp"
+            val ref = FirebaseStorage.getInstance().reference.child("news/$fileName")
+
+            ref.putFile(Uri.fromFile(file))
+                .addOnSuccessListener {
+                    ref.downloadUrl.addOnSuccessListener { url ->
+                        file.delete()
+                        onSuccess(url.toString())
+                    }
+                }
+                .addOnFailureListener {
+                    file.delete()
+                    onError(it)
+                }
+
+        } catch (e: Exception) {
+            onError(e)
+        }
     }
 }

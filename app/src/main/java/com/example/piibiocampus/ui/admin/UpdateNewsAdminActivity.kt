@@ -1,6 +1,7 @@
 package com.example.piibiocampus.ui.admin
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
 import android.util.Log
@@ -9,6 +10,7 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -19,11 +21,17 @@ import com.example.piibiocampus.utils.setTopBarTitle
 import com.squareup.picasso.Picasso
 
 class UpdateNewsAdminActivity : AppCompatActivity() {
+    private lateinit var imageView: ImageView
+    private var selectedImageUri: Uri? = null
 
-    private lateinit var recyclerView: RecyclerView
-
-    private val photos = mutableListOf<Map<String, Any>>()
-    private lateinit var adapter: ItemNewsAdapter
+    private val pickImageLauncher = registerForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            selectedImageUri = it
+            imageView.setImageURI(it)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,7 +52,7 @@ class UpdateNewsAdminActivity : AppCompatActivity() {
             val source = intent.getStringExtra("source")
 
             val titleView = findViewById<EditText>(R.id.titleNews)
-            val imageView = findViewById<ImageView>(R.id.pictureNews)
+            imageView = findViewById<ImageView>(R.id.pictureNews)
             val sourceView = findViewById<EditText>(R.id.sourceNews)
 
             titleView.setText(title)
@@ -55,22 +63,47 @@ class UpdateNewsAdminActivity : AppCompatActivity() {
                 .into(imageView)
         }
 
-        btnValidateUpdate.setOnClickListener{
-            NewsDao.updateNews(
-                newsId = idNews.toString(),
-                title = findViewById<EditText>(R.id.titleNews).text.toString(),
-                source = findViewById<EditText>(R.id.sourceNews).text.toString(),
-                imageUrl = imageUrl,
-                onSuccess = {
-                    Toast.makeText(this, "Mise à jour effectuée", Toast.LENGTH_SHORT).show()
-                    val intent = Intent(this, NewsListAdminActivity::class.java)
-                    this.startActivity(intent)
-                },
-                onError = { e ->
-                    Toast.makeText(this, "Erreur : ${e.message}", Toast.LENGTH_LONG).show()
-                    Log.e("FIREBASE_ERROR", "Erreur update", e)
-                }
-            )
+        val btnChangeImage = findViewById<Button>(R.id.btnChangeImage)
+
+        btnChangeImage.setOnClickListener {
+            pickImageLauncher.launch("image/*")
         }
+
+        btnValidateUpdate.setOnClickListener{
+            // si changement d'image
+            if (selectedImageUri != null) {
+                NewsDao.uploadNewsImage(
+                    context = this,
+                    imageUri = selectedImageUri!!,
+                    onSuccess = { url ->
+                        updateInfos(idNews.toString(), url)
+                    },
+                    onError = { e ->
+                        Toast.makeText(this, "Erreur lors de l'upload de l'image : ${e.message}", Toast.LENGTH_LONG).show()
+                    }
+                )
+            // pas de changement d'image
+            }else{
+                updateInfos(idNews.toString(), imageUrl)
+            }
+        }
+    }
+
+    fun updateInfos(newsId : String, url : String){
+        NewsDao.updateNews(
+            newsId = newsId.toString(),
+            title = findViewById<EditText>(R.id.titleNews).text.toString(),
+            source = findViewById<EditText>(R.id.sourceNews).text.toString(),
+            imageUrl = url,
+            onSuccess = {
+                Toast.makeText(this, "Mise à jour effectuée", Toast.LENGTH_SHORT).show()
+                val intent = Intent(this, NewsListAdminActivity::class.java)
+                this.startActivity(intent)
+            },
+            onError = { e ->
+                Toast.makeText(this, "Erreur : ${e.message}", Toast.LENGTH_LONG).show()
+                Log.e("FIREBASE_ERROR", "Erreur update", e)
+            }
+        )
     }
 }
