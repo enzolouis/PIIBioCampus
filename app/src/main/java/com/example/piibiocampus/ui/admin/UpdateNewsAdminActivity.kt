@@ -36,24 +36,26 @@ class UpdateNewsAdminActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_update_news_admin)
-        setTopBarTitle("Modification Actu'")
-
-        val status = intent.getIntExtra("status", -1)
-        //Log.d("test",status.toString())
 
         val btnValidateUpdate = findViewById<Button>(R.id.btnValideUpdate)
+        val btnChangeImage = findViewById<Button>(R.id.btnChangeImage)
+        val titleView = findViewById<EditText>(R.id.titleNews)
+        imageView = findViewById<ImageView>(R.id.pictureNews)
+        val sourceView = findViewById<EditText>(R.id.sourceNews)
 
         lateinit var idNews: String
         lateinit var imageUrl: String
-        if (status == 0){
+
+        val status = intent.getStringExtra("status")
+        if (status == "update"){
+            setTopBarTitle("Modifier une Actu'")
+            btnValidateUpdate.text = "Appliquer"
+            btnChangeImage.text = "Changer l'image"
+
             idNews = intent.getStringExtra("id") ?: ""
             val title = intent.getStringExtra("title")
             imageUrl = intent.getStringExtra("imageUrl")?: ""
             val source = intent.getStringExtra("source")
-
-            val titleView = findViewById<EditText>(R.id.titleNews)
-            imageView = findViewById<ImageView>(R.id.pictureNews)
-            val sourceView = findViewById<EditText>(R.id.sourceNews)
 
             titleView.setText(title)
             sourceView.setText(source)
@@ -61,30 +63,69 @@ class UpdateNewsAdminActivity : AppCompatActivity() {
             Picasso.get()
                 .load(imageUrl)
                 .into(imageView)
-        }
+        }else{
+            setTopBarTitle("Créer une Actu'")
+            btnValidateUpdate.text = "Créer"
+            btnChangeImage.text = "Choisir une image"
 
-        val btnChangeImage = findViewById<Button>(R.id.btnChangeImage)
+        }
 
         btnChangeImage.setOnClickListener {
             pickImageLauncher.launch("image/*")
         }
 
         btnValidateUpdate.setOnClickListener{
-            // si changement d'image
-            if (selectedImageUri != null) {
-                NewsDao.uploadNewsImage(
-                    context = this,
-                    imageUri = selectedImageUri!!,
-                    onSuccess = { url ->
-                        updateInfos(idNews.toString(), url)
-                    },
-                    onError = { e ->
-                        Toast.makeText(this, "Erreur lors de l'upload de l'image : ${e.message}", Toast.LENGTH_LONG).show()
-                    }
-                )
-            // pas de changement d'image
+            // si c'est une maj
+            if (status == "update"){
+                // si changement d'image
+                if (selectedImageUri != null) {
+                    NewsDao.uploadNewsImage(
+                        context = this,
+                        imageUri = selectedImageUri!!,
+                        onSuccess = { url ->
+                            updateInfos(idNews.toString(), url)
+                        },
+                        onError = { e ->
+                            Toast.makeText(this, "Erreur lors de l'upload de l'image : ${e.message}", Toast.LENGTH_LONG).show()
+                        }
+                    )
+                    // pas de changement d'image
+                }else{
+                    updateInfos(idNews.toString(), imageUrl)
+                }
+            // si c'est une création
             }else{
-                updateInfos(idNews.toString(), imageUrl)
+                if (selectedImageUri != null) {
+                    NewsDao.uploadNewsImage(
+                        context = this,
+                        imageUri = selectedImageUri!!,
+                        onSuccess = { url ->
+                            NewsDao.createNews(
+                                titre = findViewById<EditText>(R.id.titleNews).text.toString(),
+                                imageUrl = url,
+                                source = findViewById<EditText>(R.id.sourceNews).text.toString(),
+                                onSuccess = {
+                                    Toast.makeText(this, "Actualité créee avec succès", Toast.LENGTH_SHORT).show()
+                                    val intent = Intent(this, NewsListAdminActivity::class.java)
+                                    this.startActivity(intent)
+                                },
+                                onError = { e ->
+                                    Toast.makeText(this, "Erreur : ${e.message}", Toast.LENGTH_LONG).show()
+                                    Log.e("FIREBASE_ERROR", "Erreur création news", e)
+                                }
+                            )
+                        },
+                        onError = { e ->
+                            Toast.makeText(
+                                this,
+                                "Erreur lors de l'upload de l'image : ${e.message}",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+                    )
+                }else{
+                    Toast.makeText(this, "Veuillez insérez une image et écrire un titre", Toast.LENGTH_LONG).show()
+                }
             }
         }
     }

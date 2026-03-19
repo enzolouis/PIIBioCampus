@@ -4,7 +4,6 @@ import android.content.Context
 import android.net.Uri
 import com.example.piibiocampus.data.model.ItemNews
 import com.google.firebase.FirebaseApp
-import com.google.firebase.firestore.FieldPath.documentId
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 
@@ -92,5 +91,28 @@ object NewsDao {
         } catch (e: Exception) {
             onError(e)
         }
+    }
+
+    fun createNews(
+        titre: String,
+        imageUrl: String,
+        source: String,
+        onSuccess: () -> Unit,
+        onError: (Exception) -> Unit
+    ) {
+        val itemNews = mapOf(
+            "titre" to titre,
+            "imageUrl" to imageUrl,
+            "source" to source
+        )
+
+        firestore.collection("news")
+            .add(itemNews)
+            .addOnSuccessListener {
+                onSuccess()
+            }
+            .addOnFailureListener { e ->
+                onError(e)
+            }
     }
 }

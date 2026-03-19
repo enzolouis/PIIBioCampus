@@ -7,6 +7,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -31,6 +32,7 @@ class NewsListAdminActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_news_list_admin)
         setTopBarTitle("Actualité")
+        val btnAddNews = findViewById<Button>(R.id.btnAddNews)
 
         recyclerView = findViewById(R.id.recyclerView)
         recyclerView.layoutManager = GridLayoutManager(this, 1)
@@ -44,6 +46,12 @@ class NewsListAdminActivity : AppCompatActivity() {
             Toast.makeText(this, "Erreur : ${exception.message}", Toast.LENGTH_SHORT).show()
         }
         )
+
+        btnAddNews.setOnClickListener {
+            val intent = Intent(this, UpdateNewsAdminActivity::class.java)
+            intent.putExtra("status", "create")
+            this.startActivity(intent)
+        }
     }
 
 inner class ItemNewsAdapter(
@@ -78,7 +86,7 @@ inner class ItemNewsAdapter(
             intent.putExtra("imageUrl", item.imageUrl)
             intent.putExtra("source", item.source)
             // signifie que c'est une modif et pas une nouvelle actu (car meme page)
-            intent.putExtra("status", 0)
+            intent.putExtra("status", "update")
 
             holder.itemView.context.startActivity(intent)
         }
