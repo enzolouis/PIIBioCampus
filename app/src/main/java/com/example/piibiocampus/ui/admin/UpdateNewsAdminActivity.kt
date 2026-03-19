@@ -73,9 +73,9 @@ class UpdateNewsAdminActivity : AppCompatActivity() {
             btnChangeImage.text = "Choisir une image"
 
             btnSuppr.visibility = View.GONE
-            val params = btnChangeImage.layoutParams as ViewGroup.MarginLayoutParams
-            params.marginStart = 24
-            btnSuppr.layoutParams = params
+            val params = btnValidateUpdate.layoutParams as ViewGroup.MarginLayoutParams
+            params.marginStart = dpToPx(24)
+            btnValidateUpdate.layoutParams = params
         }
 
         btnChangeImage.setOnClickListener {
@@ -169,5 +169,8 @@ class UpdateNewsAdminActivity : AppCompatActivity() {
                 Log.e("FIREBASE_ERROR", "Erreur update", e)
             }
         )
+    }
+    fun dpToPx(dp: Int): Int {
+        return (dp * resources.displayMetrics.density).toInt()
     }
 }
