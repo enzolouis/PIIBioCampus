@@ -12,6 +12,8 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.piibiocampus.R
@@ -34,17 +36,25 @@ class NewsListAdminActivity : AppCompatActivity() {
         setTopBarTitle("Actualité")
         val btnAddNews = findViewById<Button>(R.id.btnAddNews)
 
+        ViewCompat.setOnApplyWindowInsetsListener(btnAddNews) { view, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val extraPadding = (20 * resources.displayMetrics.density).toInt()
+            (view.layoutParams as ViewGroup.MarginLayoutParams).bottomMargin =
+                systemBars.bottom + extraPadding
+            insets
+        }
+
         recyclerView = findViewById(R.id.recyclerView)
         recyclerView.layoutManager = GridLayoutManager(this, 1)
 
         NewsDao.getAllNews(
-        onSuccess = { items ->
-            adapter = ItemNewsAdapter(items)
-            recyclerView.adapter = adapter
-        },
-        onError = { exception ->
-            Toast.makeText(this, "Erreur : ${exception.message}", Toast.LENGTH_SHORT).show()
-        }
+            onSuccess = { items ->
+                adapter = ItemNewsAdapter(items)
+                recyclerView.adapter = adapter
+            },
+            onError = { exception ->
+                Toast.makeText(this, "Erreur : ${exception.message}", Toast.LENGTH_SHORT).show()
+            }
         )
 
         btnAddNews.setOnClickListener {
@@ -54,49 +64,47 @@ class NewsListAdminActivity : AppCompatActivity() {
         }
     }
 
-inner class ItemNewsAdapter(
-    private val items: List<ItemNews>
-) : RecyclerView.Adapter<ItemNewsAdapter.ItemNewsViewHolder>() {
+    inner class ItemNewsAdapter(
+        private val items: List<ItemNews>
+    ) : RecyclerView.Adapter<ItemNewsAdapter.ItemNewsViewHolder>() {
 
-    inner class ItemNewsViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val title: TextView = view.findViewById(R.id.title)
-        val image: ImageView = view.findViewById(R.id.image)
-    }
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemNewsViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_news_admin, parent, false)
-        return ItemNewsViewHolder(view)
-    }
-
-    override fun onBindViewHolder(holder: ItemNewsViewHolder, position: Int) {
-        val item = items[position]
-
-
-        holder.title.text = item.titre
-        Picasso.get()
-            .load(item.imageUrl)
-            .into(holder.image)
-
-        holder.itemView.setOnClickListener {
-            val intent = Intent(holder.itemView.context, UpdateNewsAdminActivity::class.java)
-            Log.d("DEBUG_ID", "ID item = ${item.id}")
-            intent.putExtra("id", item.id)
-            intent.putExtra("title", item.titre)
-            intent.putExtra("imageUrl", item.imageUrl)
-            intent.putExtra("source", item.source)
-            // signifie que c'est une modif et pas une nouvelle actu (car meme page)
-            intent.putExtra("status", "update")
-
-            holder.itemView.context.startActivity(intent)
+        inner class ItemNewsViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+            val title: TextView = view.findViewById(R.id.title)
+            val image: ImageView = view.findViewById(R.id.image)
         }
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemNewsViewHolder {
+            val view = LayoutInflater.from(parent.context)
+                .inflate(R.layout.item_news_admin, parent, false)
+            return ItemNewsViewHolder(view)
+        }
+
+        override fun onBindViewHolder(holder: ItemNewsViewHolder, position: Int) {
+            val item = items[position]
+
+            holder.title.text = item.titre
+            Picasso.get()
+                .load(item.imageUrl)
+                .into(holder.image)
+
+            holder.itemView.setOnClickListener {
+                val intent = Intent(holder.itemView.context, UpdateNewsAdminActivity::class.java)
+                Log.d("DEBUG_ID", "ID item = ${item.id}")
+                intent.putExtra("id", item.id)
+                intent.putExtra("title", item.titre)
+                intent.putExtra("imageUrl", item.imageUrl)
+                intent.putExtra("source", item.source)
+                intent.putExtra("status", "update")
+
+                holder.itemView.context.startActivity(intent)
+            }
+        }
+
+        override fun getItemCount() = items.size
     }
 
-    override fun getItemCount() = items.size
-}
-
-override fun onResume() {
-    super.onResume()
-    setTopBarTitle(R.string.actualite)
-}
+    override fun onResume() {
+        super.onResume()
+        setTopBarTitle(R.string.actualite)
+    }
 }
