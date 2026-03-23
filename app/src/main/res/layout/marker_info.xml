@@ -22,7 +22,7 @@
 
         <!-- Point rouge en haut à droite : recordingStatus == false -->
         <View
-            android:id="@+id/ivRecordingDot"
+            android:id="@+id/ivDotRed"
             android:layout_width="12dp"
             android:layout_height="12dp"
             android:layout_gravity="top|end"
@@ -30,9 +30,18 @@
             android:background="@drawable/bg_dot_red"
             android:visibility="gone" />
 
+        <View
+            android:id="@+id/ivDotOrange"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:layout_gravity="top|end"
+            android:layout_margin="5dp"
+            android:background="@drawable/bg_dot_orange"
+            android:visibility="gone" />
+
         <!-- Point vert en haut à droite : adminValidated == true -->
         <View
-            android:id="@+id/ivValidatedBadge"
+            android:id="@+id/ivDotGreen"
             android:layout_width="12dp"
             android:layout_height="12dp"
             android:layout_gravity="top|end"
