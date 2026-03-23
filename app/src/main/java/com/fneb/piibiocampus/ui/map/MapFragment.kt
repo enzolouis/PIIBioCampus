@@ -117,6 +117,8 @@ class MapFragment : Fragment(R.layout.fragment_map) {
         map.setTilesScaledToDpi(true)
         map.setMultiTouchControls(true)
         map.controller.setZoom(15.0)
+        map.minZoomLevel = 3.0
+        map.maxZoomLevel = 20.0
 
         if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
             ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
