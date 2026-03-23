@@ -28,16 +28,16 @@
     <!-- Bouton caméra flottant -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabCamera"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
         android:contentDescription="@string/camera"
         android:src="@drawable/camera"
-        app:tint="@android:color/white"
+        android:translationY="-32dp"
         app:backgroundTint="@color/primary"
-
+        app:fabCustomSize="70dp"
+        app:maxImageSize="36dp"
         app:layout_anchor="@id/bottomNav"
         app:layout_anchorGravity="top|center"
-        android:translationY="-32dp"
-        />
+        app:tint="@android:color/white" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
