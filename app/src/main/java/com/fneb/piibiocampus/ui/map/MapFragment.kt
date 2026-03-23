@@ -178,8 +178,9 @@ class MapFragment : Fragment(R.layout.fragment_map) {
                 override fun onOpen(item: Any?) {
                     val titleView    = mView.findViewById<TextView>(R.id.title)
                     val photoView    = mView.findViewById<ImageView>(R.id.photo)
-                    val recordingDot = mView.findViewById<View>(R.id.ivRecordingDot)
-                    val validatedDot = mView.findViewById<View>(R.id.ivValidatedBadge)
+                    val recordingDotRed: View = view.findViewById(R.id.ivDotRed)
+                    val recordingDotOrange: View = view.findViewById(R.id.ivDotOrange)
+                    val validatedDot: View = view.findViewById(R.id.ivDotGreen)
                     val imageUrl     = (o["imageUrl"] as? String) ?: (o["image"] as? String) ?: ""
 
                     titleView.text = marker.title
@@ -193,15 +194,18 @@ class MapFragment : Fragment(R.layout.fragment_map) {
                     when {
                         adminValidated -> {
                             validatedDot.visibility = View.VISIBLE
-                            recordingDot.visibility = View.GONE
+                            recordingDotRed.visibility = View.GONE
+                            recordingDotOrange.visibility = View.GONE
                         }
                         !recordingStatus -> {
-                            recordingDot.visibility = View.VISIBLE
+                            recordingDotRed.visibility = View.VISIBLE
                             validatedDot.visibility = View.GONE
+                            recordingDotOrange.visibility = View.GONE
                         }
                         else -> {
-                            recordingDot.visibility = View.GONE
+                            recordingDotRed.visibility = View.GONE
                             validatedDot.visibility = View.GONE
+                            recordingDotOrange.visibility = View.VISIBLE
                         }
                     }
 

@@ -365,8 +365,8 @@ class PicturesAdminActivity : AppCompatActivity() {
 
         inner class VH(view: View) : RecyclerView.ViewHolder(view) {
             val image: ImageView   = view.findViewById(R.id.photoItem)
-            val recordingDot: View = view.findViewById(R.id.ivRecordingDot)
-            val validatedDot: View = view.findViewById(R.id.ivValidatedBadge)
+            val recordingDot: View = view.findViewById(R.id.ivDotRed)
+            val validatedDot: View = view.findViewById(R.id.ivDotGreen)
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH =
