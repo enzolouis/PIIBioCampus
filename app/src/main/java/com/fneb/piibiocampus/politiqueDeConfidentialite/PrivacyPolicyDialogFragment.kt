@@ -1,4 +1,4 @@
-package com.fneb.piibiocampus.ui.auth
+package com.fneb.piibiocampus.politiqueDeConfidentialite
 
 import android.os.Bundle
 import android.view.*
@@ -20,25 +20,23 @@ import com.fneb.piibiocampus.R
  * @param onAccepted  callback appelé quand l'utilisateur·ice accepte
  * @param onDeclined  callback appelé quand il ou elle refuse (ou ferme sans accepter)
  */
-class CguDialogFragment : DialogFragment() {
+class PrivacyPolicyDialogFragment : DialogFragment() {
 
     private var onAccepted: (() -> Unit)? = null
     private var onDeclined: (() -> Unit)? = null
 
     companion object {
-        private const val TAG = "CguDialogFragment"
-
-        /** Version des CGU — incrémenter force une nouvelle acceptation */
-        const val CGU_VERSION = 1
+        private const val TAG = "PrivacyPolicyDialogFragment"
+        const val PRIVAXY_POLICY_VERSION = 1
         const val PREF_FILE   = "piibiocampus_prefs"
-        const val PREF_KEY    = "cgu_accepted_v$CGU_VERSION"
+        const val PREF_KEY    = "poc_accepted_v$PRIVAXY_POLICY_VERSION"
 
         fun show(
             fm:          FragmentManager,
             onAccepted:  () -> Unit,
             onDeclined:  () -> Unit = {}
         ) {
-            CguDialogFragment().also {
+            PrivacyPolicyDialogFragment().also {
                 it.onAccepted = onAccepted
                 it.onDeclined = onDeclined
             }.show(fm, TAG)
@@ -48,12 +46,12 @@ class CguDialogFragment : DialogFragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setStyle(STYLE_NO_TITLE, R.style.DialogPopup)
-        isCancelable = false  // force un choix explicite
+        isCancelable = false
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ): View = inflater.inflate(R.layout.fragment_cgu_dialog, container, false)
+    ): View = inflater.inflate(R.layout.fragment_politique_de_confidentialite_dialog, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

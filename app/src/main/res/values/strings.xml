@@ -227,6 +227,193 @@ Site web : https://fneb.fr
 
 Document soumis au droit français — Loi n° 78-17 du 6 janvier 1978 modifiée et RGPD (UE) 2016/679.
 </string>
+    <string name="Politique_de_confidentitalite">
+POLITIQUE DE CONFIDENTIALITÉ
+Application PiiBioCampus
+Fédération Nationale des Étudiant·es en Sciences exactes, naturelles et techniques (FNEB)
+Version en vigueur au 15 mars 2026
+
+─────────────────────────────────────
+
+ARTICLE 1 — OBJET
+
+La présente Politique de Confidentialité a pour objet d’informer les utilisateur·ices de l’application PiiBioCampus sur la manière dont leurs données personnelles sont collectées, utilisées, stockées et protégées.
+
+Elle est distincte des Conditions Générales d’Utilisation (CGU) et constitue un document autonome conforme au Règlement (UE) 2016/679 (RGPD) et à la loi Informatique et Libertés.
+
+─────────────────────────────────────
+
+ARTICLE 2 — RESPONSABLE DU TRAITEMENT
+
+Le responsable du traitement est :
+
+Fédération Nationale des Étudiant·es en Sciences exactes, naturelles et techniques (FNEB)
+Association loi 1901
+Siège social : FNEB c/o BIOSPHERE — 43 boulevard du 11 novembre 1918, 69622 Villeurbanne Cedex
+E-mail : contact@fneb.fr
+Site web : https://fneb.fr
+
+─────────────────────────────────────
+
+ARTICLE 3 — DONNÉES COLLECTÉES
+
+Dans le cadre de l’utilisation de l’application, les données suivantes peuvent être collectées :
+
+3.1 Données d’identification
+- Adresse e-mail
+- Pseudonyme
+- Informations de rôle (utilisateur·ice / administrateur·ice)
+
+3.2 Données de contribution
+- Photographies prises via l’application
+- Identification taxonomique associée
+- Date et heure des contributions
+
+3.3 Données de localisation
+- Coordonnées GPS (latitude, longitude, altitude) associées aux photographies
+
+3.4 Données techniques et d’usage
+- Données de connexion
+- Identifiants techniques
+- Données de navigation au sein de l’application
+
+Certaines de ces données sont collectées via des services tiers décrits à l’article 6.
+
+─────────────────────────────────────
+
+ARTICLE 4 — FINALITÉS DU TRAITEMENT
+
+Les données sont collectées pour les finalités suivantes :
+
+- Gestion des comptes utilisateur·ices
+- Fonctionnement de l’application
+- Réalisation de recensements scientifiques de biodiversité
+- Amélioration des fonctionnalités et de l’expérience utilisateur
+- Analyse statistique de l’utilisation de l’application
+- Sécurisation de la plateforme
+
+─────────────────────────────────────
+
+ARTICLE 5 — BASES LÉGALES
+
+Les traitements reposent sur :
+
+- Le consentement (article 6.1.a RGPD) pour la collecte des données de géolocalisation et des photographies
+- L’intérêt légitime (article 6.1.f RGPD) pour :
+  - la gestion technique de l’application
+  - la sécurité
+  - l’amélioration des services
+
+─────────────────────────────────────
+
+ARTICLE 6 — SERVICES TIERS UTILISÉS
+
+6.1 Firebase
+
+L’application utilise Firebase, un service fourni par Google LLC, pour :
+- l’hébergement des données
+- l’authentification
+- le stockage des fichiers (photographies)
+
+Les données sont hébergées sur des serveurs situés en Europe de l’Ouest (région europe-west9).
+
+6.2 Google Analytics
+
+L’application utilise Google Analytics (Google LLC) afin de :
+- mesurer l’audience
+- analyser l’usage de l’application
+- améliorer les performances et fonctionnalités
+
+Google Analytics peut collecter des données techniques (type d’appareil, interactions, durée d’utilisation), sans identification directe de l’utilisateur·ice.
+
+6.3 Rôle de Google
+
+Google agit en qualité de sous-traitant au sens du RGPD.
+Les traitements effectués par ces services sont encadrés par des clauses contractuelles conformes au droit européen.
+
+─────────────────────────────────────
+
+ARTICLE 7 — LOCALISATION ET TRANSFERTS DE DONNÉES
+
+Les données sont principalement stockées au sein de l’Union européenne, dans la région europe-west9.
+
+Certains traitements techniques opérés par Google peuvent impliquer des transferts hors de l’Union européenne, encadrés par des garanties appropriées (clauses contractuelles types de la Commission européenne).
+
+─────────────────────────────────────
+
+ARTICLE 8 — DURÉE DE CONSERVATION
+
+Les données sont conservées sans durée de conservation limitée, tant que leur utilisation est pertinente pour les finalités scientifiques, pédagogiques et techniques de l’application.
+
+Toutefois :
+- Les utilisateur·ices peuvent demander la suppression de leur compte à tout moment
+- Les données directement identifiantes peuvent être supprimées sur demande
+
+Les données scientifiques (notamment anonymisées) peuvent être conservées à long terme dans un objectif de recherche.
+
+─────────────────────────────────────
+
+ARTICLE 9 — DESTINATAIRES DES DONNÉES
+
+Les données sont accessibles :
+
+- Aux services internes de la FNEB
+- Aux administrateur·ices de l’application (dans le cadre de leurs missions)
+- Aux prestataires techniques (notamment Google via Firebase et Google Analytics)
+
+Aucune donnée personnelle n’est vendue ni cédée à des tiers à des fins commerciales.
+
+─────────────────────────────────────
+
+ARTICLE 10 — SÉCURITÉ DES DONNÉES
+
+La FNEB met en œuvre des mesures de sécurité adaptées, notamment :
+
+- Chiffrement des communications (HTTPS/TLS)
+- Authentification sécurisée
+- Gestion des accès par rôle
+- Protection des infrastructures Firebase
+
+─────────────────────────────────────
+
+ARTICLE 11 — DROITS DES UTILISATEUR·ICES
+
+Conformément au RGPD, vous disposez des droits suivants :
+
+- Droit d’accès
+- Droit de rectification
+- Droit à l’effacement
+- Droit à la limitation du traitement
+- Droit à la portabilité
+- Droit d’opposition
+
+Vous pouvez exercer vos droits en contactant :
+contact@fneb.fr
+
+En cas de litige, vous pouvez saisir la CNIL : https://www.cnil.fr
+
+─────────────────────────────────────
+
+ARTICLE 12 — MODIFICATIONS
+
+La présente Politique de Confidentialité peut être modifiée à tout moment.
+Les utilisateur·ices seront informé·es via l’application en cas de modification substantielle.
+
+─────────────────────────────────────
+
+ARTICLE 13 — CONTACT
+
+Pour toute question relative à cette politique :
+
+FNEB
+FNEB c/o BIOSPHERE — 43 boulevard du 11 novembre 1918, 69622 Villeurbanne Cedex
+E-mail : contact@fneb.fr
+Site web : https://fneb.fr
+
+─────────────────────────────────────
+
+Document soumis au droit français — RGPD (UE) 2016/679 et Loi Informatique et Libertés modifiée
+    </string>
     <string name="recherche">Recherche</string>
     <string name="map">Carte</string>
     <string name="bibliotheque">Bibliothèque</string>

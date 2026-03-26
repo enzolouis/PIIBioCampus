@@ -7,6 +7,7 @@ import com.fneb.piibiocampus.data.repository.AuthRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 class AuthViewModel(
     private val repository: AuthRepository = AuthRepository()
@@ -21,7 +22,22 @@ class AuthViewModel(
 
             repository.login(email, password)
                 .onSuccess { user ->
-                    // récupérer le rôle puis émettre Authenticated
+                    try {
+                        user.reload().await()
+                    } catch (e: Exception) {
+                        _uiState.value = AuthUiState.Error(e)
+                        return@onSuccess
+                    }
+
+                    if (!user.isEmailVerified) {
+                        try {
+                            user.sendEmailVerification().await()
+                        } catch (_: Exception) { }
+                        repository.signOut()
+                        _uiState.value = AuthUiState.EmailNotVerified
+                        return@onSuccess
+                    }
+
                     repository.getUserRole(user.uid)
                         .onSuccess { role ->
                             _uiState.value = AuthUiState.Authenticated(role)
@@ -41,8 +57,15 @@ class AuthViewModel(
             _uiState.value = AuthUiState.Loading
 
             repository.register(email, password, username)
-                .onSuccess {
-                    _uiState.value = AuthUiState.Registered
+                .onSuccess { user ->
+                    try {
+                        user.sendEmailVerification().await()
+                        repository.signOut()
+                        _uiState.value = AuthUiState.EmailVerificationSent
+                    } catch (e: Exception) {
+                        repository.signOut()
+                        _uiState.value = AuthUiState.Error(e)
+                    }
                 }
                 .onFailure { err ->
                     _uiState.value = AuthUiState.Error(err)

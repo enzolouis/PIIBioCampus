@@ -12,7 +12,7 @@
         android:id="@+id/tvPoCTitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Conditions Générales d'Utilisation"
+        android:text="Politique de confidentialité"
         android:textSize="17sp"
         android:textStyle="bold"
         android:textColor="@color/black"
@@ -75,7 +75,7 @@
                 android:textColor="@color/black"
                 android:lineSpacingExtra="3dp"
                 android:fontFamily="@font/gentium_plus_regular"
-                android:text="@string/cgu_full_text" />
+                android:text="@string/Politique_de_confidentitalite" />
 
         </LinearLayout>
     </ScrollView>
