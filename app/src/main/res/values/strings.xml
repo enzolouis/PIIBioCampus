@@ -233,5 +233,8 @@ Document soumis au droit français — Loi n° 78-17 du 6 janvier 1978 modifiée
     <string name="compte">Compte</string>
     <string name="arbre_de_recensement">Arbre de recensement</string>
     <string name="chargement">Chargement…</string>
+    <string name="titleSettings">Paramètres</string>
+    <string name="titleCgu">CGU &amp; Confidentialité (RGPD)</string>
+    <string name="titleEditProfile">Mon profil</string>
 
 </resources>

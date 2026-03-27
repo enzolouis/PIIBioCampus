@@ -5,6 +5,7 @@ import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await
 
 object UserDao {
@@ -97,6 +98,13 @@ object UserDao {
             .await()
     }
 
+    suspend fun deleteCurrentUser() {
+        val user = auth.currentUser ?: throw IllegalStateException("Aucun utilisateur connecté")
+        val uid = user.uid
+        banUser(uid)
+        user.delete().await()
+    }
+
 
     suspend fun getAllUsersWithUid(): List<UserProfile> {
         val snapshot = db.collection("users")
@@ -119,5 +127,72 @@ object UserDao {
         return snapshot.documents.mapNotNull { doc ->
             doc.toObject(UserProfile::class.java)?.copy(uid = doc.id)
         }
+    }
+
+    /**
+    (CGU) Récupérer les données d'un profil pour le sauvegarde CGU des données
+     */
+    suspend fun getCurrentUserDataForExport(): Map<String, String> {
+        val user = auth.currentUser ?: return emptyMap()
+        val profile = getCurrentUserProfile() ?: return emptyMap()
+        return mapOf(
+            "email" to (user.email ?: ""),
+            "name" to (profile.name ?: ""),
+            "description" to (profile.description ?: ""),
+            "profilePictureUrl" to (profile.profilePictureUrl ?: "")
+        )
+    }
+
+    /**
+     * Update profile (concerne les 3 prochaines fonctions)
+     */
+
+    suspend fun updateUserProfile(name: String, description: String) {
+        val user = auth.currentUser ?: return
+        db.collection("users")
+            .document(user.uid)
+            .update(mapOf("name" to name, "description" to description))
+            .await()
+    }
+
+    suspend fun updateCurrentBadge(badgeId: String) {
+        val user = auth.currentUser ?: return
+        db.collection("users")
+            .document(user.uid)
+            .update("currentBadge", badgeId)
+            .await()
+    }
+
+    suspend fun uploadProfilePicture(context: android.content.Context, imageBytes: ByteArray): String {
+        val user = auth.currentUser ?: throw IllegalStateException("Utilisateur non connecté")
+        val webpFile = PictureDao.bytesToWebpFile(context, imageBytes)
+        val ref = FirebaseStorage.getInstance().reference.child("profile_pictures/${user.uid}.webp")
+        val metadata = com.google.firebase.storage.StorageMetadata.Builder()
+            .setContentType("image/webp")
+            .build()
+        ref.putFile(android.net.Uri.fromFile(webpFile), metadata).await()
+        val url = ref.downloadUrl.await().toString()
+        db.collection("users").document(user.uid).update("profilePictureUrl", url).await()
+        webpFile.delete()
+        return url
+    }
+
+    suspend fun updatePassword(oldPassword: String, newPassword: String) {
+        val user = auth.currentUser ?: throw IllegalStateException("Utilisateur non connecté")
+        val email = user.email ?: throw IllegalStateException("Email introuvable")
+        val credential = com.google.firebase.auth.EmailAuthProvider.getCredential(email, oldPassword)
+        user.reauthenticate(credential).await()
+        user.updatePassword(newPassword).await()
+    }
+
+    suspend fun getCurrentUserData(): Map<String, String> {
+        val user = auth.currentUser ?: return emptyMap()
+        val profile = getCurrentUserProfile() ?: return emptyMap()
+        return mapOf(
+            "email" to (user.email ?: ""),
+            "name" to (profile.name),
+            "description" to (profile.description),
+            "profilePictureUrl" to (profile.profilePictureUrl)
+        )
     }
 }
