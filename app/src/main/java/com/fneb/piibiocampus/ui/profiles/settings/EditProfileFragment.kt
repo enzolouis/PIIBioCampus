@@ -62,10 +62,10 @@ class EditProfileFragment : PermissionFragment() {
         editConfirmPassword = view.findViewById(R.id.editConfirmPassword)
 
         view.findViewById<View>(R.id.editProfilePictureLabel).setOnClickListener {
-            pickImageLauncher.launch("image/*")
+            openGallery()
         }
         editProfilePicture.setOnClickListener {
-            pickImageLauncher.launch("image/*")
+            openGallery()
         }
 
         view.findViewById<View>(R.id.currentBadgeRow).setOnClickListener {
@@ -82,6 +82,18 @@ class EditProfileFragment : PermissionFragment() {
     override fun onResume() {
         super.onResume()
         setTopBarTitle(R.string.titleEditProfile)
+    }
+
+    private fun openGallery() {
+        val permission = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            android.Manifest.permission.READ_MEDIA_IMAGES
+        } else {
+            android.Manifest.permission.READ_EXTERNAL_STORAGE
+        }
+        withPermission(
+            permission = permission,
+            onGranted = { pickImageLauncher.launch("image/*") }
+        )
     }
 
     private fun loadCurrentProfile() {
