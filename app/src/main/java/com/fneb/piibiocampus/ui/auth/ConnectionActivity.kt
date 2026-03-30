@@ -16,7 +16,6 @@
     import androidx.core.view.WindowInsetsCompat
     import androidx.lifecycle.lifecycleScope
     import com.fneb.piibiocampus.R
-    import com.fneb.piibiocampus.politiqueDeConfidentialite.PrivacyPolicyDialogFragment
     import com.fneb.piibiocampus.ui.MainActivity
     import com.fneb.piibiocampus.ui.admin.DashboardAdminActivity
     import com.fneb.piibiocampus.ui.common.LoadingDialog
@@ -90,31 +89,15 @@
                 }
 
                 if (isCguAccepted()) {
-                    if (isPrivacyPolicyAccepted()) {
-                        LoadingDialog.show(supportFragmentManager, "Connexion en cours…")
-                        viewModel.login(email, password)
-                    } else {
-                        showPrivacyPolicyDialog(
-                            onAccepted = {
-                                LoadingDialog.show(supportFragmentManager, "Connexion en cours…")
-                                viewModel.login(email, password)
-                            }
-                        )
-                    }
+
+                    LoadingDialog.show(supportFragmentManager, "Connexion en cours…")
+                    viewModel.login(email, password)
+
                 } else {
                     showCguDialog(
                         onAccepted = {
-                            if (isPrivacyPolicyAccepted()) {
                                 LoadingDialog.show(supportFragmentManager, "Connexion en cours…")
                                 viewModel.login(email, password)
-                            } else {
-                                showPrivacyPolicyDialog(
-                                    onAccepted = {
-                                        LoadingDialog.show(supportFragmentManager, "Connexion en cours…")
-                                        viewModel.login(email, password)
-                                    }
-                                )
-                            }
                         }
                     )
                 }
@@ -166,24 +149,11 @@
         private fun isCguAccepted(): Boolean =
             getSharedPreferences(CguDialogFragment.PREF_FILE, MODE_PRIVATE)
                 .getBoolean(CguDialogFragment.PREF_KEY, false)
-
-        private fun isPrivacyPolicyAccepted(): Boolean =
-            getSharedPreferences(PrivacyPolicyDialogFragment.PREF_FILE, MODE_PRIVATE)
-                .getBoolean(PrivacyPolicyDialogFragment.PREF_KEY, false)
-
         private fun showCguDialog(onAccepted: () -> Unit) {
             CguDialogFragment.show(
                 fm         = supportFragmentManager,
                 onAccepted = onAccepted,
                 onDeclined = { toast("Vous devez accepter les CGU pour utiliser l'application") }
-            )
-        }
-
-        private fun showPrivacyPolicyDialog(onAccepted: () -> Unit){
-            PrivacyPolicyDialogFragment.show(
-                fm         = supportFragmentManager,
-                onAccepted = onAccepted,
-                onDeclined = { toast("Vous devez accepter la politique de confidentialité pour utiliser l'application") }
             )
         }
     }

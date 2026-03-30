@@ -15,7 +15,6 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import com.fneb.piibiocampus.R
-import com.fneb.piibiocampus.politiqueDeConfidentialite.PrivacyPolicyDialogFragment
 import com.fneb.piibiocampus.ui.common.LoadingDialog
 import com.fneb.piibiocampus.utils.Extensions.toast
 import com.fneb.piibiocampus.utils.Validators
@@ -74,40 +73,14 @@ class CreateAccountActivity : AppCompatActivity() {
             }
 
             if (isCguAccepted()) {
-                if (isPrivacyPolicyAccepted()) {
                     LoadingDialog.show(supportFragmentManager, "Création du compte…")
                     viewModel.register(emailStr, passwordStr, usernameStr)
-                } else {
-                    PrivacyPolicyDialogFragment.show(
-                        fm = supportFragmentManager,
-                        onAccepted = {
-                            LoadingDialog.show(supportFragmentManager, "Création du compte…")
-                            viewModel.register(emailStr, passwordStr, usernameStr)
-                        },
-                        onDeclined = {
-                            toast("Vous devez accepter la politique de confidentialité pour créer un compte")
-                        }
-                    )
-                }
             } else {
                 CguDialogFragment.show(
                     fm = supportFragmentManager,
                     onAccepted = {
-                        if (isPrivacyPolicyAccepted()) {
-                            LoadingDialog.show(supportFragmentManager, "Création du compte…")
-                            viewModel.register(emailStr, passwordStr, usernameStr)
-                        } else {
-                            PrivacyPolicyDialogFragment.show(
-                                fm = supportFragmentManager,
-                                onAccepted = {
-                                    LoadingDialog.show(supportFragmentManager, "Création du compte…")
-                                    viewModel.register(emailStr, passwordStr, usernameStr)
-                                },
-                                onDeclined = {
-                                    toast("Vous devez accepter la politique de confidentialité pour créer un compte")
-                                }
-                            )
-                        }
+                        LoadingDialog.show(supportFragmentManager, "Création du compte…")
+                        viewModel.register(emailStr, passwordStr, usernameStr)
                     },
                     onDeclined = {
                         toast("Vous devez accepter les CGU pour créer un compte")
@@ -158,9 +131,4 @@ class CreateAccountActivity : AppCompatActivity() {
     private fun isCguAccepted(): Boolean =
         getSharedPreferences(CguDialogFragment.PREF_FILE, MODE_PRIVATE)
             .getBoolean(CguDialogFragment.PREF_KEY, false)
-
-    private fun isPrivacyPolicyAccepted(): Boolean =
-        getSharedPreferences(PrivacyPolicyDialogFragment.PREF_FILE, MODE_PRIVATE)
-            .getBoolean(PrivacyPolicyDialogFragment.PREF_KEY, false)
-
 }

@@ -12,7 +12,7 @@
         android:id="@+id/tvPoCTitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Conditions Générales d'Utilisation"
+        android:text="@string/title_cgu_pcd"
         android:textSize="17sp"
         android:textStyle="bold"
         android:textColor="@color/black"
@@ -38,7 +38,7 @@
         android:id="@+id/tvScrollHint"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="↓ Faites défiler jusqu'en bas pour accepter"
+        android:text="@string/sub_title_cgu_pcd"
         android:textSize="12sp"
         android:textColor="?attr/colorPrimary"
         android:gravity="center"
@@ -68,7 +68,7 @@
             android:paddingBottom="8dp">
 
             <TextView
-                android:id="@+id/tvPoCContent"
+                android:id="@+id/tvPoCContentCGU"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textSize="13sp"
@@ -76,6 +76,24 @@
                 android:lineSpacingExtra="3dp"
                 android:fontFamily="@font/gentium_plus_regular"
                 android:text="@string/cgu_full_text" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp"
+                android:background="@color/black"
+                android:alpha="0.12" />
+
+            <TextView
+                android:id="@+id/tvPoCContentPDC"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="13sp"
+                android:textColor="@color/black"
+                android:lineSpacingExtra="3dp"
+                android:fontFamily="@font/gentium_plus_regular"
+                android:text="@string/Politique_de_confidentitalite" />
 
         </LinearLayout>
     </ScrollView>
