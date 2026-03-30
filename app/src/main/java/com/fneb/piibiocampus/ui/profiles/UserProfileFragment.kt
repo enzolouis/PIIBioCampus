@@ -82,6 +82,8 @@ class UserProfileFragment : Fragment() {
                         .load(Uri.parse(userProfile.profilePictureUrl))
                         .placeholder(R.drawable.photo_placeholder)
                         .into(profilePicture)
+                } else {
+                    profilePicture.setImageResource(R.drawable.ic_profile)
                 }
             }
 

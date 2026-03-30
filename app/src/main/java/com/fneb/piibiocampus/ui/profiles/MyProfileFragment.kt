@@ -19,6 +19,8 @@ import com.fneb.piibiocampus.ui.MainActivity
 import com.fneb.piibiocampus.ui.photo.PhotoViewerState
 import com.fneb.piibiocampus.ui.photo.PicturesViewerCaller
 import com.fneb.piibiocampus.ui.photo.PicturesViewerFragment
+import com.fneb.piibiocampus.ui.profiles.settings.SettingsFragment
+import com.fneb.piibiocampus.utils.BadgeUtils
 import com.fneb.piibiocampus.utils.setTopBarTitle
 import com.google.firebase.firestore.ListenerRegistration
 import com.squareup.picasso.Picasso
@@ -33,6 +35,7 @@ class MyProfileFragment : Fragment() {
     private lateinit var description: TextView
     private lateinit var profilePicture: ImageView
     private lateinit var badge: ImageView
+    private lateinit var settingsButton: ImageView
 
     private val photos = mutableListOf<Map<String, Any>>()
     private lateinit var adapter: PhotoAdapter
@@ -56,13 +59,20 @@ class MyProfileFragment : Fragment() {
         description    = view.findViewById(R.id.description)
         profilePicture = view.findViewById(R.id.profilePicture)
         badge          = view.findViewById(R.id.badge)
+        settingsButton = view.findViewById(R.id.settingsButton)
 
         recyclerView.layoutManager = GridLayoutManager(requireContext(), 3)
         adapter = PhotoAdapter(photos)
         recyclerView.adapter = adapter
         recyclerView.clipToPadding = false
 
-        // Bouton retour système → retour vers MainActivity
+        settingsButton.setOnClickListener {
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, SettingsFragment())
+                .addToBackStack(null)
+                .commit()
+        }
+
         requireActivity().onBackPressedDispatcher.addCallback(
             viewLifecycleOwner,
             object : OnBackPressedCallback(true) {
@@ -73,7 +83,6 @@ class MyProfileFragment : Fragment() {
             }
         )
 
-        // Résultat du viewer (suppression, mise à jour de recensement)
         parentFragmentManager.setFragmentResultListener(
             PicturesViewerFragment.REQUEST_KEY,
             viewLifecycleOwner
@@ -84,8 +93,6 @@ class MyProfileFragment : Fragment() {
 
         loadUserDataAndListenToPhotos()
     }
-
-    // ── Chargement ────────────────────────────────────────────────────────────
 
     private fun loadUserDataAndListenToPhotos() {
         viewLifecycleOwner.lifecycleScope.launch {
@@ -98,12 +105,21 @@ class MyProfileFragment : Fragment() {
                 pseudoText.text  = userProfile.name
                 description.text = userProfile.description
 
-                if (!userProfile.profilePictureUrl.isNullOrEmpty()) {
+                if (userProfile.profilePictureUrl.isNotEmpty()) {
                     Picasso.get()
                         .load(Uri.parse(userProfile.profilePictureUrl))
                         .placeholder(R.drawable.photo_placeholder)
                         .into(profilePicture)
+                } else {
+                    profilePicture.setImageResource(R.drawable.ic_profile)
                 }
+
+                val badgeRes = if (userProfile.currentBadge.isNotEmpty()) {
+                    BadgeUtils.getDrawableById(userProfile.currentBadge)
+                } else {
+                    R.drawable.norank
+                }
+                badge.setImageResource(badgeRes)
 
                 setupPhotosListener(user.uid)
             }
@@ -115,22 +131,6 @@ class MyProfileFragment : Fragment() {
         firestoreListener = PictureDao.listenToPicturesByUserEnrichedSortedByDate(userId) { enrichedPhotos ->
             photos.clear()
             photos.addAll(enrichedPhotos)
-
-            val badgeRes = when {
-                enrichedPhotos.size >= 100 -> R.drawable.ic_badge_cerf_erudit
-                enrichedPhotos.size >= 90  -> R.drawable.ic_badge_chouette_savante
-                enrichedPhotos.size >= 80  -> R.drawable.ic_badge_renard_ruse
-                enrichedPhotos.size >= 70  -> R.drawable.ic_badge_sanglier_chercheur
-                enrichedPhotos.size >= 60  -> R.drawable.ic_badge_pie_futee
-                enrichedPhotos.size >= 50  -> R.drawable.ic_badge_ecureuil_eclaire
-                enrichedPhotos.size >= 40  -> R.drawable.ic_badge_blaireau_fouineur
-                enrichedPhotos.size >= 30  -> R.drawable.ic_badge_herisson_debrouillard
-                enrichedPhotos.size >= 20  -> R.drawable.ic_badge_lapin_malin
-                enrichedPhotos.size >= 10  -> R.drawable.ic_badge_scarabe_astucieux
-                enrichedPhotos.size >= 1   -> R.drawable.ic_badge_abeille_curieuse
-                else                       -> R.drawable.norank
-            }
-            badge.setImageResource(badgeRes)
             adapter.notifyDataSetChanged()
         }
     }
@@ -143,8 +143,7 @@ class MyProfileFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         setTopBarTitle(R.string.titleProfile)
-        val uid = currentUserId ?: return
-        setupPhotosListener(uid)
+        loadUserDataAndListenToPhotos()
     }
 
     override fun onDestroyView() {
@@ -152,16 +151,14 @@ class MyProfileFragment : Fragment() {
         firestoreListener?.remove()
     }
 
-    // ── Adapter ───────────────────────────────────────────────────────────────
-
     inner class PhotoAdapter(private val items: List<Map<String, Any>>) :
         RecyclerView.Adapter<PhotoAdapter.PhotoViewHolder>() {
 
         inner class PhotoViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-            val image: ImageView   = view.findViewById(R.id.photoItem)
+            val image: ImageView      = view.findViewById(R.id.photoItem)
             val recordingDotRed: View = view.findViewById(R.id.ivDotRed)
             val recordingDotOrange: View = view.findViewById(R.id.ivDotOrange)
-            val validatedDot: View = view.findViewById(R.id.ivDotGreen)
+            val validatedDot: View    = view.findViewById(R.id.ivDotGreen)
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PhotoViewHolder {
@@ -189,18 +186,18 @@ class MyProfileFragment : Fragment() {
 
             when {
                 adminValidated -> {
-                    holder.validatedDot.visibility = View.VISIBLE
-                    holder.recordingDotRed.visibility = View.GONE
+                    holder.validatedDot.visibility       = View.VISIBLE
+                    holder.recordingDotRed.visibility    = View.GONE
                     holder.recordingDotOrange.visibility = View.GONE
                 }
                 !recordingStatus -> {
-                    holder.recordingDotRed.visibility = View.VISIBLE
-                    holder.validatedDot.visibility = View.GONE
+                    holder.recordingDotRed.visibility    = View.VISIBLE
+                    holder.validatedDot.visibility       = View.GONE
                     holder.recordingDotOrange.visibility = View.GONE
                 }
                 else -> {
-                    holder.recordingDotRed.visibility = View.GONE
-                    holder.validatedDot.visibility = View.GONE
+                    holder.recordingDotRed.visibility    = View.GONE
+                    holder.validatedDot.visibility       = View.GONE
                     holder.recordingDotOrange.visibility = View.VISIBLE
                 }
             }
