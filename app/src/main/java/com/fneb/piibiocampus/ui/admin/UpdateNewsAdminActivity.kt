@@ -11,13 +11,13 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
 import com.fneb.piibiocampus.R
 import com.fneb.piibiocampus.data.dao.NewsDao
+import com.fneb.piibiocampus.ui.BaseActivity
 import com.fneb.piibiocampus.utils.setTopBarTitle
 import com.squareup.picasso.Picasso
 
-class UpdateNewsAdminActivity : AppCompatActivity() {
+class UpdateNewsAdminActivity : BaseActivity() {
     private lateinit var imageView: ImageView
     private var selectedImageUri: Uri? = null
 

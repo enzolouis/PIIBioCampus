@@ -3,15 +3,15 @@ package com.fneb.piibiocampus.ui.admin
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import android.widget.GridLayout
 import com.fneb.piibiocampus.R
+import com.fneb.piibiocampus.ui.BaseActivity
 import com.fneb.piibiocampus.ui.census.CensusEditorActivity
 import com.fneb.piibiocampus.utils.setTopBarTitle
 
-class DashboardAdminActivity : AppCompatActivity() {
+class DashboardAdminActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

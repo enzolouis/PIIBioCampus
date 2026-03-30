@@ -17,10 +17,10 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.fneb.piibiocampus.R
+import com.fneb.piibiocampus.ui.BaseActivity
 import com.fneb.piibiocampus.ui.photo.PhotoViewerState
 import com.fneb.piibiocampus.ui.photo.PicturesViewerCaller
 import com.fneb.piibiocampus.ui.photo.PicturesViewerFragment
@@ -30,7 +30,7 @@ import com.squareup.picasso.Picasso
 import java.text.SimpleDateFormat
 import java.util.*
 
-class PicturesAdminActivity : AppCompatActivity() {
+class PicturesAdminActivity : BaseActivity() {
 
     private val viewModel: PicturesAdminViewModel by viewModels { PicturesAdminViewModelFactory() }
 

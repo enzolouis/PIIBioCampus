@@ -10,17 +10,17 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import com.fneb.piibiocampus.R
+import com.fneb.piibiocampus.ui.BaseActivity
 import com.fneb.piibiocampus.ui.common.LoadingDialog
 import com.fneb.piibiocampus.utils.Extensions.toast
 import com.fneb.piibiocampus.utils.Validators
 import kotlinx.coroutines.launch
 
-class CreateAccountActivity : AppCompatActivity() {
+class CreateAccountActivity : BaseActivity() {
 
     private val viewModel: AuthViewModel by viewModels()
 

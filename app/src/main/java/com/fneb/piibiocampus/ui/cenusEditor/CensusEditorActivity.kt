@@ -5,16 +5,16 @@ import android.view.View
 import android.widget.*
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.fneb.piibiocampus.R
+import com.fneb.piibiocampus.ui.BaseActivity
 import com.fneb.piibiocampus.utils.setTopBarTitle
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
-class CensusEditorActivity : AppCompatActivity() {
+class CensusEditorActivity : BaseActivity() {
 
     private val viewModel: CensusEditorViewModel by viewModels()
 

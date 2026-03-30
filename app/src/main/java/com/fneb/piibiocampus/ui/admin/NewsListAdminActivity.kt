@@ -10,7 +10,6 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.GridLayoutManager
@@ -18,10 +17,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.fneb.piibiocampus.R
 import com.fneb.piibiocampus.data.dao.NewsDao
 import com.fneb.piibiocampus.data.model.ItemNews
+import com.fneb.piibiocampus.ui.BaseActivity
 import com.fneb.piibiocampus.utils.setTopBarTitle
 import com.squareup.picasso.Picasso
 
-class NewsListAdminActivity : AppCompatActivity() {
+class NewsListAdminActivity : BaseActivity() {
 
     private lateinit var recyclerView: RecyclerView
 

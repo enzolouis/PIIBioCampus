@@ -5,7 +5,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
-import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
@@ -16,11 +15,12 @@ import androidx.camera.view.PreviewView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.fneb.piibiocampus.databinding.ActivityPictureBinding
+import com.fneb.piibiocampus.ui.BaseActivity
 import com.fneb.piibiocampus.utils.ImageUtils.resizeAndCompress
 
 private const val FILENAME_FORMAT = "yyyy-MM-dd-HH-mm-ss-SSS"
 
-class PictureActivity : AppCompatActivity() {
+class PictureActivity : BaseActivity() {
     private lateinit var viewBinding: ActivityPictureBinding
     private var cameraController: LifecycleCameraController? = null
 
