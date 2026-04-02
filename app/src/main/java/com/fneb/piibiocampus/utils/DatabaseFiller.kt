@@ -107,7 +107,7 @@ object DatabaseFiller {
 
             // Bordeaux
             Campus(generateId("Bordeaux Carreire"), "Bordeaux-Carreire", 1000.0, -0.6051290299378996, 44.82582965077974),
-            Campus(generateId("Bordeaux Victoire Bastide"), "Bordeaux-Victoire et Bastide", 2000.0, -0.5708716577644373, 44.831917163988464),
+            Campus(generateId("Bordeaux Victoire Bastide"), "Bordeaux-Victoire et Bastide", 1500.0, -0.5708716577644373, 44.831917163988464),
             Campus(generateId("Pessac Talence Gradignan"), "Pessac Talence Gradignan", 1000.0, -0.5962678104864305, 44.8005876650241),
 
             // Rennes
