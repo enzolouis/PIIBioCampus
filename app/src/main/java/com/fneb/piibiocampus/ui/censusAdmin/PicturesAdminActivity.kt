@@ -25,6 +25,7 @@ import com.fneb.piibiocampus.ui.photo.PhotoViewerState
 import com.fneb.piibiocampus.ui.photo.PicturesViewerCaller
 import com.fneb.piibiocampus.ui.photo.PicturesViewerFragment
 import com.fneb.piibiocampus.utils.setTopBarTitle
+import com.fneb.piibiocampus.utils.showTopBarLeftButton
 import com.google.android.material.chip.Chip
 import com.squareup.picasso.Picasso
 import java.text.SimpleDateFormat
@@ -78,7 +79,7 @@ class PicturesAdminActivity : BaseActivity() {
         }
 
         setTopBarTitle("Gestion des recensements")
-
+        showTopBarLeftButton { finish() }
         viewModel.loadAll()
     }
 

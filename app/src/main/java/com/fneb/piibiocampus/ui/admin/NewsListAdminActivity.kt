@@ -19,6 +19,7 @@ import com.fneb.piibiocampus.data.dao.NewsDao
 import com.fneb.piibiocampus.data.model.ItemNews
 import com.fneb.piibiocampus.ui.BaseActivity
 import com.fneb.piibiocampus.utils.setTopBarTitle
+import com.fneb.piibiocampus.utils.showTopBarLeftButton
 import com.squareup.picasso.Picasso
 
 class NewsListAdminActivity : BaseActivity() {
@@ -32,6 +33,7 @@ class NewsListAdminActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_news_list_admin)
         setTopBarTitle("Actualité")
+        showTopBarLeftButton { finish() }
         val btnAddNews = findViewById<Button>(R.id.btnAddNews)
 
         ViewCompat.setOnApplyWindowInsetsListener(btnAddNews) { view, insets ->
@@ -45,6 +47,16 @@ class NewsListAdminActivity : BaseActivity() {
         recyclerView = findViewById(R.id.recyclerView)
         recyclerView.layoutManager = GridLayoutManager(this, 1)
 
+        loadNews()
+
+        btnAddNews.setOnClickListener {
+            val intent = Intent(this, UpdateNewsAdminActivity::class.java)
+            intent.putExtra("status", "create")
+            this.startActivity(intent)
+        }
+    }
+
+    private fun loadNews() {
         NewsDao.getAllNews(
             onSuccess = { items ->
                 adapter = ItemNewsAdapter(items)
@@ -54,12 +66,6 @@ class NewsListAdminActivity : BaseActivity() {
                 Toast.makeText(this, "Erreur : ${exception.message}", Toast.LENGTH_SHORT).show()
             }
         )
-
-        btnAddNews.setOnClickListener {
-            val intent = Intent(this, UpdateNewsAdminActivity::class.java)
-            intent.putExtra("status", "create")
-            this.startActivity(intent)
-        }
     }
 
     inner class ItemNewsAdapter(
@@ -104,5 +110,6 @@ class NewsListAdminActivity : BaseActivity() {
     override fun onResume() {
         super.onResume()
         setTopBarTitle(R.string.actualite)
+        loadNews()
     }
 }

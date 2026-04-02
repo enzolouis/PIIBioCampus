@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.fneb.piibiocampus.R
 import com.fneb.piibiocampus.ui.BaseActivity
 import com.fneb.piibiocampus.utils.setTopBarTitle
+import com.fneb.piibiocampus.utils.showTopBarLeftButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class CensusEditorActivity : BaseActivity() {
@@ -40,6 +41,7 @@ class CensusEditorActivity : BaseActivity() {
         setupButtons()
         observeViewModel()
         setTopBarTitle(getString(R.string.arbre_de_recensement))
+        showTopBarLeftButton { finish() }
         viewModel.loadTree()
     }
 

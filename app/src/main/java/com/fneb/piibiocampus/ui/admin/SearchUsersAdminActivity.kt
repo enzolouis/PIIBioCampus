@@ -19,6 +19,7 @@ import com.fneb.piibiocampus.data.dao.UserDao
 import com.fneb.piibiocampus.data.model.UserProfile
 import com.fneb.piibiocampus.ui.BaseActivity
 import com.fneb.piibiocampus.utils.setTopBarTitle
+import com.fneb.piibiocampus.utils.showTopBarLeftButton
 import com.google.android.material.textfield.TextInputEditText
 import kotlinx.coroutines.launch
 
@@ -38,6 +39,7 @@ class SearchUsersAdminActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_searchusers_admin)
         setTopBarTitle(R.string.txtSearchAdmin)
+        showTopBarLeftButton { finish() }
 
         recyclerView = findViewById(R.id.resultsRecyclerView)
         searchEditText = findViewById(R.id.searchEditText)
