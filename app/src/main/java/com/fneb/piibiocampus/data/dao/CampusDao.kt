@@ -14,11 +14,11 @@ object CampusDao {
                 for (doc in query.documents) {
                     val data = doc.data ?: continue
                     val campus = Campus(
-                        id        = doc.id,
-                        name      = data["name"] as? String ?: "",
-                        radius    = (data["radius"] as? Number)?.toDouble() ?: 0.0,
+                        id = doc.id,
+                        name = data["name"] as? String ?: "",
+                        radius = (data["radius"] as? Number)?.toDouble() ?: 0.0,
                         longitudeCenter = (data["longitudeCenter"] as? Number)?.toDouble() ?: 0.0,
-                        latitudeCenter  = (data["latitudeCenter"] as? Number)?.toDouble() ?: 0.0
+                        latitudeCenter = (data["latitudeCenter"] as? Number)?.toDouble() ?: 0.0
                     )
                     campusList.add(campus)
                 }

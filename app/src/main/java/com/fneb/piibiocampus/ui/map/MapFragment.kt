@@ -281,19 +281,30 @@ class MapFragment : Fragment(R.layout.fragment_map) {
         campusTextOverlays.clear()
 
         for (campus in campusList) {
-            val circle = Polygon(map).apply {
-                points = Polygon.pointsAsCircle(
+
+            // ── Choix : polygone précis ou cercle de fallback ─────────────────
+            val polygonPoints: List<GeoPoint> = if (campus.polygon.isNotEmpty()) {
+                // Polygone réel depuis Firebase (champ "polygon")
+                campus.polygon.map { GeoPoint(it.lat, it.lng) }
+            } else {
+                // Fallback cercle (ancien système centre + rayon)
+                Polygon.pointsAsCircle(
                     GeoPoint(campus.latitudeCenter, campus.longitudeCenter),
-                    campus.radius
+                    campus.radius.toDouble()
                 )
+            }
+
+            val shape = Polygon(map).apply {
+                points = polygonPoints
                 fillPaint.color    = Color.argb(40,  255, 179, 0)
                 outlinePaint.color = Color.argb(180, 255, 179, 0)
                 outlinePaint.strokeWidth = 3f
                 infoWindow = null
                 setOnClickListener { _, _, _ -> true }
             }
-            map.overlays.add(0, circle)
+            map.overlays.add(0, shape)
 
+            // ── Label centré sur le campus ────────────────────────────────────
             val textOverlay = TextOverlay(
                 GeoPoint(campus.latitudeCenter, campus.longitudeCenter),
                 campus.name
@@ -303,6 +314,7 @@ class MapFragment : Fragment(R.layout.fragment_map) {
             map.overlays.add(insertIndex, textOverlay)
         }
 
+        // Remettre les markers au-dessus des polygones
         val markers = map.overlays.filterIsInstance<Marker>()
         map.overlays.removeAll { it is Marker }
         map.overlays.addAll(markers)
