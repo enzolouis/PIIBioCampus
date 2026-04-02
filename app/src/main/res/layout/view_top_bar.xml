@@ -8,13 +8,15 @@
     android:background="@color/primary"
     android:paddingTop="40dp">
 
-    <ImageView
-        android:id="@+id/topBarLogo"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_gravity="end"
-        android:src="@drawable/logo_piibiocampus"
-        android:contentDescription="@string/logo_admin" />
+    <ImageButton
+        android:id="@+id/topBarLeftButton"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_gravity="start"
+        android:src="@drawable/ic_arrow_back"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/back"
+        android:visibility="gone"/>
 
     <TextView
         android:id="@+id/topBarTitle"
@@ -25,5 +27,13 @@
         android:textSize="18sp"
         android:textStyle="bold"
         android:fontFamily="@font/kg_blank_space_sketch" />
+
+    <ImageView
+        android:id="@+id/topBarLogo"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_gravity="end"
+        android:src="@drawable/logo_piibiocampus"
+        android:contentDescription="@string/logo_admin" />
 
 </com.google.android.material.appbar.MaterialToolbar>

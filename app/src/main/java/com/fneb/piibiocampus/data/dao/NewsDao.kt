@@ -2,6 +2,8 @@ package com.fneb.piibiocampus.data.dao
 
 import android.content.Context
 import android.net.Uri
+import com.fneb.piibiocampus.data.error.AppException
+import com.fneb.piibiocampus.data.error.FirebaseExceptionMapper
 import com.fneb.piibiocampus.data.model.ItemNews
 import com.google.firebase.FirebaseApp
 import com.google.firebase.firestore.FirebaseFirestore
@@ -19,7 +21,7 @@ object NewsDao {
 
     fun getAllNews(
         onSuccess: (List<ItemNews>) -> Unit,
-        onError: (Exception) -> Unit
+        onError: (AppException) -> Unit
     ) {
         newsRef.get()
             .addOnSuccessListener { snapshot ->
@@ -33,7 +35,7 @@ object NewsDao {
                 }
                 onSuccess(newsList)
             }
-            .addOnFailureListener(onError)
+            .addOnFailureListener { e -> onError(FirebaseExceptionMapper.map(e)) }
     }
 
     fun updateNews(
@@ -42,7 +44,7 @@ object NewsDao {
         source: String,
         imageUrl: String,
         onSuccess: () -> Unit,
-        onError: (Exception) -> Unit
+        onError: (AppException) -> Unit
     ) {
         newsRef.document(newsId)
             .update(
@@ -53,14 +55,14 @@ object NewsDao {
                 )
             )
             .addOnSuccessListener { onSuccess() }
-            .addOnFailureListener(onError)
+            .addOnFailureListener { e -> onError(FirebaseExceptionMapper.map(e)) }
     }
 
     fun uploadNewsImage(
         context: Context,
         imageUri: Uri,
         onSuccess: (String) -> Unit,
-        onError: (Exception) -> Unit
+        onError: (AppException) -> Unit
     ) {
         try {
             // convertir en bytes
@@ -78,18 +80,13 @@ object NewsDao {
 
             ref.putFile(Uri.fromFile(file))
                 .addOnSuccessListener {
-                    ref.downloadUrl.addOnSuccessListener { url ->
-                        file.delete()
-                        onSuccess(url.toString())
-                    }
+                    ref.downloadUrl
+                        .addOnSuccessListener { url -> file.delete(); onSuccess(url.toString()) }
+                        .addOnFailureListener { e -> file.delete(); onError(FirebaseExceptionMapper.map(e)) }
                 }
-                .addOnFailureListener {
-                    file.delete()
-                    onError(it)
-                }
-
+                .addOnFailureListener { e -> file.delete(); onError(FirebaseExceptionMapper.map(e))}
         } catch (e: Exception) {
-            onError(e)
+            onError(FirebaseExceptionMapper.map(e))
         }
     }
 
@@ -98,7 +95,7 @@ object NewsDao {
         imageUrl: String,
         source: String,
         onSuccess: () -> Unit,
-        onError: (Exception) -> Unit
+        onError: (AppException) -> Unit
     ) {
         val itemNews = mapOf(
             "titre" to titre,
@@ -112,7 +109,7 @@ object NewsDao {
                 onSuccess()
             }
             .addOnFailureListener { e ->
-                onError(e)
+                onError(FirebaseExceptionMapper.map(e))
             }
     }
 
@@ -127,7 +124,7 @@ object NewsDao {
                 onSuccess()
             }
             .addOnFailureListener { e ->
-                onError(e)
+                onError(FirebaseExceptionMapper.map(e))
             }
     }
 }

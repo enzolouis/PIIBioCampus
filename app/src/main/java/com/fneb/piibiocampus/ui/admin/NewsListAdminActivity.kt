@@ -19,6 +19,7 @@ import com.fneb.piibiocampus.data.dao.NewsDao
 import com.fneb.piibiocampus.data.model.ItemNews
 import com.fneb.piibiocampus.ui.BaseActivity
 import com.fneb.piibiocampus.utils.setTopBarTitle
+import com.fneb.piibiocampus.utils.showTopBarLeftButton
 import com.squareup.picasso.Picasso
 
 class NewsListAdminActivity : BaseActivity() {
@@ -32,6 +33,7 @@ class NewsListAdminActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_news_list_admin)
         setTopBarTitle("Actualité")
+        showTopBarLeftButton { finish() }
         val btnAddNews = findViewById<Button>(R.id.btnAddNews)
 
         ViewCompat.setOnApplyWindowInsetsListener(btnAddNews) { view, insets ->

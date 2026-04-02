@@ -1,5 +1,7 @@
 package com.fneb.piibiocampus.data.dao
 
+import com.fneb.piibiocampus.data.error.AppException
+import com.fneb.piibiocampus.data.error.FirebaseExceptionMapper
 import com.fneb.piibiocampus.ui.census.CensusNode
 import com.fneb.piibiocampus.ui.census.CensusType
 import com.google.firebase.firestore.FirebaseFirestore
@@ -14,7 +16,7 @@ object CensusDao {
      * Récupère la hiérarchie complète depuis la collection "census".
      * Appelle onComplete(rootNodes) sur succès.
      */
-    fun fetchCensusTree(onComplete: (List<CensusNode>) -> Unit, onError: (Exception) -> Unit) {
+    fun fetchCensusTree(onComplete: (List<CensusNode>) -> Unit, onError: (AppException) -> Unit) {
         fetchCensusTreeFull(
             onComplete = { _, roots -> onComplete(roots) },
             onError    = onError
@@ -27,7 +29,7 @@ object CensusDao {
      */
     fun fetchCensusTreeFull(
         onComplete: (docId: String?, roots: List<CensusNode>) -> Unit,
-        onError: (Exception) -> Unit
+        onError: (AppException) -> Unit
     ) {
         db.collection("census").get()
             .addOnSuccessListener { query ->
@@ -49,7 +51,7 @@ object CensusDao {
                 }
                 onComplete(firstDocId, allRoots)
             }
-            .addOnFailureListener { e -> onError(e) }
+            .addOnFailureListener { e -> onError(FirebaseExceptionMapper.map(e)) }
     }
 
     // ── Écriture ──────────────────────────────────────────────────────────────
@@ -71,7 +73,7 @@ object CensusDao {
 
         ref.set(data)
             .addOnSuccessListener { onSuccess(ref.id) }
-            .addOnFailureListener { e -> onError(e) }
+            .addOnFailureListener { e -> onError(FirebaseExceptionMapper.map(e)) }
     }
 
     // ── Sérialisation CensusNode → Map ────────────────────────────────────────

@@ -5,6 +5,8 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
+import com.fneb.piibiocampus.data.error.AppException
+import com.fneb.piibiocampus.data.error.FirebaseExceptionMapper
 import com.fneb.piibiocampus.data.model.LocationMeta
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
@@ -45,21 +47,22 @@ object PictureDao {
                 val bytes = URL(imageUrl).readBytes()
                 onSuccess(bytes)
             } catch (e: Exception) {
-                onError(e)
+                onError(FirebaseExceptionMapper.map(e))
             }
         }.start()
     }
 
     fun listenToPicturesByUserEnrichedSortedByDate(
         userId: String,
-        onUpdate: (List<Map<String, Any>>) -> Unit
+        onUpdate: (List<Map<String, Any>>) -> Unit,
+        onError: (AppException) -> Unit
     ): ListenerRegistration {
         return firestore.collection("pictures")
             .whereEqualTo("userRef", userId)
             .orderBy("timestamp", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
-                    onUpdate(emptyList()); return@addSnapshotListener
+                    onError(FirebaseExceptionMapper.map(error)); return@addSnapshotListener
                 }
                 val pictures = snapshot?.documents?.mapNotNull { document ->
                     val data = document.data ?: return@mapNotNull null
@@ -70,7 +73,7 @@ object PictureDao {
                 enrichPicturesWithCensusData(
                     pictures,
                     onSuccess = { onUpdate(it) },
-                    onError   = { onUpdate(pictures) }
+                    onError   = { e -> onError(FirebaseExceptionMapper.map(e)) }
                 )
             }
     }
@@ -92,12 +95,29 @@ object PictureDao {
             .addOnFailureListener(onError)
     }
 
+    fun getAllPicturesEnriched(
+        onSuccess: (List<Map<String, Any>>) -> Unit,
+        onError: (AppException) -> Unit
+    ) {
+        picturesRef.get()
+            .addOnSuccessListener { snapshot ->
+                val pictures = snapshot.documents.mapNotNull { document ->
+                    val data = document.data ?: return@mapNotNull null
+                    val map  = data.toMutableMap()
+                    map["id"] = document.id
+                    map
+                }
+                enrichPicturesWithCensusData(pictures, onSuccess, onError)
+            }
+            .addOnFailureListener { e -> onError(FirebaseExceptionMapper.map(e)) }
+    }
+
     fun getPicturesNearLocation(
         centerLat: Double,
         centerLon: Double,
         radiusMeters: Double,
         onSuccess: (List<Map<String, Any>>) -> Unit,
-        onError: (Exception) -> Unit
+        onError: (AppException) -> Unit
     ) {
         picturesRef.get()
             .addOnSuccessListener { snapshot ->
@@ -114,7 +134,7 @@ object PictureDao {
                 }
                 onSuccess(result)
             }
-            .addOnFailureListener(onError)
+            .addOnFailureListener { e -> onError(FirebaseExceptionMapper.map(e)) }
     }
 
     fun getPicturesNearLocationEnriched(
@@ -122,7 +142,7 @@ object PictureDao {
         centerLon: Double,
         radiusMeters: Double,
         onSuccess: (List<Map<String, Any>>) -> Unit,
-        onError: (Exception) -> Unit
+        onError: (AppException) -> Unit
     ) {
         getPicturesNearLocation(centerLat, centerLon, radiusMeters,
             onSuccess = { enrichPicturesWithCensusData(it, onSuccess, onError) },
@@ -177,10 +197,10 @@ object PictureDao {
                             .addOnFailureListener(onError)
                     }.addOnFailureListener(onError)
                 }
-                .addOnFailureListener { e -> webpFile.delete(); onError(e) }
+                .addOnFailureListener { e -> webpFile.delete(); onError(FirebaseExceptionMapper.map(e)) }
 
         } catch (e: Exception) {
-            onError(e)
+            onError(FirebaseExceptionMapper.map(e))
         }
     }
 
@@ -198,7 +218,7 @@ object PictureDao {
         picturesRef.document(pictureId)
             .update(updates)
             .addOnSuccessListener { onSuccess() }
-            .addOnFailureListener { e -> onError(e) }
+            .addOnFailureListener { e -> onError(FirebaseExceptionMapper.map(e)) }
     }
 
     fun setAdminValidated(
@@ -210,7 +230,7 @@ object PictureDao {
         picturesRef.document(pictureId)
             .update("adminValidated", validated)
             .addOnSuccessListener { onSuccess() }
-            .addOnFailureListener { e -> onError(e) }
+            .addOnFailureListener { e -> onError(FirebaseExceptionMapper.map(e)) }
     }
 
     fun deletePicture(
@@ -221,7 +241,7 @@ object PictureDao {
         picturesRef.document(pictureId)
             .delete()
             .addOnSuccessListener { onSuccess() }
-            .addOnFailureListener { e -> onError(e) }
+            .addOnFailureListener { e -> onError(FirebaseExceptionMapper.map(e)) }
     }
 
     // ── Upload image pour l'arbre de recensement ──────────────────────────────
@@ -235,13 +255,18 @@ object PictureDao {
         context: Context,
         imageBytes: ByteArray,
         onSuccess: (String) -> Unit,
-        onError: (Exception) -> Unit
+        onError: (AppException) -> Unit
     ) {
         try {
             val currentUser = FirebaseAuth.getInstance().currentUser
-                ?: run { onError(IllegalStateException("Utilisateur non connecté.")); return }
+                ?: run { onError(AppException.NotAuthenticated()); return }
 
-            val webpFile = bytesToWebpFile(context, imageBytes)
+            val webpFile = try {
+                bytesToWebpFile(context, imageBytes)
+            } catch (e: Exception) {
+                onError(AppException.ImageProcessingError(e)); return
+            }
+
             val imageId  = UUID.randomUUID().toString()
             val ref      = storageRef.child("$imageId.webp")
 
@@ -260,15 +285,17 @@ object PictureDao {
                         }
                         .addOnFailureListener { e ->
                             webpFile.delete()
-                            onError(e)
+                            onError(FirebaseExceptionMapper.map(e))
                         }
                 }
                 .addOnFailureListener { e ->
                     webpFile.delete()
-                    onError(e)
+                    onError(FirebaseExceptionMapper.map(e))
                 }
-        } catch (e: Exception) {
+        } catch (e: AppException) {
             onError(e)
+        } catch (e: Exception) {
+            onError(FirebaseExceptionMapper.map(e))
         }
     }
 
@@ -285,7 +312,7 @@ object PictureDao {
     private fun enrichPicturesWithCensusData(
         pictures: List<Map<String, Any>>,
         onSuccess: (List<Map<String, Any>>) -> Unit,
-        onError: (Exception) -> Unit
+        onError: (AppException) -> Unit
     ) {
         if (pictures.isEmpty()) { onSuccess(emptyList()); return }
 
@@ -345,7 +372,7 @@ object PictureDao {
                                 onSuccess(enriched)
                             }
                         }
-                        .addOnFailureListener(onError)
+                        .addOnFailureListener { e -> onError(FirebaseExceptionMapper.map(e)) }
                 }
             },
             onError = onError
@@ -355,32 +382,31 @@ object PictureDao {
     fun getPictureEnrichedById(
         pictureId: String,
         onSuccess: (Map<String, Any>) -> Unit,
-        onError: (Exception) -> Unit
+        onError: (AppException) -> Unit
     ) {
         picturesRef.document(pictureId).get()
             .addOnSuccessListener { document ->
                 val data = document.data
-                if (data == null) { onError(Exception("Photo introuvable")); return@addOnSuccessListener }
+                if (data == null) { onError(AppException.DocumentNotFound()); return@addOnSuccessListener }
                 val map  = data.toMutableMap()
                 map["id"] = document.id
                 enrichPicturesWithCensusData(
                     pictures  = listOf(map),
                     onSuccess = { enriched -> onSuccess(enriched.first()) },
-                    onError   = onError
+                    onError   = { e -> onError(FirebaseExceptionMapper.map(e)) }
                 )
             }
-            .addOnFailureListener(onError)
+            .addOnFailureListener { e -> onError(FirebaseExceptionMapper.map(e)) }
     }
 
     suspend fun getPicturesByUserEnrichedSortedByDate(userId: String): List<Map<String, Any>> {
+        // Les exceptions Firebase remontent naturellement grâce au try/catch externe
         return try {
             val snapshot = firestore.collection("pictures")
                 .whereEqualTo("userRef", userId)
                 .orderBy("timestamp", Query.Direction.DESCENDING)
                 .get()
                 .await()
-
-            android.util.Log.d("PictureDao", "Photos trouvées pour $userId : ${snapshot.documents.size}")
 
             val pictures = snapshot.documents.mapNotNull { document ->
                 val data = document.data ?: return@mapNotNull null
@@ -393,20 +419,21 @@ object PictureDao {
 
             enrichPicturesWithCensusData(
                 pictures  = pictures,
-                onSuccess = {
-                    android.util.Log.d("PictureDao", "Enrichissement OK : ${it.size} photos")
-                    deferred.complete(it)
-                },
-                onError   = {
-                    android.util.Log.e("PictureDao", "Erreur enrichissement : ${it.message}")
+                onSuccess = { deferred.complete(it) },
+                onError   = { e ->
+                    // L'enrichissement est non-critique : on retourne les photos brutes
+                    // mais on logue l'erreur mappée pour le débogage
+                    android.util.Log.w("PictureDao", FirebaseExceptionMapper.map(e).userMessage)
                     deferred.complete(pictures)
                 }
             )
 
             deferred.await()
+
+        } catch (e: AppException) {
+            throw e                              // déjà mappée, on laisse passer
         } catch (e: Exception) {
-            android.util.Log.e("PictureDao", "Exception : ${e.message}")
-            emptyList()
+            throw FirebaseExceptionMapper.map(e) // erreur Firebase → AppException
         }
     }
 
@@ -434,7 +461,7 @@ object PictureDao {
 
     fun getAllRecordedPictures(
         onSuccess: (List<Map<String, Any>>) -> Unit,
-        onError:   (Exception) -> Unit
+        onError:   (AppException) -> Unit
     ) {
         picturesRef
             .whereEqualTo("recordingStatus", true)
@@ -448,6 +475,6 @@ object PictureDao {
                 }
                 onSuccess(pictures)
             }
-            .addOnFailureListener { e -> onError(e) }
+            .addOnFailureListener { e -> onError(FirebaseExceptionMapper.map(e)) }
     }
 }

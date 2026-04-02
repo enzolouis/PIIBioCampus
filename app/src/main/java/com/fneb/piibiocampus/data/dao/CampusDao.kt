@@ -1,5 +1,7 @@
 package com.fneb.piibiocampus.data.dao
 
+import com.fneb.piibiocampus.data.error.AppException
+import com.fneb.piibiocampus.data.error.FirebaseExceptionMapper
 import com.fneb.piibiocampus.data.model.Campus
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -7,7 +9,7 @@ object CampusDao {
 
     private val db = FirebaseFirestore.getInstance()
 
-    fun getAll(onComplete: (List<Campus>) -> Unit, onError: (Exception) -> Unit) {
+    fun getAll(onComplete: (List<Campus>) -> Unit, onError: (AppException) -> Unit) {
         db.collection("campus").get()
             .addOnSuccessListener { query ->
                 val campusList = mutableListOf<Campus>()
@@ -25,7 +27,7 @@ object CampusDao {
                 onComplete(campusList)
             }
             .addOnFailureListener { e ->
-                onError(e)
+                onError(FirebaseExceptionMapper.map(e))
             }
     }
 }
