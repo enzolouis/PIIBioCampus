@@ -9,13 +9,13 @@ import android.view.View
 import android.widget.*
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.fneb.piibiocampus.R
 import com.fneb.piibiocampus.data.dao.PictureDao
 import com.fneb.piibiocampus.data.model.LocationMeta
+import com.fneb.piibiocampus.ui.BaseActivity
 import com.fneb.piibiocampus.ui.MainActivity
 import com.fneb.piibiocampus.ui.photo.PicturesViewerCaller
 import com.github.chrisbanes.photoview.PhotoView
@@ -24,7 +24,7 @@ import com.squareup.picasso.Picasso
 
 enum class CensusMode { CREATE, UPDATE }
 
-class CensusTreeActivity : AppCompatActivity() {
+class CensusTreeActivity : BaseActivity() {
 
     private lateinit var recyclerView:    RecyclerView
     private lateinit var previewThumbnail: ImageView

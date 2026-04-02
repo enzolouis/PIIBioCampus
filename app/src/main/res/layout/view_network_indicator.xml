@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ImageView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/ivNoNetwork"
+    android:layout_width="28dp"
+    android:layout_height="28dp"
+    android:src="@drawable/ic_signal_wifi_off"
+    android:visibility="gone"
+    android:layout_marginTop="8dp"
+    android:layout_marginEnd="16dp"
+    app:tint="@color/danger" />

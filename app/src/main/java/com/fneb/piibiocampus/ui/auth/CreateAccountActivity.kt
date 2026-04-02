@@ -10,18 +10,17 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import com.fneb.piibiocampus.R
-import com.fneb.piibiocampus.ui.MainActivity
+import com.fneb.piibiocampus.ui.BaseActivity
 import com.fneb.piibiocampus.ui.common.LoadingDialog
 import com.fneb.piibiocampus.utils.Extensions.toast
 import com.fneb.piibiocampus.utils.Validators
 import kotlinx.coroutines.launch
 
-class CreateAccountActivity : AppCompatActivity() {
+class CreateAccountActivity : BaseActivity() {
 
     private val viewModel: AuthViewModel by viewModels()
 
@@ -45,6 +44,7 @@ class CreateAccountActivity : AppCompatActivity() {
 
         connectionBtn.setOnClickListener {
             startActivity(Intent(this, ConnectionActivity::class.java))
+            finish()
         }
 
         val togglePassword = findViewById<ImageView>(R.id.btnTogglePassword)
@@ -73,16 +73,18 @@ class CreateAccountActivity : AppCompatActivity() {
             }
 
             if (isCguAccepted()) {
-                LoadingDialog.show(supportFragmentManager, "Création du compte…")
-                viewModel.register(emailStr, passwordStr, usernameStr)
+                    LoadingDialog.show(supportFragmentManager, "Création du compte…")
+                    viewModel.register(emailStr, passwordStr, usernameStr)
             } else {
                 CguDialogFragment.show(
-                    fm         = supportFragmentManager,
+                    fm = supportFragmentManager,
                     onAccepted = {
                         LoadingDialog.show(supportFragmentManager, "Création du compte…")
                         viewModel.register(emailStr, passwordStr, usernameStr)
                     },
-                    onDeclined = { toast("Vous devez accepter les CGU pour créer un compte") }
+                    onDeclined = {
+                        toast("Vous devez accepter les CGU pour créer un compte")
+                    }
                 )
             }
         }
@@ -91,14 +93,27 @@ class CreateAccountActivity : AppCompatActivity() {
             viewModel.uiState.collect { state ->
                 when (state) {
                     is AuthUiState.Loading -> {
-                        // Le LoadingDialog est déjà affiché au clic
+                        // LoadingDialog déjà affiché au clic
                     }
 
-                    is AuthUiState.Registered -> {
+                    is AuthUiState.EmailVerificationSent -> {
                         LoadingDialog.hide(supportFragmentManager)
-                        toast("Compte créé avec succès !")
-                        startActivity(Intent(this@CreateAccountActivity, MainActivity::class.java))
-                        finish()
+
+                        // Pop-up "compte créé + email envoyé" → redirige vers connexion au clic
+                        EmailSentDialogFragment.show(
+                            fm   = supportFragmentManager,
+                            mode = EmailSentDialogFragment.MODE_ACCOUNT_CREATED,
+                            onDismiss = {
+                                startActivity(
+                                    Intent(this@CreateAccountActivity, ConnectionActivity::class.java)
+                                        .apply {
+                                            flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                                                    Intent.FLAG_ACTIVITY_SINGLE_TOP
+                                        }
+                                )
+                                finish()
+                            }
+                        )
                     }
 
                     is AuthUiState.Error -> {
@@ -112,8 +127,6 @@ class CreateAccountActivity : AppCompatActivity() {
             }
         }
     }
-
-    // ── CGU ───────────────────────────────────────────────────────────────────
 
     private fun isCguAccepted(): Boolean =
         getSharedPreferences(CguDialogFragment.PREF_FILE, MODE_PRIVATE)

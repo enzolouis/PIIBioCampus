@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@color/background">
+
+    <ImageView
+        android:id="@+id/dialogIcon"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_gravity="center_horizontal"
+        android:src="@drawable/logo_purple"
+        android:layout_marginBottom="12dp" />
+
+    <TextView
+        android:id="@+id/dialogTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAlignment="center"
+        android:textSize="22sp"
+        android:fontFamily="@font/kg_blank_space_sketch"
+        android:layout_marginBottom="16dp" />
+
+    <TextView
+        android:id="@+id/dialogMessage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAlignment="center"
+        android:textSize="15sp"
+        android:fontFamily="@font/gentium_plus_regular"
+        android:lineSpacingMultiplier="1.4"
+        android:layout_marginBottom="8dp" />
+
+    <TextView
+        android:id="@+id/dialogSender"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAlignment="center"
+        android:textSize="13sp"
+        android:fontFamily="@font/gentium_plus_regular"
+        android:layout_marginBottom="24dp" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/dialogBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="J'ai compris"
+        style="@style/ButtonPrimary" />
+
+</LinearLayout>

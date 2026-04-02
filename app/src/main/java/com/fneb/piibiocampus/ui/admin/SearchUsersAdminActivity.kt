@@ -10,7 +10,6 @@ import android.graphics.Color
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -18,11 +17,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.fneb.piibiocampus.R
 import com.fneb.piibiocampus.data.dao.UserDao
 import com.fneb.piibiocampus.data.model.UserProfile
+import com.fneb.piibiocampus.ui.BaseActivity
 import com.fneb.piibiocampus.utils.setTopBarTitle
+import com.fneb.piibiocampus.utils.showTopBarLeftButton
 import com.google.android.material.textfield.TextInputEditText
 import kotlinx.coroutines.launch
 
-class SearchUsersAdminActivity : AppCompatActivity() {
+class SearchUsersAdminActivity : BaseActivity() {
 
     private lateinit var adapter: UserAdapter
     private lateinit var recyclerView: RecyclerView
@@ -38,6 +39,7 @@ class SearchUsersAdminActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_searchusers_admin)
         setTopBarTitle(R.string.txtSearchAdmin)
+        showTopBarLeftButton { finish() }
 
         recyclerView = findViewById(R.id.resultsRecyclerView)
         searchEditText = findViewById(R.id.searchEditText)

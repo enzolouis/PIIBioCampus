@@ -11,13 +11,14 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
 import com.fneb.piibiocampus.R
 import com.fneb.piibiocampus.data.dao.NewsDao
+import com.fneb.piibiocampus.ui.BaseActivity
 import com.fneb.piibiocampus.utils.setTopBarTitle
+import com.fneb.piibiocampus.utils.showTopBarLeftButton
 import com.squareup.picasso.Picasso
 
-class UpdateNewsAdminActivity : AppCompatActivity() {
+class UpdateNewsAdminActivity : BaseActivity() {
     private lateinit var imageView: ImageView
     private var selectedImageUri: Uri? = null
 
@@ -47,6 +48,7 @@ class UpdateNewsAdminActivity : AppCompatActivity() {
         val status = intent.getStringExtra("status")
         if (status == "update"){
             setTopBarTitle("Modifier une Actu'")
+            showTopBarLeftButton { finish() }
             btnValidateUpdate.text = "Appliquer"
             btnChangeImage.text = "Changer l'image"
 
@@ -63,6 +65,7 @@ class UpdateNewsAdminActivity : AppCompatActivity() {
                 .into(imageView)
         }else{
             setTopBarTitle("Créer une Actu'")
+            showTopBarLeftButton { finish() }
             btnValidateUpdate.text = "Créer"
             btnChangeImage.text = "Choisir une image"
 
@@ -81,8 +84,7 @@ class UpdateNewsAdminActivity : AppCompatActivity() {
                 newsId = idNews.toString(),
                 onSuccess = {
                     Toast.makeText(this, "Suppression effectuée", Toast.LENGTH_SHORT).show()
-                    val intent = Intent(this, NewsListAdminActivity::class.java)
-                    this.startActivity(intent)
+                    finish()
                 },
                 onError = { e ->
                     Toast.makeText(this, "Erreur : ${e.message}", Toast.LENGTH_LONG).show()
@@ -123,8 +125,7 @@ class UpdateNewsAdminActivity : AppCompatActivity() {
                                 source = findViewById<EditText>(R.id.sourceNews).text.toString(),
                                 onSuccess = {
                                     Toast.makeText(this, "Actualité créee avec succès", Toast.LENGTH_SHORT).show()
-                                    val intent = Intent(this, NewsListAdminActivity::class.java)
-                                    this.startActivity(intent)
+                                    finish()
                                 },
                                 onError = { e ->
                                     Toast.makeText(this, "Erreur : ${e.message}", Toast.LENGTH_LONG).show()
@@ -155,8 +156,7 @@ class UpdateNewsAdminActivity : AppCompatActivity() {
             imageUrl = url,
             onSuccess = {
                 Toast.makeText(this, "Mise à jour effectuée", Toast.LENGTH_SHORT).show()
-                val intent = Intent(this, NewsListAdminActivity::class.java)
-                this.startActivity(intent)
+                finish()
             },
             onError = { e ->
                 Toast.makeText(this, "Erreur : ${e.message}", Toast.LENGTH_LONG).show()

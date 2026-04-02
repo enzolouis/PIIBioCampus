@@ -2,6 +2,8 @@ package com.fneb.piibiocampus.utils
 
 import android.app.Activity
 import android.support.annotation.StringRes
+import android.view.View
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.fneb.piibiocampus.R
@@ -28,4 +30,23 @@ fun Fragment.setTopBarTitle(text: String) {
 
 fun Fragment.setTopBarTitle(@StringRes resId: Int) {
     requireActivity().setTopBarTitle(resId)
+}
+
+fun Activity.showTopBarLeftButton(onClick: () -> Unit) {
+    findViewById<ImageButton>(R.id.topBarLeftButton)?.let { btn ->
+        btn.visibility = View.VISIBLE
+        btn.setOnClickListener { onClick() }
+    }
+}
+
+fun Activity.hideTopBarLeftButton() {
+    findViewById<ImageButton>(R.id.topBarLeftButton)?.visibility = View.GONE
+}
+
+fun Fragment.showTopBarLeftButton(onClick: () -> Unit) {
+    requireActivity().showTopBarLeftButton(onClick)
+}
+
+fun Fragment.hideTopBarLeftButton() {
+    requireActivity().hideTopBarLeftButton()
 }

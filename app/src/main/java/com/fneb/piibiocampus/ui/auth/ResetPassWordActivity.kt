@@ -6,17 +6,17 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.fneb.piibiocampus.R
+import com.fneb.piibiocampus.ui.BaseActivity
 import com.fneb.piibiocampus.utils.Extensions.toast
 import kotlinx.coroutines.launch
 
-class ResetPassWordActivity : AppCompatActivity() {
+class ResetPassWordActivity : BaseActivity() {
 
     private val viewModel: ResetPasswordViewModel by viewModels()
 
