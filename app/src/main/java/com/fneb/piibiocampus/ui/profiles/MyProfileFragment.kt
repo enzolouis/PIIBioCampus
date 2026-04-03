@@ -35,7 +35,7 @@ class MyProfileFragment : Fragment() {
     private lateinit var profilePicture:  ImageView
     private lateinit var badge:           ImageView
     private lateinit var settingsButton:  ImageView
-    private lateinit var progressBar:     View
+    private var progressBar: View? = null
 
     private val viewModel: ProfileViewModel by viewModels { MyProfileViewModelFactory() }
 
@@ -165,7 +165,7 @@ class MyProfileFragment : Fragment() {
     // ── UI helpers ────────────────────────────────────────────────────────────
 
     private fun showLoading(visible: Boolean) {
-        progressBar.visibility = if (visible) View.VISIBLE else View.GONE
+        progressBar?.visibility = if (visible) View.VISIBLE else View.GONE
     }
 
     // ── Adapter ───────────────────────────────────────────────────────────────

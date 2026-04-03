@@ -35,7 +35,7 @@ class CensusTreeActivity : BaseActivity() {
     private lateinit var btnStop:          Button
     private lateinit var btnValidate:      Button
     private lateinit var tvEmptyLevel:     TextView
-    private lateinit var progressBar:      View           // ex. ProgressBar ou View avec shimmer
+    private var progressBar: View? = null
 
     private val viewModel: CensusViewModel by viewModels { CensusViewModelFactory() }
 
@@ -299,7 +299,7 @@ class CensusTreeActivity : BaseActivity() {
     // ── UI helpers ────────────────────────────────────────────────────────────
 
     private fun showLoading(visible: Boolean) {
-        progressBar.visibility = if (visible) View.VISIBLE else View.GONE
+        progressBar?.visibility = if (visible) View.VISIBLE else View.GONE
     }
 
     private fun showError(exception: com.fneb.piibiocampus.data.error.AppException) {

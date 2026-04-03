@@ -30,7 +30,7 @@ class EditProfileFragment : PermissionFragment() {
     private lateinit var editNewPassword:     EditText
     private lateinit var editConfirmPassword: EditText
     private lateinit var saveButton:          Button
-    private lateinit var progressBar:         View
+    private var progressBar: View? = null
 
     private val viewModel: EditProfileViewModel by viewModels { EditProfileViewModelFactory() }
 
@@ -234,7 +234,7 @@ class EditProfileFragment : PermissionFragment() {
     // ── UI helpers ────────────────────────────────────────────────────────────
 
     private fun showLoading(visible: Boolean) {
-        progressBar.visibility = if (visible) View.VISIBLE else View.GONE
+        progressBar?.visibility = if (visible) View.VISIBLE else View.GONE
         saveButton.isEnabled   = !visible
     }
 

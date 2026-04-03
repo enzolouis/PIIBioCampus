@@ -16,7 +16,7 @@ import com.fneb.piibiocampus.utils.setTopBarTitle
 
 class SettingsFragment : PermissionFragment() {
 
-    private lateinit var progressBar: View
+    private var progressBar: View? = null
 
     private val viewModel: SettingsViewModel by viewModels { SettingsViewModelFactory() }
 
@@ -136,7 +136,7 @@ class SettingsFragment : PermissionFragment() {
     // ── UI helpers ────────────────────────────────────────────────────────────
 
     private fun showLoading(visible: Boolean) {
-        progressBar.visibility = if (visible) View.VISIBLE else View.GONE
+        progressBar?.visibility = if (visible) View.VISIBLE else View.GONE
     }
 
     private fun navigateToAuth() {

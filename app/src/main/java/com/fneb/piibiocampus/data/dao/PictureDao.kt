@@ -80,23 +80,6 @@ object PictureDao {
 
     fun getAllPicturesEnriched(
         onSuccess: (List<Map<String, Any>>) -> Unit,
-        onError: (Exception) -> Unit
-    ) {
-        picturesRef.get()
-            .addOnSuccessListener { snapshot ->
-                val pictures = snapshot.documents.mapNotNull { document ->
-                    val data = document.data ?: return@mapNotNull null
-                    val map  = data.toMutableMap()
-                    map["id"] = document.id
-                    map
-                }
-                enrichPicturesWithCensusData(pictures, onSuccess, onError)
-            }
-            .addOnFailureListener(onError)
-    }
-
-    fun getAllPicturesEnriched(
-        onSuccess: (List<Map<String, Any>>) -> Unit,
         onError: (AppException) -> Unit
     ) {
         picturesRef.get()
