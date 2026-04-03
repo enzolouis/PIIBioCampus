@@ -2,14 +2,27 @@ package com.fneb.piibiocampus.ui.admin
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
+import android.view.View
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import android.widget.GridLayout
+import androidx.activity.viewModels
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewModelScope
 import com.fneb.piibiocampus.R
+import com.fneb.piibiocampus.data.dao.UserDao
+import com.fneb.piibiocampus.data.repository.AuthRepository
+import com.fneb.piibiocampus.ui.MainActivity
+import com.fneb.piibiocampus.ui.auth.AuthViewModel
 import com.fneb.piibiocampus.ui.census.CensusEditorActivity
+import com.fneb.piibiocampus.ui.common.LoadingDialog
+import com.fneb.piibiocampus.utils.Extensions.toast
 import com.fneb.piibiocampus.utils.setTopBarTitle
+import kotlinx.coroutines.launch
+import kotlin.getValue
 
 class DashboardAdminActivity : AppCompatActivity() {
 
@@ -32,7 +45,9 @@ class DashboardAdminActivity : AppCompatActivity() {
         }
         val btnSearch: Button = findViewById(R.id.btnSearch);
         btnSearch.setOnClickListener {
+            val role = intent.getStringExtra("role")
             val intent = Intent(this, SearchUsersAdminActivity::class.java)
+            intent.putExtra("role", role)
             startActivity(intent)
         }
 

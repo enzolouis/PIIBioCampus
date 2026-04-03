@@ -8,9 +8,12 @@ import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.graphics.Color
 import android.os.Bundle
+import android.view.View
+import android.widget.Spinner
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.children
 import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -42,7 +45,9 @@ class SearchUsersAdminActivity : AppCompatActivity() {
         recyclerView = findViewById(R.id.resultsRecyclerView)
         searchEditText = findViewById(R.id.searchEditText)
 
-        adapter = UserAdapter(displayedUsers) { user, position ->
+        val role = intent.getStringExtra("role")
+
+        adapter = UserAdapter(displayedUsers, role) { user, position ->
             AlertDialog.Builder(this)
                 .setTitle("Bannir l'utilisateur")
                 .setMessage("Voulez-vous vraiment bannir ${user.name} ?")
@@ -87,7 +92,7 @@ class SearchUsersAdminActivity : AppCompatActivity() {
     private fun loadAllUsers() {
         lifecycleScope.launch {
             try {
-                val result = UserDao.getAllUsers()
+                val result = UserDao.getAllUsersAndAdmins()
                 allUsers.clear()
                 allUsers.addAll(result)
                 applyFilter()

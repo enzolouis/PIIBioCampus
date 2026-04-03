@@ -13,7 +13,7 @@
     <string name="titleAdmin">Tableau de bord admin</string>
     <string name="titleActu">Les actus</string>
     <string name="titleExport">Exportation de données</string>
-    <string name="titleSearchUser">Rechercher un·e utilisateur·rice</string>
+    <string name="titleSearchUser">Gestion des utilisateur·rice·s</string>
     <string name="titleCensus">Arbre de recensement</string>
     <string name="titleListAdmin">Liste des admins</string>
     <string name="titleListCensus">Liste des recensements</string>

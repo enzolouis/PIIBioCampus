@@ -120,4 +120,31 @@ object UserDao {
             doc.toObject(UserProfile::class.java)?.copy(uid = doc.id)
         }
     }
+
+    suspend fun getAllUsersAndAdmins(): List<UserProfile> {
+        val snapshot = db.collection("users")
+            //.whereEqualTo("role", "USER")
+            .whereIn("role",listOf("USER", "ADMIN"))
+            .orderBy("name")
+            .get()
+            .await()
+
+        return snapshot.documents.mapNotNull { doc ->
+            doc.toObject(UserProfile::class.java)?.copy(uid = doc.id)
+        }
+    }
+
+    fun updateUserRole(
+        userId: String,
+        newRole: String,
+        onSuccess: () -> Unit,
+        onError: (Exception) -> Unit
+    ) {
+        db.collection("users")
+            .document(userId)
+            .update("role", newRole)
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { onError(it) }
+    }
+
 }

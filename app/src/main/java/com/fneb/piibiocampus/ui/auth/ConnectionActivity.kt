@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.ViewGroup
 import android.text.method.HideReturnsTransformationMethod
 import android.text.method.PasswordTransformationMethod
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
@@ -16,6 +17,7 @@ import androidx.lifecycle.lifecycleScope
 import com.fneb.piibiocampus.R
 import com.fneb.piibiocampus.ui.MainActivity
 import com.fneb.piibiocampus.ui.admin.DashboardAdminActivity
+import com.fneb.piibiocampus.ui.admin.UpdateNewsAdminActivity
 import com.fneb.piibiocampus.ui.common.LoadingDialog
 import com.fneb.piibiocampus.utils.Extensions.toast
 import com.fneb.piibiocampus.utils.Validators
@@ -102,9 +104,23 @@ class ConnectionActivity : AppCompatActivity() {
                             "USER" -> startActivity(
                                 Intent(this@ConnectionActivity, MainActivity::class.java)
                             )
-                            "ADMIN", "SUPER_ADMIN" -> startActivity(
-                                Intent(this@ConnectionActivity, DashboardAdminActivity::class.java)
-                            )
+                            "ADMIN" -> {
+                                val intent = Intent(
+                                    this@ConnectionActivity,
+                                    DashboardAdminActivity::class.java
+                                )
+                                intent.putExtra("role", "ADMIN")
+                                startActivity(intent)
+                            }
+                            "SUPER_ADMIN" -> {
+                                val intent = Intent(
+                                    this@ConnectionActivity,
+                                    DashboardAdminActivity::class.java
+                                )
+                                intent.putExtra("role", "SUPER_ADMIN")
+                                startActivity(intent)
+                            }
+
                             else -> toast("Rôle inconnu : ${state.role}")
                         }
                         finish()

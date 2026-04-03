@@ -36,11 +36,20 @@
         app:layout_constraintStart_toEndOf="@id/userAvatar"
         app:layout_constraintTop_toTopOf="@id/userAvatar"
         app:layout_constraintBottom_toBottomOf="@id/userAvatar"
-        app:layout_constraintEnd_toStartOf="@id/btnBan"
+        app:layout_constraintEnd_toStartOf="@id/spinnerRole"
         android:ellipsize="end"
         android:singleLine="true"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"/>
+
+    <Spinner
+        android:id="@+id/spinnerRole"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/userAvatar"
+        app:layout_constraintEnd_toStartOf="@id/btnBan"
+        app:layout_constraintBottom_toBottomOf="@id/userAvatar"/>
 
     <!-- Ban button -->
     <com.google.android.material.button.MaterialButton
