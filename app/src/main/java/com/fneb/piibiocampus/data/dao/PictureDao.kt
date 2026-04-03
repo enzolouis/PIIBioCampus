@@ -167,7 +167,7 @@ object PictureDao {
             val uid       = currentUser.uid
             val webpFile  = bytesToWebpFile(context, imageBytes)
             val pictureId = picturesRef.document().id
-            val picRef    = storageRef.child("$pictureId.webp")
+            val picRef = storageRef.child("pictures/$pictureId.webp")
 
             val metadata = StorageMetadata.Builder()
                 .setContentType("image/webp")
@@ -268,7 +268,7 @@ object PictureDao {
             }
 
             val imageId  = UUID.randomUUID().toString()
-            val ref      = storageRef.child("$imageId.webp")
+            val ref = storageRef.child("census_images/$imageId.webp")
 
             val metadata = StorageMetadata.Builder()
                 .setContentType("image/webp")

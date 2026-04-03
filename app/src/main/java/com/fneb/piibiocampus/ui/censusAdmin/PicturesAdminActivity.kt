@@ -80,7 +80,6 @@ class PicturesAdminActivity : BaseActivity() {
 
         setTopBarTitle("Gestion des recensements")
         showTopBarLeftButton { finish() }
-
         viewModel.loadAll()
     }
 
