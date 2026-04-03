@@ -17,8 +17,10 @@ import com.fneb.piibiocampus.data.repository.AuthRepository
 import com.fneb.piibiocampus.ui.MainActivity
 import com.fneb.piibiocampus.ui.auth.AuthViewModel
 import com.fneb.piibiocampus.ui.BaseActivity
+import com.fneb.piibiocampus.ui.admin.settings.SettingsAdminActivity
 import com.fneb.piibiocampus.ui.census.CensusEditorActivity
 import com.fneb.piibiocampus.ui.common.LoadingDialog
+import com.fneb.piibiocampus.ui.profiles.settings.SettingsFragment
 import com.fneb.piibiocampus.utils.Extensions.toast
 import com.fneb.piibiocampus.utils.setTopBarTitle
 import kotlinx.coroutines.launch
@@ -72,6 +74,12 @@ class DashboardAdminActivity : BaseActivity() {
         val btnNews: Button = findViewById(R.id.btnNews);
         btnNews.setOnClickListener {
             val intent = Intent(this, NewsListAdminActivity::class.java)
+            startActivity(intent)
+        }
+
+        val btnSettings: Button = findViewById(R.id.btnSettings);
+        btnSettings.setOnClickListener {
+            val intent = Intent(this, SettingsAdminActivity::class.java)
             startActivity(intent)
         }
     }

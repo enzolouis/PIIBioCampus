@@ -78,6 +78,15 @@
         <activity
             android:name=".ui.library.LibraryFragment"
             android:exported="true" />
+        <activity
+            android:name=".ui.admin.settings.SettingsAdminActivity"
+            android:exported="true" />
+        <activity
+            android:name=".ui.admin.settings.CguActivityAdmin"
+            android:exported="true" />
+        <activity
+            android:name=".ui.admin.settings.EditProfileActivityAdmin"
+            android:exported="true" />
 
     </application>
 

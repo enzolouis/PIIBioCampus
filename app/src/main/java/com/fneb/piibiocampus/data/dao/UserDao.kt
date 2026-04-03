@@ -169,6 +169,16 @@ object UserDao {
             "profilePictureUrl" to (profile.profilePictureUrl ?: "")
         )
     }
+    /**
+     * Update profile name
+     */
+    suspend fun updateUserProfileName(name: String) {
+        val user = auth.currentUser ?: return
+        db.collection("users")
+            .document(user.uid)
+            .update(mapOf("name" to name))
+            .await()
+    }
 
     /**
      * Update profile (concerne les 3 prochaines fonctions)
