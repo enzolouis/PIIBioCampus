@@ -1,11 +1,18 @@
 package com.fneb.piibiocampus.ui.census
 
+import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.fneb.piibiocampus.data.dao.PictureDao
+import com.fneb.piibiocampus.data.error.AppException
+import com.fneb.piibiocampus.data.model.LocationMeta
 import com.fneb.piibiocampus.data.repository.CensusRepository
+import com.fneb.piibiocampus.data.ui.UiState
 
 class CensusViewModel(private val repository: CensusRepository) : ViewModel() {
+
+    // ── Arbre de navigation ───────────────────────────────────────────────────
 
     private val _currentNodes = MutableLiveData<List<CensusNode>>(emptyList())
     val currentNodes: LiveData<List<CensusNode>> = _currentNodes
@@ -13,10 +20,19 @@ class CensusViewModel(private val repository: CensusRepository) : ViewModel() {
     private val _selectedNodeId = MutableLiveData<String?>(null)
     val selectedNodeId: LiveData<String?> = _selectedNodeId
 
+    // ── États UI ──────────────────────────────────────────────────────────────
+
+    /** Chargement de l'arbre (Loading / Success / Error) */
+    val treeState: LiveData<UiState<List<CensusNode>>> = repository.uiState
+
+    /** Résultat de la sauvegarde photo (Loading / Success / Error) */
+    private val _saveState = MutableLiveData<UiState<Unit>>(UiState.Idle)
+    val saveState: LiveData<UiState<Unit>> = _saveState
+
+    // ── Navigation interne ────────────────────────────────────────────────────
+
     private val navStack  = ArrayDeque<List<CensusNode>>()
     private val pathStack = ArrayDeque<CensusNode?>()
-
-    // Garde une référence aux racines pour pouvoir chercher un nœud par ID
     private var cachedRoots: List<CensusNode> = emptyList()
 
     /**
@@ -43,13 +59,14 @@ class CensusViewModel(private val repository: CensusRepository) : ViewModel() {
         repository.loadRoots()
     }
 
+    // ── Chargement ────────────────────────────────────────────────────────────
+
     /**
      * Recharge les racines depuis le repository.
      * Si [initialNodeId] est fourni, navigue automatiquement jusqu'à ce nœud
      * une fois les données chargées (utilisé pour "Reprendre le recensement").
      */
     fun refreshRoots(initialNodeId: String? = null) {
-        // Réinitialise la navigation
         navStack.clear()
         pathStack.clear()
         pathStack.addLast(null)
@@ -58,12 +75,9 @@ class CensusViewModel(private val repository: CensusRepository) : ViewModel() {
         cachedRoots = emptyList()
         lastNavigatedNodeId = null
 
-        repository.loadRoots(onError = { e ->
-            // Tu peux exposer une LiveData d'erreur ici si besoin
-        })
+        repository.loadRoots()
 
         if (initialNodeId != null) {
-            // On observe une seule fois les roots pour lancer la navigation
             val observer = object : androidx.lifecycle.Observer<List<CensusNode>> {
                 override fun onChanged(roots: List<CensusNode>) {
                     if (roots.isNotEmpty()) {
@@ -72,11 +86,7 @@ class CensusViewModel(private val repository: CensusRepository) : ViewModel() {
                         pathStack.clear()
                         pathStack.addLast(null)
                         _currentNodes.postValue(roots)
-
-                        // Navigue jusqu'au nœud sauvegardé
                         navigateToNodeById(initialNodeId)
-
-                        // Désinscription après le premier appel
                         repository.roots.removeObserver(this)
                     }
                 }
@@ -85,10 +95,12 @@ class CensusViewModel(private val repository: CensusRepository) : ViewModel() {
         }
     }
 
+    // ── Navigation ────────────────────────────────────────────────────────────
+
     fun navigateTo(node: CensusNode) {
         _currentNodes.value?.let { navStack.addLast(it) }
         pathStack.addLast(node)
-        lastNavigatedNodeId = node.id   // ← mémorise le nœud de navigation
+        lastNavigatedNodeId = node.id
         _selectedNodeId.postValue(null)
         _currentNodes.postValue(node.children)
     }
@@ -99,8 +111,6 @@ class CensusViewModel(private val repository: CensusRepository) : ViewModel() {
         if (canNavigateUp()) {
             val previous = navStack.removeLast()
             pathStack.removeLastOrNull()
-            // Après être remonté, le "dernier navigué" est désormais le parent
-            // (avant-dernier de pathStack, i.e. le nouveau dernier non-null)
             lastNavigatedNodeId = pathStack.lastOrNull { it != null }?.id
             _currentNodes.postValue(previous)
             _selectedNodeId.postValue(null)
@@ -121,6 +131,55 @@ class CensusViewModel(private val repository: CensusRepository) : ViewModel() {
      */
     fun stopCensusRef(): String? = _selectedNodeId.value ?: lastNavigatedNodeId
 
+    // ── Sauvegarde photo ──────────────────────────────────────────────────────
+
+    fun createPicture(
+        context: Context,
+        imageBytes: ByteArray,
+        location: LocationMeta,
+        censusRef: String?,
+        recordingStatus: Boolean
+    ) {
+        _saveState.value = UiState.Loading
+        PictureDao.exportPictureFromBytes(
+            context         = context,
+            imageBytes      = imageBytes,
+            location        = location,
+            censusRef       = censusRef,
+            recordingStatus = recordingStatus,
+            adminValidated  = false,
+            onSuccess       = {
+                _saveState.postValue(UiState.Success(Unit))
+            },
+            onError = { e ->
+                val mapped = if (e is AppException) e else AppException.Unknown(e)
+                _saveState.postValue(UiState.Error(mapped))
+            }
+        )
+    }
+
+    fun updatePicture(
+        pictureId: String,
+        censusRef: String?,
+        recordingStatus: Boolean
+    ) {
+        _saveState.value = UiState.Loading
+        PictureDao.updatePictureCensus(
+            pictureId       = pictureId,
+            censusRef       = censusRef,
+            recordingStatus = recordingStatus,
+            onSuccess       = {
+                _saveState.postValue(UiState.Success(Unit))
+            },
+            onError = { e ->
+                val mapped = if (e is AppException) e else AppException.Unknown(e)
+                _saveState.postValue(UiState.Error(mapped))
+            }
+        )
+    }
+
+    // ── Navigation par ID (reprise de recensement) ────────────────────────────
+
     /**
      * Cherche le chemin depuis la racine jusqu'au nœud [targetId]
      * et reconstruit la pile de navigation directement depuis les données,
@@ -131,22 +190,12 @@ class CensusViewModel(private val repository: CensusRepository) : ViewModel() {
         val roots = cachedRoots.ifEmpty { _currentNodes.value ?: return }
         val path  = findPathToNode(roots, targetId) ?: return
 
-        // Réinitialise les piles
         navStack.clear()
         pathStack.clear()
         pathStack.addLast(null)
         lastNavigatedNodeId = null
 
-        // Construit navStack et pathStack directement depuis les données du chemin.
-        // On ne passe jamais par navigateTo() ni par _currentNodes.value ici,
-        // car postValue est asynchrone : .value serait toujours vide pendant la boucle.
-        //
-        // Schéma pour un chemin [A, B, C] (C = cible feuille) :
-        //   navStack  : [roots, A.children, B.children]
-        //   pathStack : [null, A, B, C]  ← C ajouté seulement si non-feuille
-        //   _currentNodes → B.children (niveau des frères de C)
-        //   _selectedNodeId → C.id si feuille
-        val target = path.last()
+        val target       = path.last()
         val pathToParent = path.dropLast(1)
 
         var currentLevel: List<CensusNode> = roots
@@ -158,11 +207,9 @@ class CensusViewModel(private val repository: CensusRepository) : ViewModel() {
         }
 
         if (target.children.isEmpty()) {
-            // Feuille (espèce) : affiche ses frères et la sélectionne
             _currentNodes.postValue(currentLevel)
             _selectedNodeId.postValue(target.id)
         } else {
-            // Nœud intermédiaire : entre dedans et affiche ses enfants
             navStack.addLast(currentLevel)
             pathStack.addLast(target)
             lastNavigatedNodeId = target.id

@@ -7,41 +7,49 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.lifecycle.lifecycleScope
+import androidx.fragment.app.viewModels
 import com.fneb.piibiocampus.R
-import com.fneb.piibiocampus.data.dao.UserDao
 import com.fneb.piibiocampus.data.model.Badge
+import com.fneb.piibiocampus.data.model.UserProfile
+import com.fneb.piibiocampus.data.ui.UiState
+import com.fneb.piibiocampus.data.ui.showError
 import com.fneb.piibiocampus.ui.PermissionFragment
 import com.fneb.piibiocampus.utils.BadgeUtils
 import com.fneb.piibiocampus.utils.setTopBarTitle
 import com.google.android.material.imageview.ShapeableImageView
 import com.squareup.picasso.Picasso
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 
 class EditProfileFragment : PermissionFragment() {
 
-    private lateinit var editProfilePicture: ShapeableImageView
-    private lateinit var editName: EditText
-    private lateinit var editDescription: EditText
-    private lateinit var currentBadgeImage: ImageView
-    private lateinit var currentBadgeLabel: TextView
-    private lateinit var editOldPassword: EditText
-    private lateinit var editNewPassword: EditText
+    private lateinit var editProfilePicture:  ShapeableImageView
+    private lateinit var editName:            EditText
+    private lateinit var editDescription:     EditText
+    private lateinit var currentBadgeImage:   ImageView
+    private lateinit var currentBadgeLabel:   TextView
+    private lateinit var editOldPassword:     EditText
+    private lateinit var editNewPassword:     EditText
     private lateinit var editConfirmPassword: EditText
+    private lateinit var saveButton:          Button
+    private lateinit var progressBar:         View
 
-    private var selectedBadgeId: String = ""
+    private val viewModel: EditProfileViewModel by viewModels { EditProfileViewModelFactory() }
+
+    private var selectedBadgeId: String  = ""
     private var pendingImageBytes: ByteArray? = null
-    private var photoCount: Int = 0
+
+    // ── Galerie ───────────────────────────────────────────────────────────────
 
     private val pickImageLauncher = registerForActivityResult(
         ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         uri ?: return@registerForActivityResult
-        val bytes = requireContext().contentResolver.openInputStream(uri)?.readBytes() ?: return@registerForActivityResult
+        val bytes = requireContext().contentResolver
+            .openInputStream(uri)?.readBytes() ?: return@registerForActivityResult
         pendingImageBytes = bytes
         editProfilePicture.setImageURI(uri)
     }
+
+    // ── Cycle de vie ──────────────────────────────────────────────────────────
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -60,23 +68,15 @@ class EditProfileFragment : PermissionFragment() {
         editOldPassword     = view.findViewById(R.id.editOldPassword)
         editNewPassword     = view.findViewById(R.id.editNewPassword)
         editConfirmPassword = view.findViewById(R.id.editConfirmPassword)
+        saveButton          = view.findViewById(R.id.saveButton)
+        progressBar         = view.findViewById(R.id.progressBar)
 
-        view.findViewById<View>(R.id.editProfilePictureLabel).setOnClickListener {
-            openGallery()
-        }
-        editProfilePicture.setOnClickListener {
-            openGallery()
-        }
+        view.findViewById<View>(R.id.editProfilePictureLabel).setOnClickListener { openGallery() }
+        editProfilePicture.setOnClickListener { openGallery() }
+        view.findViewById<View>(R.id.currentBadgeRow).setOnClickListener { showBadgePickerDialog() }
+        saveButton.setOnClickListener { attemptSave() }
 
-        view.findViewById<View>(R.id.currentBadgeRow).setOnClickListener {
-            showBadgePickerDialog()
-        }
-
-        view.findViewById<Button>(R.id.saveButton).setOnClickListener {
-            saveProfile()
-        }
-
-        loadCurrentProfile()
+        setupObservers()
     }
 
     override fun onResume() {
@@ -84,44 +84,70 @@ class EditProfileFragment : PermissionFragment() {
         setTopBarTitle(R.string.titleEditProfile)
     }
 
+    // ── Observers ─────────────────────────────────────────────────────────────
+
+    private fun setupObservers() {
+        viewModel.profileState.observe(viewLifecycleOwner) { state ->
+            when (state) {
+                is UiState.Loading -> showLoading(true)
+                is UiState.Success -> {
+                    showLoading(false)
+                    bindProfile(state.data)
+                }
+                is UiState.Error -> {
+                    showLoading(false)
+                    showError(state.exception)
+                }
+                else -> Unit
+            }
+        }
+
+        viewModel.saveState.observe(viewLifecycleOwner) { state ->
+            when (state) {
+                is UiState.Loading -> showLoading(true)
+                is UiState.Success -> {
+                    showLoading(false)
+                    Toast.makeText(requireContext(), "Profil mis à jour", Toast.LENGTH_SHORT).show()
+                    parentFragmentManager.popBackStack()
+                }
+                is UiState.Error -> {
+                    showLoading(false)
+                    showError(state.exception)
+                }
+                else -> Unit
+            }
+        }
+    }
+
+    // ── Binding ───────────────────────────────────────────────────────────────
+
+    private fun bindProfile(profile: UserProfile) {
+        editName.setText(profile.name)
+        editDescription.setText(profile.description)
+
+        if (profile.profilePictureUrl.isNotEmpty()) {
+            Picasso.get()
+                .load(Uri.parse(profile.profilePictureUrl))
+                .placeholder(R.drawable.photo_placeholder)
+                .into(editProfilePicture)
+        }
+
+        selectedBadgeId = profile.currentBadge
+        updateBadgeRow(selectedBadgeId)
+    }
+
+    // ── Galerie / permissions ─────────────────────────────────────────────────
+
     private fun openGallery() {
         val permission = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
             android.Manifest.permission.READ_MEDIA_IMAGES
         } else {
             android.Manifest.permission.READ_EXTERNAL_STORAGE
         }
-        withPermission(
-            permission = permission,
-            onGranted = { pickImageLauncher.launch("image/*") }
-        )
+        withPermission(permission = permission, onGranted = { pickImageLauncher.launch("image/*") })
     }
 
-    private fun loadCurrentProfile() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            val user = UserDao.getCurrentUser() ?: return@launch
-            val profile = UserDao.getCurrentUserProfile() ?: return@launch
-
-            editName.setText(profile.name)
-            editDescription.setText(profile.description)
-
-            if (profile.profilePictureUrl.isNotEmpty()) {
-                Picasso.get()
-                    .load(Uri.parse(profile.profilePictureUrl))
-                    .placeholder(R.drawable.photo_placeholder)
-                    .into(editProfilePicture)
-            }
-
-            val snapshot = com.google.firebase.firestore.FirebaseFirestore.getInstance()
-                .collection("pictures")
-                .whereEqualTo("userRef", user.uid)
-                .get()
-                .await()
-            photoCount = snapshot.size()
-
-            selectedBadgeId = profile.currentBadge
-            updateBadgeRow(selectedBadgeId)
-        }
-    }
+    // ── Badge ─────────────────────────────────────────────────────────────────
 
     private fun updateBadgeRow(badgeId: String) {
         val badge = BadgeUtils.ALL_BADGES.firstOrNull { it.id == badgeId }
@@ -135,6 +161,7 @@ class EditProfileFragment : PermissionFragment() {
     }
 
     private fun showBadgePickerDialog() {
+        val photoCount     = viewModel.photoCount.value ?: 0
         val unlockedBadges = BadgeUtils.getUnlockedBadges(photoCount)
 
         if (unlockedBadges.isEmpty()) {
@@ -144,7 +171,6 @@ class EditProfileFragment : PermissionFragment() {
 
         val dialogView = LayoutInflater.from(requireContext())
             .inflate(R.layout.dialog_badge_picker, null)
-
         val recycler = dialogView.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.badgeRecycler)
         recycler.layoutManager = androidx.recyclerview.widget.GridLayoutManager(requireContext(), 3)
 
@@ -163,71 +189,65 @@ class EditProfileFragment : PermissionFragment() {
         dialog.show()
     }
 
-    private fun saveProfile() {
-        val name        = editName.text.toString().trim()
-        val description = editDescription.text.toString().trim()
+    // ── Sauvegarde ────────────────────────────────────────────────────────────
+
+    private fun attemptSave() {
+        val name            = editName.text.toString().trim()
+        val description     = editDescription.text.toString().trim()
         val oldPassword     = editOldPassword.text.toString()
         val newPassword     = editNewPassword.text.toString()
         val confirmPassword = editConfirmPassword.text.toString()
 
+        // Validation locale — pas besoin du ViewModel pour ça
         if (name.isEmpty()) {
             editName.error = "Le pseudo ne peut pas être vide"
             return
         }
 
-        val passwordChangeRequested = oldPassword.isNotEmpty() || newPassword.isNotEmpty() || confirmPassword.isNotEmpty()
+        val passwordChangeRequested = oldPassword.isNotEmpty()
+                || newPassword.isNotEmpty()
+                || confirmPassword.isNotEmpty()
 
         if (passwordChangeRequested) {
             if (oldPassword.isEmpty()) {
-                editOldPassword.error = "Entrez votre ancien mot de passe"
-                return
+                editOldPassword.error = "Entrez votre ancien mot de passe"; return
             }
             if (newPassword.length < 6) {
-                editNewPassword.error = "Le mot de passe doit faire au moins 6 caractères"
-                return
+                editNewPassword.error = "Le mot de passe doit faire au moins 6 caractères"; return
             }
             if (newPassword != confirmPassword) {
-                editConfirmPassword.error = "Les mots de passe ne correspondent pas"
-                return
+                editConfirmPassword.error = "Les mots de passe ne correspondent pas"; return
             }
         }
 
-        val progressDialog = android.app.ProgressDialog(requireContext()).apply {
-            setMessage("Enregistrement…")
-            setCancelable(false)
-            show()
-        }
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                val imageBytes = pendingImageBytes
-                if (imageBytes != null) {
-                    UserDao.uploadProfilePicture(requireContext(), imageBytes)
-                }
-                UserDao.updateUserProfile(name, description)
-                if (selectedBadgeId.isNotEmpty()) {
-                    UserDao.updateCurrentBadge(selectedBadgeId)
-                }
-                if (passwordChangeRequested) {
-                    UserDao.updatePassword(oldPassword, newPassword)
-                }
-                Toast.makeText(requireContext(), "Profil mis à jour", Toast.LENGTH_SHORT).show()
-                parentFragmentManager.popBackStack()
-            } catch (e: Exception) {
-                Toast.makeText(requireContext(), "Erreur : ${e.message}", Toast.LENGTH_SHORT).show()
-            } finally {
-                progressDialog.dismiss()
-            }
-        }
+        viewModel.saveProfile(
+            context         = requireContext(),
+            name            = name,
+            description     = description,
+            selectedBadgeId = selectedBadgeId,
+            imageBytes      = pendingImageBytes,
+            oldPassword     = if (passwordChangeRequested) oldPassword else "",
+            newPassword     = if (passwordChangeRequested) newPassword else ""
+        )
     }
 
+    // ── UI helpers ────────────────────────────────────────────────────────────
+
+    private fun showLoading(visible: Boolean) {
+        progressBar.visibility = if (visible) View.VISIBLE else View.GONE
+        saveButton.isEnabled   = !visible
+    }
+
+    // ── Adapter badge picker ──────────────────────────────────────────────────
+
     inner class BadgePickerAdapter(
-        private val badges: List<Badge>,
+        private val badges:     List<Badge>,
         private val selectedId: String,
-        private val onSelect: (Badge) -> Unit
+        private val onSelect:   (Badge) -> Unit
     ) : androidx.recyclerview.widget.RecyclerView.Adapter<BadgePickerAdapter.BadgeViewHolder>() {
 
-        inner class BadgeViewHolder(view: View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(view) {
+        inner class BadgeViewHolder(view: View) :
+            androidx.recyclerview.widget.RecyclerView.ViewHolder(view) {
             val image: ImageView = view.findViewById(R.id.badgeItemImage)
             val label: TextView  = view.findViewById(R.id.badgeItemLabel)
             val check: View      = view.findViewById(R.id.badgeItemCheck)

@@ -9,44 +9,47 @@ import android.view.View
 import android.widget.*
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
-import androidx.lifecycle.Observer
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.fneb.piibiocampus.R
-import com.fneb.piibiocampus.data.dao.PictureDao
 import com.fneb.piibiocampus.data.model.LocationMeta
+import com.fneb.piibiocampus.data.ui.UiState
 import com.fneb.piibiocampus.ui.BaseActivity
 import com.fneb.piibiocampus.ui.MainActivity
 import com.fneb.piibiocampus.ui.photo.PicturesViewerCaller
 import com.github.chrisbanes.photoview.PhotoView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.Snackbar
 import com.squareup.picasso.Picasso
 
 enum class CensusMode { CREATE, UPDATE }
 
 class CensusTreeActivity : BaseActivity() {
 
-    private lateinit var recyclerView:    RecyclerView
+    private lateinit var recyclerView:     RecyclerView
     private lateinit var previewThumbnail: ImageView
-    private lateinit var tvHeaderTitle:   TextView
-    private lateinit var btnBack:         ImageButton
-    private lateinit var btnCancel:       Button
-    private lateinit var btnStop:         Button
-    private lateinit var btnValidate:     Button
-    private lateinit var tvEmptyLevel:    TextView   // ← message niveau vide
+    private lateinit var tvHeaderTitle:    TextView
+    private lateinit var btnBack:          ImageButton
+    private lateinit var btnCancel:        Button
+    private lateinit var btnStop:          Button
+    private lateinit var btnValidate:      Button
+    private lateinit var tvEmptyLevel:     TextView
+    private lateinit var progressBar:      View           // ex. ProgressBar ou View avec shimmer
 
     private val viewModel: CensusViewModel by viewModels { CensusViewModelFactory() }
 
-    private var imageBytes: ByteArray? = null
-    private var locationMeta: LocationMeta? = null
-
-    private var mode: CensusMode = CensusMode.CREATE
+    private var imageBytes:        ByteArray? = null
+    private var locationMeta:      LocationMeta? = null
+    private var mode:              CensusMode = CensusMode.CREATE
     private var existingPictureId: String? = null
-    private var existingImageUrl: String? = null
-    private var zoomDialog: android.app.Dialog? = null
-    private var callerName: String = PicturesViewerCaller.MAP.name
+    private var existingImageUrl:  String? = null
+    private var zoomDialog:        android.app.Dialog? = null
+    private var callerName:        String = PicturesViewerCaller.MAP.name
 
     private lateinit var adapter: CensusAdapter
+
+    // ── Cycle de vie ──────────────────────────────────────────────────────────
 
     override fun onDestroy() {
         super.onDestroy()
@@ -66,6 +69,7 @@ class CensusTreeActivity : BaseActivity() {
         btnStop          = findViewById(R.id.btnStop)
         btnValidate      = findViewById(R.id.btnValidate)
         tvEmptyLevel     = findViewById(R.id.tvEmptyLevel)
+        progressBar      = findViewById(R.id.progressBar)
 
         mode       = CensusMode.valueOf(intent.getStringExtra("mode") ?: CensusMode.CREATE.name)
         callerName = intent.getStringExtra("caller") ?: PicturesViewerCaller.MAP.name
@@ -142,12 +146,7 @@ class CensusTreeActivity : BaseActivity() {
             selectedNodeId = null,
             onItemClick    = { node, _ ->
                 when {
-                    // Espèce (feuille) → sélection
                     node.type == CensusType.SPECIES -> viewModel.selectNode(node)
-                    // Nœud avec enfants → navigation normale
-                    node.children.isNotEmpty()      -> viewModel.navigateTo(node)
-                    // Nœud vide (pas encore rempli par les admins) → on entre quand même
-                    // pour afficher le message explicatif
                     else                            -> viewModel.navigateTo(node)
                 }
             },
@@ -160,50 +159,75 @@ class CensusTreeActivity : BaseActivity() {
     // ── Observers ─────────────────────────────────────────────────────────────
 
     private fun setupObservers() {
-        viewModel.currentNodes.observe(this, Observer { nodes ->
+
+        // Chargement de l'arbre
+        viewModel.treeState.observe(this) { state ->
+            when (state) {
+                is UiState.Loading -> showLoading(true)
+                is UiState.Error   -> {
+                    showLoading(false)
+                    showError(state.exception)
+                }
+                // Success : les nodes arrivent via currentNodes ci-dessous
+                else -> showLoading(false)
+            }
+        }
+
+        // Résultat de la sauvegarde photo
+        viewModel.saveState.observe(this) { state ->
+            when (state) {
+                is UiState.Loading -> showLoading(true)
+                is UiState.Success -> {
+                    showLoading(false)
+                    onSaveSuccess()
+                }
+                is UiState.Error -> {
+                    showLoading(false)
+                    showError(state.exception)
+                }
+                else -> Unit
+            }
+        }
+
+        // Nœuds courants (navigation)
+        viewModel.currentNodes.observe(this) { nodes ->
             adapter.update(nodes, viewModel.selectedNodeId.value)
             updateHeaderTitle()
 
             val atSpecies  = nodes.firstOrNull()?.type == CensusType.SPECIES
             val levelEmpty = nodes.isEmpty() && viewModel.canNavigateUp()
 
-            // Bouton Valider : visible seulement au niveau espèce
             btnValidate.visibility = if (atSpecies) View.VISIBLE else View.GONE
+            btnBack.visibility     = if (viewModel.canNavigateUp()) View.VISIBLE else View.GONE
 
-            // Bouton retour arbre
-            btnBack.visibility = if (viewModel.canNavigateUp()) View.VISIBLE else View.GONE
-
-            // Grille vs message niveau vide
             if (levelEmpty) {
                 recyclerView.visibility = View.GONE
                 tvEmptyLevel.visibility = View.VISIBLE
-                // On ne peut pas continuer → désactive Valider et Stop (sans censusRef utile)
                 btnValidate.visibility  = View.GONE
             } else {
                 recyclerView.visibility = View.VISIBLE
                 tvEmptyLevel.visibility = View.GONE
             }
-        })
+        }
 
-        viewModel.selectedNodeId.observe(this, Observer { selId ->
+        // Sélection d'espèce
+        viewModel.selectedNodeId.observe(this) { selId ->
             adapter.update(viewModel.currentNodes.value ?: emptyList(), selId)
             val atSpecies = viewModel.currentNodes.value?.firstOrNull()?.type == CensusType.SPECIES
             btnValidate.isEnabled = (selId != null && atSpecies)
-        })
+        }
     }
 
     // ── Boutons ───────────────────────────────────────────────────────────────
 
     private fun setupButtons() {
         btnBack.setOnClickListener {
-            if (viewModel.canNavigateUp()) viewModel.navigateUp()
-            else finish()
+            if (viewModel.canNavigateUp()) viewModel.navigateUp() else finish()
         }
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                if (viewModel.canNavigateUp()) viewModel.navigateUp()
-                else finish()
+                if (viewModel.canNavigateUp()) viewModel.navigateUp() else finish()
             }
         })
 
@@ -225,65 +249,62 @@ class CensusTreeActivity : BaseActivity() {
 
     // ── Sauvegarde ────────────────────────────────────────────────────────────
 
+    /**
+     * Délègue entièrement la sauvegarde au ViewModel.
+     * L'Activity n'appelle plus aucun DAO directement.
+     */
     private fun performSave(recordingStatus: Boolean, censusRef: String?) {
         when (mode) {
-            CensusMode.CREATE -> performCreate(recordingStatus, censusRef)
-            CensusMode.UPDATE -> performUpdate(recordingStatus, censusRef)
+            CensusMode.CREATE -> {
+                val imgBytes = imageBytes ?: run {
+                    Toast.makeText(this, "Données manquantes", Toast.LENGTH_SHORT).show(); return
+                }
+                val loc = locationMeta ?: run {
+                    Toast.makeText(this, "Données manquantes", Toast.LENGTH_SHORT).show(); return
+                }
+                viewModel.createPicture(this, imgBytes, loc, censusRef, recordingStatus)
+            }
+            CensusMode.UPDATE -> {
+                val pid = existingPictureId ?: run {
+                    Toast.makeText(this, "ID manquant", Toast.LENGTH_SHORT).show(); return
+                }
+                viewModel.updatePicture(pid, censusRef, recordingStatus)
+            }
         }
     }
 
-    private fun performCreate(recordingStatus: Boolean, censusRef: String?) {
-        val imgBytes = imageBytes
-        val loc      = locationMeta
-        if (imgBytes == null || loc == null) {
-            Toast.makeText(this, "Données manquantes", Toast.LENGTH_SHORT).show(); return
-        }
-
-        PictureDao.exportPictureFromBytes(
-            context = this, imageBytes = imgBytes, location = loc,
-            censusRef = censusRef, recordingStatus = recordingStatus, adminValidated = false,
-            onSuccess = {
-                runOnUiThread {
-                    Toast.makeText(this, "Photo enregistrée", Toast.LENGTH_SHORT).show()
-                    val intent = Intent(this, MainActivity::class.java).apply {
-                        flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-                        putExtra("navigateTo", when (callerName) {
-                            PicturesViewerCaller.MY_PROFILE.name -> "myProfile"
-                            else                                  -> "map"
-                        })
-                    }
-                    startActivity(intent)
-                    finish()
+    /** Appelé quand saveState passe à Success. */
+    private fun onSaveSuccess() {
+        when (mode) {
+            CensusMode.CREATE -> {
+                Toast.makeText(this, "Photo enregistrée", Toast.LENGTH_SHORT).show()
+                val intent = Intent(this, MainActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    putExtra("navigateTo", when (callerName) {
+                        PicturesViewerCaller.MY_PROFILE.name -> "myProfile"
+                        else                                  -> "map"
+                    })
                 }
-            },
-            onError = { e ->
-                runOnUiThread { Toast.makeText(this, "Erreur : ${e.message}", Toast.LENGTH_LONG).show() }
+                startActivity(intent)
+                finish()
             }
-        )
-    }
-
-    private fun performUpdate(recordingStatus: Boolean, censusRef: String?) {
-        val pid = existingPictureId
-        if (pid.isNullOrEmpty()) {
-            Toast.makeText(this, "ID manquant", Toast.LENGTH_SHORT).show(); return
+            CensusMode.UPDATE -> {
+                Toast.makeText(this, "Recensement mis à jour", Toast.LENGTH_SHORT).show()
+                setResult(Activity.RESULT_OK)
+                finish()
+            }
         }
-
-        PictureDao.updatePictureCensus(
-            pictureId = pid, censusRef = censusRef, recordingStatus = recordingStatus,
-            onSuccess = {
-                runOnUiThread {
-                    Toast.makeText(this, "Recensement mis à jour", Toast.LENGTH_SHORT).show()
-                    setResult(Activity.RESULT_OK)
-                    finish()
-                }
-            },
-            onError = { e ->
-                runOnUiThread { Toast.makeText(this, "Erreur : ${e.message}", Toast.LENGTH_LONG).show() }
-            }
-        )
     }
 
     // ── UI helpers ────────────────────────────────────────────────────────────
+
+    private fun showLoading(visible: Boolean) {
+        progressBar.visibility = if (visible) View.VISIBLE else View.GONE
+    }
+
+    private fun showError(exception: com.fneb.piibiocampus.data.error.AppException) {
+        Snackbar.make(findViewById(android.R.id.content), exception.userMessage, Snackbar.LENGTH_LONG).show()
+    }
 
     private fun updateHeaderTitle() {
         val path = viewModel.currentPath()
@@ -307,7 +328,8 @@ class CensusTreeActivity : BaseActivity() {
         tvDesc.text  = item.description.ifEmpty { listOf("Aucune description disponible") }.joinToString("\n\n")
         if (item.imageUrl.isNotBlank())
             Picasso.get().load(item.imageUrl).placeholder(R.drawable.ic_placeholder_image).into(iv)
-        else iv.setImageResource(R.drawable.ic_placeholder_image)
+        else
+            iv.setImageResource(R.drawable.ic_placeholder_image)
         MaterialAlertDialogBuilder(this).setView(view).setPositiveButton(android.R.string.ok, null).show()
     }
 }
