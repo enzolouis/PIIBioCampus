@@ -212,7 +212,7 @@ object UserDao {
                 throw AppException.ImageProcessingError(e)
             }
             val ref = FirebaseStorage.getInstance()
-                .reference.child("profile_pictures/${user.uid}.webp")
+                .reference.child("profile_pictures/${user.uid}/avatar.webp")
             val metadata = StorageMetadata.Builder().setContentType("image/webp").build()
             ref.putFile(Uri.fromFile(webpFile), metadata).await()
             val url = ref.downloadUrl.await().toString()
