@@ -166,7 +166,7 @@ object UserDao {
     suspend fun uploadProfilePicture(context: android.content.Context, imageBytes: ByteArray): String {
         val user = auth.currentUser ?: throw IllegalStateException("Utilisateur non connecté")
         val webpFile = PictureDao.bytesToWebpFile(context, imageBytes)
-        val ref = FirebaseStorage.getInstance().reference.child("profile_pictures/${user.uid}.webp")
+        val ref = FirebaseStorage.getInstance().reference.child("profile_pictures/${user.uid}/avatar.webp")
         val metadata = com.google.firebase.storage.StorageMetadata.Builder()
             .setContentType("image/webp")
             .build()
