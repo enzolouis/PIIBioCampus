@@ -26,7 +26,9 @@ class NewsListAdminActivity : BaseActivity() {
 
     private lateinit var recyclerView: RecyclerView
 
-    private val photos = mutableListOf<Map<String, Any>>()
+    private lateinit var itemsStatic: List<ItemNews>
+    private lateinit var itemsDynamic: List<ItemNews>
+    private lateinit var features : List<ImageView>
     private lateinit var adapter: ItemNewsAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,23 +49,85 @@ class NewsListAdminActivity : BaseActivity() {
         recyclerView = findViewById(R.id.recyclerView)
         recyclerView.layoutManager = GridLayoutManager(this, 1)
 
-        loadNews()
+        loadDynamicNews()
 
         btnAddNews.setOnClickListener {
             val intent = Intent(this, UpdateNewsAdminActivity::class.java)
+            intent.putExtra("order", itemsDynamic.size+1)
+            intent.putExtra("behavior", "dynamic")
             intent.putExtra("status", "create")
             this.startActivity(intent)
         }
+        val featuredMain = findViewById<ImageView>(R.id.featuredMain)
+        val featuredLeft = findViewById<ImageView>(R.id.featuredLeft)
+        val featuredRight = findViewById<ImageView>(R.id.featuredRight)
+
+        features = listOf(featuredMain,featuredLeft,featuredRight)
+        loadStaticNews(features)
+
+        featuredMain.setOnClickListener {
+            createNewsStatic(1)
+        }
+        featuredLeft.setOnClickListener {
+            createNewsStatic(2)
+        }
+        featuredRight.setOnClickListener {
+            createNewsStatic(3)
+        }
     }
 
-    private fun loadNews() {
-        NewsDao.getAllNews(
+    private fun createNewsStatic(id : Int){
+        val item = itemsStatic.firstOrNull { it.order?.toInt() == id }
+        if (item == null){
+            val intent = Intent(this, UpdateNewsAdminActivity::class.java)
+            intent.putExtra("behavior", "static")
+            intent.putExtra("order", id)
+            intent.putExtra("status", "create")
+            this.startActivity(intent)
+        }else{
+            val intent = Intent(this, UpdateNewsAdminActivity::class.java)
+            Log.d("DEBUG_ID", "ID item = ${item.id}")
+            intent.putExtra("id", item.id)
+            intent.putExtra("title", item.titre)
+            intent.putExtra("imageUrl", item.imageUrl)
+            intent.putExtra("source", item.source)
+            intent.putExtra("behavior", item.behavior)
+            intent.putExtra("order", item.order)
+            intent.putExtra("status", "update")
+
+            startActivity(intent)
+        }
+    }
+
+    private fun loadDynamicNews() {
+        NewsDao.getDynamicNews(
             onSuccess = { items ->
+                itemsDynamic = items
                 adapter = ItemNewsAdapter(items)
                 recyclerView.adapter = adapter
             },
             onError = { exception ->
                 Toast.makeText(this, "Erreur : ${exception.message}", Toast.LENGTH_SHORT).show()
+                //Log.d("Test","Erreur : ${exception.message}")
+            }
+        )
+    }
+
+    private fun loadStaticNews(features : List<ImageView> ){
+        NewsDao.getStaticNews(
+            onSuccess = { items ->
+                itemsStatic = items
+                for (i in 0..items.size - 1){
+                    val item = items[i]
+                    val order = item.order?.toInt()
+                    Picasso.get()
+                        .load(item.imageUrl)
+                        .into(features[order?.minus(1) ?: 0])
+                }
+            },
+            onError = { exception ->
+                Toast.makeText(this, "Erreur : ${exception.message}", Toast.LENGTH_SHORT).show()
+                Log.d("Test","Erreur : ${exception.message}")
             }
         )
     }
@@ -98,6 +162,8 @@ class NewsListAdminActivity : BaseActivity() {
                 intent.putExtra("title", item.titre)
                 intent.putExtra("imageUrl", item.imageUrl)
                 intent.putExtra("source", item.source)
+                intent.putExtra("behavior", item.behavior)
+                intent.putExtra("order", item.order)
                 intent.putExtra("status", "update")
 
                 holder.itemView.context.startActivity(intent)
@@ -110,6 +176,10 @@ class NewsListAdminActivity : BaseActivity() {
     override fun onResume() {
         super.onResume()
         setTopBarTitle(R.string.actualite)
-        loadNews()
+        loadDynamicNews()
+        for (f in features){
+            f.setImageResource(R.drawable.ic_placeholder_image)
+        }
+        loadStaticNews(features)
     }
 }

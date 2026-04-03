@@ -15,20 +15,48 @@ object NewsDao {
     }
 
     private val newsRef = firestore.collection("news")
-    private val storageRef = storage.reference
 
-    fun getAllNews(
+    fun getDynamicNews(
         onSuccess: (List<ItemNews>) -> Unit,
         onError: (Exception) -> Unit
     ) {
-        newsRef.get()
+        newsRef
+            .whereEqualTo("behavior", "dynamic")
+            .orderBy("order")
+            .get()
             .addOnSuccessListener { snapshot ->
                 val newsList = snapshot.documents.map { doc ->
                     ItemNews(
                         id = doc.id,
                         titre = doc.getString("titre") ?: "",
                         imageUrl = doc.getString("imageUrl") ?: "",
-                        source = doc.getString("source") ?: ""
+                        source = doc.getString("source") ?: "",
+                        order = doc.getLong("order"),
+                        behavior = doc.getString("behavior") ?: "",
+                    )
+                }
+                onSuccess(newsList)
+            }
+            .addOnFailureListener(onError)
+    }
+
+    fun getStaticNews(
+        onSuccess: (List<ItemNews>) -> Unit,
+        onError: (Exception) -> Unit
+    ) {
+        newsRef
+            .whereEqualTo("behavior", "static")
+            .orderBy("order")
+            .get()
+            .addOnSuccessListener { snapshot ->
+                val newsList = snapshot.documents.map { doc ->
+                    ItemNews(
+                        id = doc.id,
+                        titre = doc.getString("titre") ?: "",
+                        imageUrl = doc.getString("imageUrl") ?: "",
+                        source = doc.getString("source") ?: "",
+                        order = doc.getLong("order"),
+                        behavior = doc.getString("behavior") ?: "",
                     )
                 }
                 onSuccess(newsList)
@@ -97,13 +125,17 @@ object NewsDao {
         titre: String,
         imageUrl: String,
         source: String,
+        behavior: String?,
+        order: Int,
         onSuccess: () -> Unit,
         onError: (Exception) -> Unit
     ) {
         val itemNews = mapOf(
             "titre" to titre,
             "imageUrl" to imageUrl,
-            "source" to source
+            "source" to source,
+            "behavior" to behavior,
+            "order" to order
         )
 
         newsRef

@@ -1,6 +1,5 @@
 package com.fneb.piibiocampus.ui.admin
 
-import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -45,6 +44,9 @@ class UpdateNewsAdminActivity : BaseActivity() {
         lateinit var idNews: String
         lateinit var imageUrl: String
 
+        val behavior = intent.getStringExtra("behavior")
+        val order = intent.getIntExtra("order",0)
+
         val status = intent.getStringExtra("status")
         if (status == "update"){
             setTopBarTitle("Modifier une Actu'")
@@ -56,7 +58,6 @@ class UpdateNewsAdminActivity : BaseActivity() {
             val title = intent.getStringExtra("title")
             imageUrl = intent.getStringExtra("imageUrl")?: ""
             val source = intent.getStringExtra("source")
-
             titleView.setText(title)
             sourceView.setText(source)
 
@@ -123,6 +124,8 @@ class UpdateNewsAdminActivity : BaseActivity() {
                                 titre = findViewById<EditText>(R.id.titleNews).text.toString(),
                                 imageUrl = url,
                                 source = findViewById<EditText>(R.id.sourceNews).text.toString(),
+                                behavior = behavior,
+                                order = order,
                                 onSuccess = {
                                     Toast.makeText(this, "Actualité créee avec succès", Toast.LENGTH_SHORT).show()
                                     finish()
