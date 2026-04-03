@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Button
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import android.widget.GridLayout
@@ -17,6 +16,7 @@ import com.fneb.piibiocampus.data.dao.UserDao
 import com.fneb.piibiocampus.data.repository.AuthRepository
 import com.fneb.piibiocampus.ui.MainActivity
 import com.fneb.piibiocampus.ui.auth.AuthViewModel
+import com.fneb.piibiocampus.ui.BaseActivity
 import com.fneb.piibiocampus.ui.census.CensusEditorActivity
 import com.fneb.piibiocampus.ui.common.LoadingDialog
 import com.fneb.piibiocampus.utils.Extensions.toast
@@ -24,7 +24,7 @@ import com.fneb.piibiocampus.utils.setTopBarTitle
 import kotlinx.coroutines.launch
 import kotlin.getValue
 
-class DashboardAdminActivity : AppCompatActivity() {
+class DashboardAdminActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

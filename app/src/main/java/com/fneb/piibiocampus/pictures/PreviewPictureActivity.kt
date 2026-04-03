@@ -9,15 +9,15 @@ import android.os.Handler
 import android.os.Looper
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.fneb.piibiocampus.databinding.ActivityPreviewPictureBinding
+import com.fneb.piibiocampus.ui.BaseActivity
 import com.fneb.piibiocampus.ui.census.CensusTreeActivity
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 
-class PreviewPictureActivity : AppCompatActivity() {
+class PreviewPictureActivity : BaseActivity() {
 
     private lateinit var viewBinding: ActivityPreviewPictureBinding
     private lateinit var imageBytes: ByteArray

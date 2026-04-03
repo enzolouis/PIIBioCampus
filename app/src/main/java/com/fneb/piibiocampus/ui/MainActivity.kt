@@ -24,7 +24,7 @@ import com.fneb.piibiocampus.ui.searchUsers.SearchUsersFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : BaseActivity() {
 
     private lateinit var fabCamera: FloatingActionButton
     private lateinit var bottomNav: BottomNavigationView

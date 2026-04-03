@@ -53,14 +53,14 @@ class CguDialogFragment : DialogFragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ): View = inflater.inflate(R.layout.fragment_cgu_dialog, container, false)
+    ): View = inflater.inflate(R.layout.fragment_cgu_pdc_dialog, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val scrollView  = view.findViewById<ScrollView>(R.id.scrollViewCgu)
-        val btnAccept   = view.findViewById<Button>(R.id.btnAcceptCgu)
-        val btnDecline  = view.findViewById<Button>(R.id.btnDeclineCgu)
+        val scrollView  = view.findViewById<ScrollView>(R.id.scrollViewPoC)
+        val btnAccept   = view.findViewById<Button>(R.id.btnAcceptPoC)
+        val btnDecline  = view.findViewById<Button>(R.id.btnDeclinePoC)
         val tvScrollHint = view.findViewById<TextView>(R.id.tvScrollHint)
 
         // Bouton désactivé par défaut

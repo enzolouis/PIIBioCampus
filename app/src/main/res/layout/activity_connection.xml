@@ -43,6 +43,16 @@
         android:layout_marginTop="50dp"
         android:src="@drawable/logo_piibiocampus" />
 
+    <TextView
+        android:id="@+id/txtVerificationBanner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#FFF3CD"
+        android:padding="12dp"
+        android:textColor="#856404"
+        android:textSize="14sp"
+        android:visibility="gone" />
+
     <EditText
         android:id="@+id/txtIdentifiant"
         android:layout_width="207dp"

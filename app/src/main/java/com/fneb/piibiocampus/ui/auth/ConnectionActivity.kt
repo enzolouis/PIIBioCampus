@@ -1,4 +1,4 @@
-package com.fneb.piibiocampus.ui.auth
+    package com.fneb.piibiocampus.ui.auth
 
 import android.content.Intent
 import android.os.Bundle
@@ -15,6 +15,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import com.fneb.piibiocampus.R
+import com.fneb.piibiocampus.ui.BaseActivity
 import com.fneb.piibiocampus.ui.MainActivity
 import com.fneb.piibiocampus.ui.admin.DashboardAdminActivity
 import com.fneb.piibiocampus.ui.admin.UpdateNewsAdminActivity
@@ -23,76 +24,85 @@ import com.fneb.piibiocampus.utils.Extensions.toast
 import com.fneb.piibiocampus.utils.Validators
 import kotlinx.coroutines.launch
 
-class ConnectionActivity : AppCompatActivity() {
+    class ConnectionActivity : BaseActivity() {
 
-    private val viewModel: AuthViewModel by viewModels()
-
-    private lateinit var pseudoZone:      EditText
-    private lateinit var passwordZone:    EditText
-    private lateinit var connectBtn:      Button
-    private lateinit var createAccountBtn: Button
-    private lateinit var resetPassWordBtn: Button
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_connection)
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.btnConnexion)) { view, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            val extraPadding = (20 * resources.displayMetrics.density).toInt()
-            (view.layoutParams as ViewGroup.MarginLayoutParams).bottomMargin =
-                systemBars.bottom + extraPadding
-            insets
+        companion object {
+            /** Passé par CreateAccountActivity — non utilisé ici, la pop-up remplace le bandeau */
+            const val EXTRA_VERIFICATION_SENT = "extra_verification_sent"
         }
 
-        pseudoZone       = findViewById(R.id.txtIdentifiant)
-        passwordZone     = findViewById(R.id.txtMdp)
-        connectBtn       = findViewById(R.id.btnConnexion)
-        createAccountBtn = findViewById(R.id.btnNoAccount)
-        resetPassWordBtn = findViewById(R.id.btnResetPassWord)
+        private val viewModel: AuthViewModel by viewModels()
 
-        val togglePassword = findViewById<ImageView>(R.id.btnTogglePassword)
-        var isPasswordVisible = false
+        private lateinit var pseudoZone:       EditText
+        private lateinit var passwordZone:     EditText
+        private lateinit var connectBtn:       Button
+        private lateinit var createAccountBtn: Button
+        private lateinit var resetPassWordBtn: Button
 
-        togglePassword.setOnClickListener {
-            if (isPasswordVisible) {
-                passwordZone.transformationMethod = PasswordTransformationMethod.getInstance()
-                togglePassword.setImageResource(R.drawable.eye_close)
-            } else {
-                passwordZone.transformationMethod = HideReturnsTransformationMethod.getInstance()
-                togglePassword.setImageResource(R.drawable.eye_open)
-            }
-            isPasswordVisible = !isPasswordVisible
-            passwordZone.setSelection(passwordZone.text.length)
-        }
+        override fun onCreate(savedInstanceState: Bundle?) {
+            super.onCreate(savedInstanceState)
+            setContentView(R.layout.activity_connection)
 
-        createAccountBtn.setOnClickListener {
-            startActivity(Intent(this, CreateAccountActivity::class.java))
-        }
-
-        resetPassWordBtn.setOnClickListener {
-            startActivity(Intent(this, ResetPassWordActivity::class.java))
-        }
-
-        connectBtn.setOnClickListener {
-            val email    = pseudoZone.text.toString().trim()
-            val password = passwordZone.text.toString().trim()
-
-            if (!Validators.areEmailAndPasswordValid(email, password)) {
-                toast("Veuillez remplir tous les champs")
-                return@setOnClickListener
+            ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.btnConnexion)) { view, insets ->
+                val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+                val extraPadding = (20 * resources.displayMetrics.density).toInt()
+                (view.layoutParams as ViewGroup.MarginLayoutParams).bottomMargin =
+                    systemBars.bottom + extraPadding
+                insets
             }
 
-            if (isCguAccepted()) {
-                LoadingDialog.show(supportFragmentManager, "Connexion en cours…")
-                viewModel.login(email, password)
-            } else {
-                showCguDialog(onAccepted = {
+            pseudoZone       = findViewById(R.id.txtIdentifiant)
+            passwordZone     = findViewById(R.id.txtMdp)
+            connectBtn       = findViewById(R.id.btnConnexion)
+            createAccountBtn = findViewById(R.id.btnNoAccount)
+            resetPassWordBtn = findViewById(R.id.btnResetPassWord)
+
+            val togglePassword = findViewById<ImageView>(R.id.btnTogglePassword)
+            var isPasswordVisible = false
+
+            togglePassword.setOnClickListener {
+                if (isPasswordVisible) {
+                    passwordZone.transformationMethod = PasswordTransformationMethod.getInstance()
+                    togglePassword.setImageResource(R.drawable.eye_close)
+                } else {
+                    passwordZone.transformationMethod = HideReturnsTransformationMethod.getInstance()
+                    togglePassword.setImageResource(R.drawable.eye_open)
+                }
+                isPasswordVisible = !isPasswordVisible
+                passwordZone.setSelection(passwordZone.text.length)
+            }
+
+            createAccountBtn.setOnClickListener {
+                startActivity(Intent(this, CreateAccountActivity::class.java))
+            }
+
+            resetPassWordBtn.setOnClickListener {
+                startActivity(Intent(this, ResetPassWordActivity::class.java))
+            }
+
+            connectBtn.setOnClickListener {
+                val email    = pseudoZone.text.toString().trim()
+                val password = passwordZone.text.toString().trim()
+
+                if (!Validators.areEmailAndPasswordValid(email, password)) {
+                    toast("Veuillez remplir tous les champs")
+                    return@setOnClickListener
+                }
+
+                if (isCguAccepted()) {
+
                     LoadingDialog.show(supportFragmentManager, "Connexion en cours…")
                     viewModel.login(email, password)
-                })
+
+                } else {
+                    showCguDialog(
+                        onAccepted = {
+                                LoadingDialog.show(supportFragmentManager, "Connexion en cours…")
+                                viewModel.login(email, password)
+                        }
+                    )
+                }
             }
-        }
 
         viewModel.checkCurrentUserAndFetchRoleIfNeeded()
         lifecycleScope.launch {
@@ -125,6 +135,13 @@ class ConnectionActivity : AppCompatActivity() {
                         }
                         finish()
                     }
+                    is AuthUiState.EmailNotVerified -> {
+                        LoadingDialog.hide(supportFragmentManager)
+                        EmailSentDialogFragment.show(
+                            fm   = supportFragmentManager,
+                            mode = EmailSentDialogFragment.MODE_NOT_VERIFIED
+                        )
+                    }
                     is AuthUiState.Error -> {
                         LoadingDialog.hide(supportFragmentManager)
                         toast(
@@ -138,17 +155,16 @@ class ConnectionActivity : AppCompatActivity() {
         }
     }
 
-    // ── CGU ───────────────────────────────────────────────────────────────────
+        // ── CGU ───────────────────────────────────────────────────────────────────
 
-    private fun isCguAccepted(): Boolean =
-        getSharedPreferences(CguDialogFragment.PREF_FILE, MODE_PRIVATE)
-            .getBoolean(CguDialogFragment.PREF_KEY, false)
-
-    private fun showCguDialog(onAccepted: () -> Unit) {
-        CguDialogFragment.show(
-            fm         = supportFragmentManager,
-            onAccepted = onAccepted,
-            onDeclined = { toast("Vous devez accepter les CGU pour utiliser l\'application") }
-        )
+        private fun isCguAccepted(): Boolean =
+            getSharedPreferences(CguDialogFragment.PREF_FILE, MODE_PRIVATE)
+                .getBoolean(CguDialogFragment.PREF_KEY, false)
+        private fun showCguDialog(onAccepted: () -> Unit) {
+            CguDialogFragment.show(
+                fm         = supportFragmentManager,
+                onAccepted = onAccepted,
+                onDeclined = { toast("Vous devez accepter les CGU pour utiliser l'application") }
+            )
+        }
     }
-}

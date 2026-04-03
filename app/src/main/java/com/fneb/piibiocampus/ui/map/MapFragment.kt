@@ -35,6 +35,7 @@ class MapFragment : Fragment(R.layout.fragment_map) {
     private lateinit var map: MapView
 
     private val campusTextOverlays = mutableListOf<TextOverlay>()
+    private var initialCenterDone = false
 
     private inner class TextOverlay(
         private val position: GeoPoint,
@@ -70,13 +71,6 @@ class MapFragment : Fragment(R.layout.fragment_map) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        // ── Suppression du listener sur R.id.main ──────────────────────────────
-        // Ce listener ajoutait systemBars.top comme padding sur le layout racine,
-        // ce qui poussait la toolbar encore plus bas — conflit avec fitsSystemWindows
-        // de la toolbar. La toolbar gère maintenant ses propres insets via
-        // fitsSystemWindows="true" dans view_top_bar.xml.
-        // ──────────────────────────────────────────────────────────────────────
 
         map = view.findViewById(R.id.map)
 
@@ -117,20 +111,37 @@ class MapFragment : Fragment(R.layout.fragment_map) {
         map.setTilesScaledToDpi(true)
         map.setMultiTouchControls(true)
         map.controller.setZoom(15.0)
+        map.minZoomLevel = 3.0
+        map.maxZoomLevel = 20.0
 
-        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
-            ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        centerOnUserLocation()
+    }
+
+    private fun centerOnUserLocation() {
+        if (ActivityCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED &&
+            ActivityCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
         ) {
-            val fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
-            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
-                if (location != null) {
-                    map.controller.setCenter(GeoPoint(location.latitude, location.longitude))
-                } else {
-                    map.controller.setCenter(GeoPoint(43.562817415184526, 1.467314949845769))
-                }
+            // Pas d'autorisation → fallback Paris, pas de GPS
+            map.controller.setCenter(GeoPoint(48.8566, 2.3522))
+            return
+        }
+
+        // Autorisation confirmée → on récupère la position
+        val fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
+        fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+            val center = if (location != null) {
+                GeoPoint(location.latitude, location.longitude)
+            } else {
+                GeoPoint(48.8566, 2.3522)
             }
-        } else {
-            map.controller.setCenter(GeoPoint(43.562817415184526, 1.467314949845769))
+            map.controller.setCenter(center)
+            initialCenterDone = true
         }
     }
 
@@ -176,11 +187,12 @@ class MapFragment : Fragment(R.layout.fragment_map) {
 
             marker.infoWindow = object : InfoWindow(R.layout.marker_info, map) {
                 override fun onOpen(item: Any?) {
-                    val titleView    = mView.findViewById<TextView>(R.id.title)
-                    val photoView    = mView.findViewById<ImageView>(R.id.photo)
-                    val recordingDot = mView.findViewById<View>(R.id.ivRecordingDot)
-                    val validatedDot = mView.findViewById<View>(R.id.ivValidatedBadge)
-                    val imageUrl     = (o["imageUrl"] as? String) ?: (o["image"] as? String) ?: ""
+                    val titleView                = mView.findViewById<TextView>(R.id.title)
+                    val photoView                = mView.findViewById<ImageView>(R.id.photo)
+                    val recordingDotRed: View    = mView.findViewById(R.id.ivDotRed)
+                    val recordingDotOrange: View = mView.findViewById(R.id.ivDotOrange)
+                    val validatedDot: View       = mView.findViewById(R.id.ivDotGreen)
+                    val imageUrl = (o["imageUrl"] as? String) ?: (o["image"] as? String) ?: ""
 
                     titleView.text = marker.title
                     if (imageUrl.isNotEmpty()) {
@@ -192,16 +204,19 @@ class MapFragment : Fragment(R.layout.fragment_map) {
 
                     when {
                         adminValidated -> {
-                            validatedDot.visibility = View.VISIBLE
-                            recordingDot.visibility = View.GONE
+                            validatedDot.visibility       = View.VISIBLE
+                            recordingDotRed.visibility    = View.GONE
+                            recordingDotOrange.visibility = View.GONE
                         }
                         !recordingStatus -> {
-                            recordingDot.visibility = View.VISIBLE
-                            validatedDot.visibility = View.GONE
+                            recordingDotRed.visibility    = View.VISIBLE
+                            validatedDot.visibility       = View.GONE
+                            recordingDotOrange.visibility = View.GONE
                         }
                         else -> {
-                            recordingDot.visibility = View.GONE
-                            validatedDot.visibility = View.GONE
+                            recordingDotRed.visibility    = View.GONE
+                            validatedDot.visibility       = View.GONE
+                            recordingDotOrange.visibility = View.VISIBLE
                         }
                     }
 
@@ -251,6 +266,10 @@ class MapFragment : Fragment(R.layout.fragment_map) {
         setTopBarTitle(R.string.titleMap)
         InfoWindow.closeAllInfoWindowsOn(map)
         viewModel.loadAllPictures()
+
+        if (!initialCenterDone) {
+            centerOnUserLocation()
+        }
     }
 
     override fun onPause()       { super.onPause();   map.onPause() }

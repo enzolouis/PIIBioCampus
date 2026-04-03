@@ -10,7 +10,6 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.GridLayoutManager
@@ -18,10 +17,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.fneb.piibiocampus.R
 import com.fneb.piibiocampus.data.dao.NewsDao
 import com.fneb.piibiocampus.data.model.ItemNews
+import com.fneb.piibiocampus.ui.BaseActivity
 import com.fneb.piibiocampus.utils.setTopBarTitle
+import com.fneb.piibiocampus.utils.showTopBarLeftButton
 import com.squareup.picasso.Picasso
 
-class NewsListAdminActivity : AppCompatActivity() {
+class NewsListAdminActivity : BaseActivity() {
 
     private lateinit var recyclerView: RecyclerView
 
@@ -32,6 +33,7 @@ class NewsListAdminActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_news_list_admin)
         setTopBarTitle("Actualité")
+        showTopBarLeftButton { finish() }
         val btnAddNews = findViewById<Button>(R.id.btnAddNews)
 
         ViewCompat.setOnApplyWindowInsetsListener(btnAddNews) { view, insets ->
@@ -45,6 +47,16 @@ class NewsListAdminActivity : AppCompatActivity() {
         recyclerView = findViewById(R.id.recyclerView)
         recyclerView.layoutManager = GridLayoutManager(this, 1)
 
+        loadNews()
+
+        btnAddNews.setOnClickListener {
+            val intent = Intent(this, UpdateNewsAdminActivity::class.java)
+            intent.putExtra("status", "create")
+            this.startActivity(intent)
+        }
+    }
+
+    private fun loadNews() {
         NewsDao.getAllNews(
             onSuccess = { items ->
                 adapter = ItemNewsAdapter(items)
@@ -54,12 +66,6 @@ class NewsListAdminActivity : AppCompatActivity() {
                 Toast.makeText(this, "Erreur : ${exception.message}", Toast.LENGTH_SHORT).show()
             }
         )
-
-        btnAddNews.setOnClickListener {
-            val intent = Intent(this, UpdateNewsAdminActivity::class.java)
-            intent.putExtra("status", "create")
-            this.startActivity(intent)
-        }
     }
 
     inner class ItemNewsAdapter(
@@ -104,5 +110,6 @@ class NewsListAdminActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         setTopBarTitle(R.string.actualite)
+        loadNews()
     }
 }

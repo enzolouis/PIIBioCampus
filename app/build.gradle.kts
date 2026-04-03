@@ -16,7 +16,7 @@ android {
 
     defaultConfig {
         applicationId = "com.fneb.piibiocampus"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -85,4 +85,5 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.fragment:fragment-ktx:1.6.1")
     implementation("com.github.chrisbanes:PhotoView:2.3.0")
+    implementation("com.google.firebase:firebase-appcheck-playintegrity")
 }

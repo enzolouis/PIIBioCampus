@@ -14,13 +14,14 @@ import android.view.*
 import android.widget.*
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.fneb.piibiocampus.R
+import com.fneb.piibiocampus.ui.BaseActivity
 import com.fneb.piibiocampus.utils.setTopBarTitle
+import com.fneb.piibiocampus.utils.showTopBarLeftButton
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.chip.Chip
 import java.io.File
@@ -28,7 +29,7 @@ import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
 
-class ExportDataActivity : AppCompatActivity() {
+class ExportDataActivity : BaseActivity() {
 
     private val viewModel: ExportDataViewModel by viewModels { ExportDataViewModelFactory() }
 
@@ -53,7 +54,7 @@ class ExportDataActivity : AppCompatActivity() {
         setupChips()
         observeViewModel()
         setTopBarTitle("Exportation des données")
-
+        showTopBarLeftButton { finish() }
         ViewCompat.setOnApplyWindowInsetsListener(btnExportCsv) { view, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             val extraPadding = (20 * resources.displayMetrics.density).toInt()
