@@ -131,7 +131,6 @@ object UserDao {
 
     suspend fun getAllUsersAndAdmins(): List<UserProfile> {
         val snapshot = db.collection("users")
-            //.whereEqualTo("role", "USER")
             .whereIn("role",listOf("USER", "ADMIN"))
             .orderBy("name")
             .get()
