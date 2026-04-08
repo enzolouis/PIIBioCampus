@@ -39,7 +39,7 @@ object NewsDao {
                 }
                 onSuccess(newsList)
             }
-            .addOnFailureListener(onError)
+            .addOnFailureListener{e -> onError(FirebaseExceptionMapper.map(e))}
     }
 
     fun getStaticNews(

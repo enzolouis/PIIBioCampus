@@ -12,9 +12,9 @@ class NewsFragmentViewModel {
     private val _state = MutableStateFlow<UiState<List<ItemNews>>>(UiState.Idle)
     val state: StateFlow<UiState<List<ItemNews>>> = _state.asStateFlow()
 
-    fun loadNews() {
+    fun loadDynamicNews() {
         _state.value = UiState.Loading
-        NewsDao.getAllNews(
+        NewsDao.getDynamicNews(
             onSuccess = { _state.value = UiState.Success(it) },
             onError   = { _state.value = UiState.Error(it) }
         )
