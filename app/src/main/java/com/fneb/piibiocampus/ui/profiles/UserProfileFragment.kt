@@ -8,31 +8,38 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.fneb.piibiocampus.R
-import com.fneb.piibiocampus.data.dao.PictureDao
-import com.fneb.piibiocampus.data.dao.UserDao
+import com.fneb.piibiocampus.data.model.UserProfile
+import com.fneb.piibiocampus.data.ui.UiState
+import com.fneb.piibiocampus.data.ui.showError
 import com.fneb.piibiocampus.ui.photo.PhotoViewerState
 import com.fneb.piibiocampus.ui.photo.PicturesViewerCaller
 import com.fneb.piibiocampus.ui.photo.PicturesViewerFragment
 import com.fneb.piibiocampus.utils.setTopBarTitle
 import com.squareup.picasso.Picasso
-import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
 
 class UserProfileFragment : Fragment() {
 
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var pseudoText: TextView
-    private lateinit var description: TextView
+    private lateinit var recyclerView:   RecyclerView
+    private lateinit var pseudoText:     TextView
+    private lateinit var description:    TextView
     private lateinit var profilePicture: ImageView
-    private lateinit var badge: ImageView
+    private lateinit var badge:          ImageView
+    private lateinit var progressBar:    View
 
     private val photos = mutableListOf<Map<String, Any>>()
     private lateinit var adapter: PhotoAdapter
+
+    private val viewModel: ProfileViewModel by viewModels {
+        val userId = arguments?.getString(ARG_USER_ID)
+            ?: error("UserProfileFragment requiert un userId")
+        UserProfileViewModelFactory(userId)
+    }
 
     companion object {
         private const val ARG_USER_ID = "userId"
@@ -41,6 +48,8 @@ class UserProfileFragment : Fragment() {
             arguments = Bundle().apply { putString(ARG_USER_ID, userId) }
         }
     }
+
+    // ── Cycle de vie ──────────────────────────────────────────────────────────
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -51,8 +60,6 @@ class UserProfileFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val userId = arguments?.getString(ARG_USER_ID) ?: return
-
         setTopBarTitle(R.string.titleProfile)
 
         recyclerView   = view.findViewById(R.id.photosRecycler)
@@ -60,37 +67,61 @@ class UserProfileFragment : Fragment() {
         description    = view.findViewById(R.id.description)
         profilePicture = view.findViewById(R.id.profilePicture)
         badge          = view.findViewById(R.id.badge)
+        progressBar    = view.findViewById(R.id.progressBar)
 
         recyclerView.layoutManager = GridLayoutManager(requireContext(), 3)
-        adapter = PhotoAdapter(photos, userId)
+        adapter = PhotoAdapter(photos)
         recyclerView.adapter = adapter
 
-        loadUserProfile(userId)
+        setupObservers()
     }
 
-    private fun loadUserProfile(userId: String) {
-        viewLifecycleOwner.lifecycleScope.launch {
-            val userProfile = UserDao.getUserProfileById(userId)
-            val photoList   = PictureDao.getPicturesByUserEnrichedSortedByDate(userId)
+    // ── Observers ─────────────────────────────────────────────────────────────
 
-            if (userProfile != null) {
-                pseudoText.text  = userProfile.name
-                description.text = userProfile.description
-
-                if (!userProfile.profilePictureUrl.isNullOrEmpty()) {
-                    Picasso.get()
-                        .load(Uri.parse(userProfile.profilePictureUrl))
-                        .placeholder(R.drawable.photo_placeholder)
-                        .into(profilePicture)
-                } else {
-                    profilePicture.setImageResource(R.drawable.ic_profile)
+    private fun setupObservers() {
+        viewModel.profileState.observe(viewLifecycleOwner) { state ->
+            when (state) {
+                is UiState.Loading -> showLoading(true)
+                is UiState.Success -> {
+                    showLoading(false)
+                    bindProfile(state.data)
                 }
+                is UiState.Error -> {
+                    showLoading(false)
+                    showError(state.exception)
+                }
+                else -> Unit
             }
+        }
 
-            photos.clear()
-            photos.addAll(photoList)
-            updateBadge(photoList.size)
-            adapter.notifyDataSetChanged()
+        viewModel.photosState.observe(viewLifecycleOwner) { state ->
+            when (state) {
+                is UiState.Loading -> { /* spinner géré par profileState */ }
+                is UiState.Success -> {
+                    photos.clear()
+                    photos.addAll(state.data)
+                    updateBadge(state.data.size)
+                    adapter.notifyDataSetChanged()
+                }
+                is UiState.Error -> showError(state.exception)
+                else -> Unit
+            }
+        }
+    }
+
+    // ── Binding ───────────────────────────────────────────────────────────────
+
+    private fun bindProfile(profile: UserProfile) {
+        pseudoText.text  = profile.name
+        description.text = profile.description
+
+        if (!profile.profilePictureUrl.isNullOrEmpty()) {
+            Picasso.get()
+                .load(Uri.parse(profile.profilePictureUrl))
+                .placeholder(R.drawable.photo_placeholder)
+                .into(profilePicture)
+        } else {
+            profilePicture.setImageResource(R.drawable.ic_profile)
         }
     }
 
@@ -112,18 +143,22 @@ class UserProfileFragment : Fragment() {
         badge.setImageResource(badgeRes)
     }
 
+    // ── UI helpers ────────────────────────────────────────────────────────────
+
+    private fun showLoading(visible: Boolean) {
+        progressBar.visibility = if (visible) View.VISIBLE else View.GONE
+    }
+
     // ── Adapter ───────────────────────────────────────────────────────────────
 
-    inner class PhotoAdapter(
-        private val items: List<Map<String, Any>>,
-        private val userId: String
-    ) : RecyclerView.Adapter<PhotoAdapter.PhotoViewHolder>() {
+    inner class PhotoAdapter(private val items: List<Map<String, Any>>) :
+        RecyclerView.Adapter<PhotoAdapter.PhotoViewHolder>() {
 
         inner class PhotoViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-            val image: ImageView   = view.findViewById(R.id.photoItem)
-            val recordingDotRed: View = view.findViewById(R.id.ivDotRed)
-            val recordingDotOrange: View = view.findViewById(R.id.ivDotOrange)
-            val validatedDot: View = view.findViewById(R.id.ivDotGreen)
+            val image:              ImageView = view.findViewById(R.id.photoItem)
+            val recordingDotRed:    View      = view.findViewById(R.id.ivDotRed)
+            val recordingDotOrange: View      = view.findViewById(R.id.ivDotOrange)
+            val validatedDot:       View      = view.findViewById(R.id.ivDotGreen)
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PhotoViewHolder {
@@ -151,18 +186,18 @@ class UserProfileFragment : Fragment() {
 
             when {
                 adminValidated -> {
-                    holder.validatedDot.visibility = View.VISIBLE
-                    holder.recordingDotRed.visibility = View.GONE
+                    holder.validatedDot.visibility       = View.VISIBLE
+                    holder.recordingDotRed.visibility    = View.GONE
                     holder.recordingDotOrange.visibility = View.GONE
                 }
                 !recordingStatus -> {
-                    holder.recordingDotRed.visibility = View.VISIBLE
-                    holder.validatedDot.visibility = View.GONE
+                    holder.recordingDotRed.visibility    = View.VISIBLE
+                    holder.validatedDot.visibility       = View.GONE
                     holder.recordingDotOrange.visibility = View.GONE
                 }
                 else -> {
-                    holder.recordingDotRed.visibility = View.GONE
-                    holder.validatedDot.visibility = View.GONE
+                    holder.recordingDotRed.visibility    = View.GONE
+                    holder.validatedDot.visibility       = View.GONE
                     holder.recordingDotOrange.visibility = View.VISIBLE
                 }
             }
@@ -170,26 +205,17 @@ class UserProfileFragment : Fragment() {
             holder.image.setOnClickListener { openPhotoViewer(photo) }
         }
 
-        private fun formatTimestamp(timestamp: Any?): String = when (timestamp) {
-            is com.google.firebase.Timestamp ->
-                SimpleDateFormat("dd/MM/yyyy à HH:mm", Locale.FRENCH).format(timestamp.toDate())
-            is java.util.Date ->
-                SimpleDateFormat("dd/MM/yyyy à HH:mm", Locale.FRENCH).format(timestamp)
-            is String -> timestamp
-            else      -> "Date inconnue"
-        }
-
         private fun openPhotoViewer(photo: Map<String, Any>) {
             val loc = photo["location"] as? Map<*, *>
             val state = PhotoViewerState(
-                imageUrl          = photo["imageUrl"]        as? String ?: "",
+                imageUrl          = photo["imageUrl"]        as? String  ?: "",
                 family            = photo["family"]          as? String,
                 genre             = photo["genre"]           as? String,
                 specie            = photo["specie"]          as? String,
                 timestamp         = formatTimestamp(photo["timestamp"]),
                 adminValidated    = photo["adminValidated"]  as? Boolean ?: false,
                 pictureId         = photo["id"]              as? String  ?: "",
-                userRef           = userId,
+                userRef           = photo["userRef"]         as? String  ?: "",
                 profilePictureUrl = null,
                 censusRef         = photo["censusRef"]       as? String,
                 imageBytes        = null,
@@ -200,6 +226,15 @@ class UserProfileFragment : Fragment() {
                 recordingStatus   = photo["recordingStatus"] as? Boolean ?: false
             )
             PicturesViewerFragment.show(parentFragmentManager, state)
+        }
+
+        private fun formatTimestamp(timestamp: Any?): String = when (timestamp) {
+            is com.google.firebase.Timestamp ->
+                SimpleDateFormat("dd/MM/yyyy à HH:mm", Locale.FRENCH).format(timestamp.toDate())
+            is java.util.Date ->
+                SimpleDateFormat("dd/MM/yyyy à HH:mm", Locale.FRENCH).format(timestamp)
+            is String -> timestamp
+            else      -> "Date inconnue"
         }
     }
 }

@@ -9,12 +9,13 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.fneb.piibiocampus.R
-import com.fneb.piibiocampus.data.dao.PictureDao
-import com.fneb.piibiocampus.data.dao.UserDao
+import com.fneb.piibiocampus.data.model.UserProfile
+import com.fneb.piibiocampus.data.ui.UiState
+import com.fneb.piibiocampus.data.ui.showError
 import com.fneb.piibiocampus.ui.MainActivity
 import com.fneb.piibiocampus.ui.photo.PhotoViewerState
 import com.fneb.piibiocampus.ui.photo.PicturesViewerCaller
@@ -22,26 +23,26 @@ import com.fneb.piibiocampus.ui.photo.PicturesViewerFragment
 import com.fneb.piibiocampus.ui.profiles.settings.SettingsFragment
 import com.fneb.piibiocampus.utils.BadgeUtils
 import com.fneb.piibiocampus.utils.setTopBarTitle
-import com.google.firebase.firestore.ListenerRegistration
 import com.squareup.picasso.Picasso
-import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
 
 class MyProfileFragment : Fragment() {
 
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var pseudoText: TextView
-    private lateinit var description: TextView
-    private lateinit var profilePicture: ImageView
-    private lateinit var badge: ImageView
-    private lateinit var settingsButton: ImageView
+    private lateinit var recyclerView:    RecyclerView
+    private lateinit var pseudoText:      TextView
+    private lateinit var description:     TextView
+    private lateinit var profilePicture:  ImageView
+    private lateinit var badge:           ImageView
+    private lateinit var settingsButton:  ImageView
+    private var progressBar: View? = null
+
+    private val viewModel: ProfileViewModel by viewModels { MyProfileViewModelFactory() }
 
     private val photos = mutableListOf<Map<String, Any>>()
     private lateinit var adapter: PhotoAdapter
 
-    private var firestoreListener: ListenerRegistration? = null
-    private var currentUserId: String? = null
+    // ── Cycle de vie ──────────────────────────────────────────────────────────
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -60,12 +61,34 @@ class MyProfileFragment : Fragment() {
         profilePicture = view.findViewById(R.id.profilePicture)
         badge          = view.findViewById(R.id.badge)
         settingsButton = view.findViewById(R.id.settingsButton)
+        progressBar    = view.findViewById(R.id.progressBar)
 
         recyclerView.layoutManager = GridLayoutManager(requireContext(), 3)
         adapter = PhotoAdapter(photos)
         recyclerView.adapter = adapter
         recyclerView.clipToPadding = false
 
+        setupButtons()
+        setupObservers()
+
+        // Recharge les photos au retour du PicturesViewerFragment
+        parentFragmentManager.setFragmentResultListener(
+            PicturesViewerFragment.REQUEST_KEY,
+            viewLifecycleOwner
+        ) { _, _ -> viewModel.reloadPhotos() }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        setTopBarTitle(R.string.titleProfile)
+        // Pas de rechargement ici : le ViewModel persiste et le listener Firestore
+        // est déjà actif. On recharge le profil uniquement si l'état est Idle
+        // (premier lancement géré par le init du ViewModel).
+    }
+
+    // ── Boutons ───────────────────────────────────────────────────────────────
+
+    private fun setupButtons() {
         settingsButton.setOnClickListener {
             parentFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, SettingsFragment())
@@ -82,83 +105,79 @@ class MyProfileFragment : Fragment() {
                 }
             }
         )
-
-        parentFragmentManager.setFragmentResultListener(
-            PicturesViewerFragment.REQUEST_KEY,
-            viewLifecycleOwner
-        ) { _, _ ->
-            val uid = currentUserId ?: return@setFragmentResultListener
-            setupPhotosListener(uid)
-        }
-
-        loadUserDataAndListenToPhotos()
     }
 
-    private fun loadUserDataAndListenToPhotos() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            val userProfile = UserDao.getCurrentUserProfile()
-            val user        = UserDao.getCurrentUser()
+    // ── Observers ─────────────────────────────────────────────────────────────
 
-            if (user != null && userProfile != null) {
-                currentUserId = user.uid
-
-                pseudoText.text  = userProfile.name
-                description.text = userProfile.description
-
-                if (userProfile.profilePictureUrl.isNotEmpty()) {
-                    Picasso.get()
-                        .load(Uri.parse(userProfile.profilePictureUrl))
-                        .placeholder(R.drawable.photo_placeholder)
-                        .into(profilePicture)
-                } else {
-                    profilePicture.setImageResource(R.drawable.ic_profile)
+    private fun setupObservers() {
+        viewModel.profileState.observe(viewLifecycleOwner) { state ->
+            when (state) {
+                is UiState.Loading -> showLoading(true)
+                is UiState.Success -> {
+                    showLoading(false)
+                    bindProfile(state.data)
                 }
-
-                val badgeRes = if (userProfile.currentBadge.isNotEmpty()) {
-                    BadgeUtils.getDrawableById(userProfile.currentBadge)
-                } else {
-                    R.drawable.norank
+                is UiState.Error -> {
+                    showLoading(false)
+                    showError(state.exception)
                 }
-                badge.setImageResource(badgeRes)
+                else -> Unit
+            }
+        }
 
-                setupPhotosListener(user.uid)
+        viewModel.photosState.observe(viewLifecycleOwner) { state ->
+            when (state) {
+                is UiState.Loading -> { /* spinner géré par profileState */ }
+                is UiState.Success -> {
+                    photos.clear()
+                    photos.addAll(state.data)
+                    adapter.notifyDataSetChanged()
+                }
+                is UiState.Error -> showError(state.exception)
+                else -> Unit
             }
         }
     }
 
-    private fun setupPhotosListener(userId: String) {
-        firestoreListener?.remove()
-        firestoreListener = PictureDao.listenToPicturesByUserEnrichedSortedByDate(userId) { enrichedPhotos ->
-            photos.clear()
-            photos.addAll(enrichedPhotos)
-            adapter.notifyDataSetChanged()
+    // ── Binding ───────────────────────────────────────────────────────────────
+
+    private fun bindProfile(profile: UserProfile) {
+        pseudoText.text  = profile.name
+        description.text = profile.description
+
+        if (profile.profilePictureUrl.isNotEmpty()) {
+            Picasso.get()
+                .load(Uri.parse(profile.profilePictureUrl))
+                .placeholder(R.drawable.photo_placeholder)
+                .into(profilePicture)
+        } else {
+            profilePicture.setImageResource(R.drawable.ic_profile)
         }
+
+        val badgeRes = if (profile.currentBadge.isNotEmpty()) {
+            BadgeUtils.getDrawableById(profile.currentBadge)
+        } else {
+            R.drawable.norank
+        }
+        badge.setImageResource(badgeRes)
     }
 
-    fun reloadPhotos() {
-        val uid = currentUserId ?: return
-        setupPhotosListener(uid)
+    // ── UI helpers ────────────────────────────────────────────────────────────
+
+    private fun showLoading(visible: Boolean) {
+        progressBar?.visibility = if (visible) View.VISIBLE else View.GONE
     }
 
-    override fun onResume() {
-        super.onResume()
-        setTopBarTitle(R.string.titleProfile)
-        loadUserDataAndListenToPhotos()
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        firestoreListener?.remove()
-    }
+    // ── Adapter ───────────────────────────────────────────────────────────────
 
     inner class PhotoAdapter(private val items: List<Map<String, Any>>) :
         RecyclerView.Adapter<PhotoAdapter.PhotoViewHolder>() {
 
         inner class PhotoViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-            val image: ImageView      = view.findViewById(R.id.photoItem)
-            val recordingDotRed: View = view.findViewById(R.id.ivDotRed)
-            val recordingDotOrange: View = view.findViewById(R.id.ivDotOrange)
-            val validatedDot: View    = view.findViewById(R.id.ivDotGreen)
+            val image:              ImageView = view.findViewById(R.id.photoItem)
+            val recordingDotRed:    View      = view.findViewById(R.id.ivDotRed)
+            val recordingDotOrange: View      = view.findViewById(R.id.ivDotOrange)
+            val validatedDot:       View      = view.findViewById(R.id.ivDotGreen)
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PhotoViewHolder {
@@ -205,6 +224,29 @@ class MyProfileFragment : Fragment() {
             holder.image.setOnClickListener { openPhotoViewer(photo) }
         }
 
+        private fun openPhotoViewer(photo: Map<String, Any>) {
+            val loc = photo["location"] as? Map<*, *>
+            val state = PhotoViewerState(
+                imageUrl          = photo["imageUrl"]        as? String  ?: "",
+                family            = photo["family"]          as? String,
+                genre             = photo["genre"]           as? String,
+                specie            = photo["specie"]          as? String,
+                timestamp         = formatTimestamp(photo["timestamp"]),
+                adminValidated    = photo["adminValidated"]  as? Boolean ?: false,
+                pictureId         = photo["id"]              as? String  ?: "",
+                userRef           = photo["userRef"]         as? String  ?: "",
+                profilePictureUrl = null,
+                censusRef         = photo["censusRef"]       as? String,
+                imageBytes        = null,
+                latitude          = (loc?.get("latitude")   as? Double) ?: 0.0,
+                longitude         = (loc?.get("longitude")  as? Double) ?: 0.0,
+                altitude          = (loc?.get("altitude")   as? Double) ?: 0.0,
+                caller            = PicturesViewerCaller.MY_PROFILE,
+                recordingStatus   = photo["recordingStatus"] as? Boolean ?: false
+            )
+            PicturesViewerFragment.show(parentFragmentManager, state)
+        }
+
         private fun formatTimestamp(timestamp: Any?): String = when (timestamp) {
             is com.google.firebase.Timestamp ->
                 SimpleDateFormat("dd/MM/yyyy à HH:mm", Locale.FRENCH).format(timestamp.toDate())
@@ -212,29 +254,6 @@ class MyProfileFragment : Fragment() {
                 SimpleDateFormat("dd/MM/yyyy à HH:mm", Locale.FRENCH).format(timestamp)
             is String -> timestamp
             else      -> "Date inconnue"
-        }
-
-        private fun openPhotoViewer(photo: Map<String, Any>) {
-            val loc = photo["location"] as? Map<*, *>
-            val state = PhotoViewerState(
-                imageUrl          = photo["imageUrl"] as? String ?: "",
-                family            = photo["family"]   as? String,
-                genre             = photo["genre"]    as? String,
-                specie            = photo["specie"]   as? String,
-                timestamp         = formatTimestamp(photo["timestamp"]),
-                adminValidated    = photo["adminValidated"]  as? Boolean ?: false,
-                pictureId         = photo["id"]              as? String  ?: "",
-                userRef           = currentUserId            ?: "",
-                profilePictureUrl = null,
-                censusRef         = photo["censusRef"]       as? String,
-                imageBytes        = null,
-                latitude          = (loc?.get("latitude")  as? Double) ?: 0.0,
-                longitude         = (loc?.get("longitude") as? Double) ?: 0.0,
-                altitude          = (loc?.get("altitude")  as? Double) ?: 0.0,
-                caller            = PicturesViewerCaller.MY_PROFILE,
-                recordingStatus   = photo["recordingStatus"] as? Boolean ?: false
-            )
-            PicturesViewerFragment.show(parentFragmentManager, state)
         }
     }
 }
