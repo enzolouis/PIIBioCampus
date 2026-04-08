@@ -32,6 +32,12 @@
             android:paddingStart="16dp"
             android:paddingEnd="16dp">
 
+            <Button
+                android:id="@+id/btnLinkPolicy"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Lien externe vers la politique de confidentialité"
+                style="@style/ButtonLink" />
             <TextView
                 android:id="@+id/tvPoCContentCGU"
                 android:layout_width="match_parent"

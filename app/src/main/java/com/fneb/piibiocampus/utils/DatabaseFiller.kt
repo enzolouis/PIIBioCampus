@@ -150,7 +150,12 @@ object DatabaseFiller {
 
             // Reims
             Campus(generateId("Croix Rouge"), "Croix-Rouge", 2500.0, 4.0170, 49.2320),
-            Campus(generateId("Reims Centre"), "Reims Centre", 1200.0, 4.0310, 49.2580)
+            Campus(generateId("Reims Centre"), "Reims Centre", 1200.0, 4.0310, 49.2580),
+
+            // Savoie
+            Campus(generateId("Annecy"), "Annecy", 2000.0, 6.1294, 45.9197),
+            Campus(generateId("Le Bourget du Lac"), "Le Bourget-du-Lac", 2500.0, 5.8670, 45.6415),
+            Campus(generateId("Chambery Jacob"), "Chambéry - Jacob-Bellecombette", 2000.0, 5.9178, 45.5620),
         )
 
         if (clear) {

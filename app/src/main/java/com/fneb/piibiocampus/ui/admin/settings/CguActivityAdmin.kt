@@ -1,6 +1,9 @@
 package com.fneb.piibiocampus.ui.admin.settings
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import com.fneb.piibiocampus.R
 import com.fneb.piibiocampus.utils.setTopBarTitle
@@ -14,6 +17,15 @@ class CguActivityAdmin : AppCompatActivity() {
 
         setTopBarTitle(R.string.titleCgu)
         showTopBarLeftButton { finish() }
+
+        val btnLinkPolicy: Button = findViewById(R.id.btnLinkPolicy)
+
+        btnLinkPolicy.setOnClickListener {
+            val intent = Intent(Intent.ACTION_VIEW)
+            intent.data = Uri.parse("https://piibiocampus.fneb.fr/politique-de-confidentialite")
+
+            btnLinkPolicy.context.startActivity(intent)
+        }
     }
 
     override fun onResume() {
