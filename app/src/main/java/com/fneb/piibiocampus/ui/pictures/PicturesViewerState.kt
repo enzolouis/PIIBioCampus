@@ -10,6 +10,7 @@ import kotlinx.parcelize.Parcelize
 enum class PicturesViewerCaller {
     MAP,
     MY_PROFILE,
+    USER_PROFILE,
     ADMIN,
     CENSUS_TREE
 }
@@ -66,6 +67,7 @@ data class PhotoViewerState(
             PicturesViewerCaller.MY_PROFILE  -> !adminValidated
             PicturesViewerCaller.CENSUS_TREE -> true
             PicturesViewerCaller.ADMIN       -> true
+            PicturesViewerCaller.USER_PROFILE -> false
             else                             -> false
         }
 

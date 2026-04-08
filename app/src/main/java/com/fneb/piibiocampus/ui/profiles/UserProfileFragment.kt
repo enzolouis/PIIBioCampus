@@ -220,7 +220,7 @@ class UserProfileFragment : Fragment() {
                 longitude         = (loc?.get("longitude")  as? Double) ?: 0.0,
                 altitude          = (loc?.get("altitude")   as? Double) ?: 0.0,
                 recordingStatus   = photo["recordingStatus"] as? Boolean ?: false,
-                caller            = PicturesViewerCaller.MY_PROFILE
+                caller            = PicturesViewerCaller.USER_PROFILE
             )
             PicturesViewerFragment.show(parentFragmentManager, state)
         }
