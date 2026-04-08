@@ -12,6 +12,7 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.fneb.piibiocampus.R
+import com.fneb.piibiocampus.data.ui.showError
 import com.fneb.piibiocampus.ui.MainActivity
 import com.fneb.piibiocampus.utils.setTopBarTitle
 import com.google.android.material.chip.Chip
@@ -52,7 +53,6 @@ class LibraryFragment : Fragment() {
         setupChips()
         observeViewModel()
 
-        // Bouton retour système → retour vers MainActivity (comme MyProfileFragment)
         requireActivity().onBackPressedDispatcher.addCallback(
             viewLifecycleOwner,
             object : OnBackPressedCallback(true) {
@@ -71,7 +71,7 @@ class LibraryFragment : Fragment() {
         setTopBarTitle(R.string.bibliotheque)
     }
 
-    // ── RecyclerView ──────────────────────────────────────
+    // ── RecyclerView ──────────────────────────────────────────────────────────
 
     private fun setupRecyclerView() {
         adapter = LibraryAdapter(emptyList()) { species ->
@@ -82,17 +82,16 @@ class LibraryFragment : Fragment() {
         recyclerView.clipToPadding = false
     }
 
-    // ── Recherche en temps réel ───────────────────────────
+    // ── Recherche ─────────────────────────────────────────────────────────────
 
     private fun setupSearch() {
         etSearch.addTextChangedListener { text ->
-            val q = text.toString().trim()
-            viewModel.searchQuery = q.ifBlank { null }
+            viewModel.searchQuery = text.toString().trim().ifBlank { null }
             viewModel.applyFilters()
         }
     }
 
-    // ── Chips campus / reset ──────────────────────────────
+    // ── Chips ─────────────────────────────────────────────────────────────────
 
     private fun setupChips() {
         chipCampus.setOnClickListener { showCampusDialog() }
@@ -105,7 +104,7 @@ class LibraryFragment : Fragment() {
         }
     }
 
-    // ── Observers ─────────────────────────────────────────
+    // ── Observers ─────────────────────────────────────────────────────────────
 
     private fun observeViewModel() {
         viewModel.displayedSpecies.observe(viewLifecycleOwner) { list ->
@@ -119,18 +118,21 @@ class LibraryFragment : Fragment() {
             progressBar.visibility = if (loading) View.VISIBLE else View.GONE
         }
 
-        viewModel.error.observe(viewLifecycleOwner) { msg ->
-            msg ?: return@observe
-            Toast.makeText(requireContext(), msg, Toast.LENGTH_LONG).show()
+        // AppException → showError() lit exception.userMessage
+        // NetworkUnavailable → "Pas de connexion internet. Vérifie ton réseau."
+        // DocumentNotFound, PermissionDenied, etc. → messages métier adaptés
+        viewModel.error.observe(viewLifecycleOwner) { exception ->
+            exception ?: return@observe
+            showError(exception)
         }
     }
 
-    // ── Dialog campus ─────────────────────────────────────
+    // ── Dialog campus ─────────────────────────────────────────────────────────
 
     private fun showCampusDialog() {
         val campusList = viewModel.campusList.value ?: emptyList()
         if (campusList.isEmpty()) {
-            chipCampus.isChecked = viewModel.filterCampusId != null  // ← remet l'état réel
+            chipCampus.isChecked = viewModel.filterCampusId != null
             Toast.makeText(requireContext(), "Aucun campus disponible", Toast.LENGTH_SHORT).show()
             return
         }
@@ -151,7 +153,6 @@ class LibraryFragment : Fragment() {
                 dialog.dismiss()
             }
             .setNegativeButton("Annuler") { _, _ ->
-                // Remettre l'état réel : coché seulement si un campus est déjà sélectionné
                 chipCampus.isChecked = viewModel.filterCampusId != null
             }
             .show()

@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.fneb.piibiocampus.data.dao.PictureDao
 import com.fneb.piibiocampus.data.error.AppException
+import com.fneb.piibiocampus.data.error.FirebaseExceptionMapper
 import com.fneb.piibiocampus.data.model.LocationMeta
 import com.fneb.piibiocampus.data.repository.CensusRepository
 import com.fneb.piibiocampus.data.ui.UiState
@@ -79,13 +80,13 @@ class CensusViewModel(private val repository: CensusRepository) : ViewModel() {
 
         if (initialNodeId != null) {
             val observer = object : androidx.lifecycle.Observer<List<CensusNode>> {
-                override fun onChanged(roots: List<CensusNode>) {
-                    if (roots.isNotEmpty()) {
-                        cachedRoots = roots
+                override fun onChanged(value: List<CensusNode>) {
+                    if (value.isNotEmpty()) {
+                        cachedRoots = value
                         navStack.clear()
                         pathStack.clear()
                         pathStack.addLast(null)
-                        _currentNodes.postValue(roots)
+                        _currentNodes.postValue(value)
                         navigateToNodeById(initialNodeId)
                         repository.roots.removeObserver(this)
                     }
@@ -152,7 +153,7 @@ class CensusViewModel(private val repository: CensusRepository) : ViewModel() {
                 _saveState.postValue(UiState.Success(Unit))
             },
             onError = { e ->
-                val mapped = if (e is AppException) e else AppException.Unknown(e)
+                val mapped = e as? AppException ?: FirebaseExceptionMapper.map(e)
                 _saveState.postValue(UiState.Error(mapped))
             }
         )
@@ -172,7 +173,7 @@ class CensusViewModel(private val repository: CensusRepository) : ViewModel() {
                 _saveState.postValue(UiState.Success(Unit))
             },
             onError = { e ->
-                val mapped = if (e is AppException) e else AppException.Unknown(e)
+                val mapped = e as? AppException ?: FirebaseExceptionMapper.map(e)
                 _saveState.postValue(UiState.Error(mapped))
             }
         )

@@ -5,6 +5,7 @@ import com.fneb.piibiocampus.data.dao.CampusDao
 import com.fneb.piibiocampus.data.dao.CensusDao
 import com.fneb.piibiocampus.data.dao.PictureDao
 import com.fneb.piibiocampus.data.dao.UserDao
+import com.fneb.piibiocampus.data.error.AppException
 import com.fneb.piibiocampus.data.model.Campus
 import com.fneb.piibiocampus.ui.census.CensusNode
 import com.fneb.piibiocampus.ui.census.CensusType
@@ -12,35 +13,42 @@ import kotlin.math.*
 
 class LibraryViewModel : ViewModel() {
 
-    // ── État ──────────────────────────────────────────────
+    // ── État ──────────────────────────────────────────────────────────────────
     private val _isLoading = MutableLiveData(false)
     val isLoading: LiveData<Boolean> = _isLoading
 
-    private val _error = MutableLiveData<String?>(null)
-    val error: LiveData<String?> = _error
+    // AppException au lieu de String : userMessage ready-to-display + type réseau identifiable
+    private val _error = MutableLiveData<AppException?>(null)
+    val error: LiveData<AppException?> = _error
 
-    // ── Données ───────────────────────────────────────────
+    // ── Données ───────────────────────────────────────────────────────────────
     private val _allSpecies = MutableLiveData<List<SpeciesItem>>(emptyList())
 
     private val _campusList = MutableLiveData<List<Campus>>(emptyList())
     val campusList: LiveData<List<Campus>> = _campusList
 
-    // ── Filtres ───────────────────────────────────────────
+    // ── Filtres ───────────────────────────────────────────────────────────────
     var searchQuery:    String? = null
     var filterCampusId: String? = null
 
-    // ── Résultat filtré ───────────────────────────────────
+    // ── Résultat filtré ───────────────────────────────────────────────────────
     private val _displayedSpecies = MutableLiveData<List<SpeciesItem>>(emptyList())
     val displayedSpecies: LiveData<List<SpeciesItem>> = _displayedSpecies
 
-    // ─────────────────────────────────────────────────────
+    // ── Chargement principal ──────────────────────────────────────────────────
 
     fun loadAll() {
         _isLoading.value = true
 
+        // Campus : erreur non bloquante — on affiche juste l'erreur et on continue
+        // (la liste reste vide, le filtre campus sera désactivé)
         CampusDao.getAll(
             onComplete = { _campusList.postValue(it) },
-            onError    = { _campusList.postValue(emptyList()) }
+            onError    = { e ->
+                // AppException directement, pas de cast
+                _error.postValue(e)
+                _campusList.postValue(emptyList())
+            }
         )
 
         val currentUid = UserDao.getCurrentUser()?.uid
@@ -60,7 +68,6 @@ class LibraryViewModel : ViewModel() {
                         val items = hierarchy.map { (node, order, family, genus) ->
                             val allForSpecies  = picsBySpecies[node.id]  ?: emptyList()
                             val userForSpecies = userPicsBySpec[node.id] ?: emptyList()
-
                             SpeciesItem(
                                 id                   = node.id,
                                 name                 = node.name,
@@ -79,32 +86,31 @@ class LibraryViewModel : ViewModel() {
                                 }
                             )
                         }
-
-                        // .value synchrone pour que applyFilters() lise immédiatement la liste
                         _allSpecies.value = items
                         _isLoading.value  = false
                         applyFilters()
                     },
                     onError = { e ->
-                        _error.postValue(e.message)
+                        // getAllRecordedPictures → onError(AppException)
+                        _error.postValue(e)
                         _isLoading.postValue(false)
                     }
                 )
             },
             onError = { e ->
-                _error.postValue(e.message)
+                // fetchCensusTree → onError(AppException)
+                _error.postValue(e)
                 _isLoading.postValue(false)
             }
         )
     }
 
-    // ── Filtres ───────────────────────────────────────────
+    // ── Filtres ───────────────────────────────────────────────────────────────
 
     fun applyFilters() {
         val campus = _campusList.value ?: emptyList()
         var result = _allSpecies.value ?: emptyList()
 
-        // Recherche textuelle
         searchQuery?.takeIf { it.isNotBlank() }?.let { q ->
             val lower = q.lowercase()
             result = result.filter {
@@ -115,7 +121,6 @@ class LibraryViewModel : ViewModel() {
             }
         }
 
-        // Filtre campus
         filterCampusId?.let { campusId ->
             val target = campus.find { it.id == campusId || it.name == campusId }
             if (target != null) {
@@ -127,7 +132,6 @@ class LibraryViewModel : ViewModel() {
             }
         }
 
-        // Tri : recensées par l'utilisateur·ice en premier, puis alphabétique
         result = result.sortedWith(
             compareByDescending<SpeciesItem> { it.isRecordedByUser }.thenBy { it.name }
         )
@@ -141,7 +145,7 @@ class LibraryViewModel : ViewModel() {
         applyFilters()
     }
 
-    // ── Helpers ───────────────────────────────────────────
+    // ── Helpers ───────────────────────────────────────────────────────────────
 
     private data class SpeciesHierarchy(
         val node:   CensusNode,

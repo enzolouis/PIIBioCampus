@@ -4,11 +4,13 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.fneb.piibiocampus.data.dao.CensusDao
+import com.fneb.piibiocampus.data.error.AppException
+import com.fneb.piibiocampus.data.error.FirebaseExceptionMapper
 import java.util.UUID
 
 class CensusEditorViewModel : ViewModel() {
 
-    // ── Arbre complet en mémoire ───────────────────────────────────────────────
+    // ── Arbre complet en mémoire ──────────────────────────────────────────────
     private val allRoots = mutableListOf<CensusNode>()
     private var firestoreDocId: String? = null
 
@@ -23,8 +25,9 @@ class CensusEditorViewModel : ViewModel() {
     private val _isLoading = MutableLiveData(false)
     val isLoading: LiveData<Boolean> = _isLoading
 
-    private val _error = MutableLiveData<String?>(null)
-    val error: LiveData<String?> = _error
+    // AppException au lieu de String : on conserve userMessage et le type d'erreur
+    private val _error = MutableLiveData<AppException?>(null)
+    val error: LiveData<AppException?> = _error
 
     // ── Chargement ────────────────────────────────────────────────────────────
 
@@ -42,7 +45,8 @@ class CensusEditorViewModel : ViewModel() {
                 _isLoading.postValue(false)
             },
             onError = { e ->
-                _error.postValue(e.message)
+                // fetchCensusTreeFull → onError(AppException) : pas de cast nécessaire
+                _error.postValue(e)
                 _isLoading.postValue(false)
             }
         )
@@ -66,9 +70,6 @@ class CensusEditorViewModel : ViewModel() {
     fun canNavigateUp(): Boolean = navStack.isNotEmpty()
     fun currentPath(): List<CensusNode> = pathStack.filterNotNull()
 
-    /**
-     * Type que les nouveaux enfants doivent avoir au niveau courant.
-     */
     fun childTypeForCurrentLevel(): CensusType {
         val parent = pathStack.lastOrNull { it != null }
         return when (parent?.type) {
@@ -79,14 +80,10 @@ class CensusEditorViewModel : ViewModel() {
         }
     }
 
-    /** Le niveau courant peut-il encore avoir des enfants ? (SPECIES est une feuille) */
-    fun canAddChildren(): Boolean = childTypeForCurrentLevel() != CensusType.SPECIES ||
-            pathStack.lastOrNull { it != null }?.type != CensusType.GENUS.let { CensusType.SPECIES }
-
     // ── Mutations ─────────────────────────────────────────────────────────────
 
     fun addNode(name: String, description: List<String>, imageUrl: String) {
-        val type = childTypeForCurrentLevel()
+        val type    = childTypeForCurrentLevel()
         val newNode = CensusNode(
             id          = UUID.randomUUID().toString(),
             name        = name,
@@ -129,25 +126,18 @@ class CensusEditorViewModel : ViewModel() {
         persistTree()
     }
 
-    /** Nombre total de descendants (pour l'alerte de suppression) */
     fun countDescendants(node: CensusNode): Int =
         node.children.sumOf { 1 + countDescendants(it) }
 
     // ── Helpers internes ──────────────────────────────────────────────────────
 
-    /**
-     * Remplace [original] par [updated] dans allRoots, navStack et pathStack.
-     */
     private fun applyNodeUpdate(original: CensusNode, updated: CensusNode) {
-        // allRoots
         for (i in allRoots.indices) {
             allRoots[i] = replaceInTree(allRoots[i], original.id, updated)
         }
-        // navStack : chaque liste mémorisée
         for (i in navStack.indices) {
             navStack[i] = navStack[i].map { if (it.id == original.id) updated else it }
         }
-        // pathStack : le nœud parent peut y figurer
         for (i in pathStack.indices) {
             if (pathStack[i]?.id == original.id) pathStack[i] = updated
         }
@@ -162,10 +152,14 @@ class CensusEditorViewModel : ViewModel() {
 
     private fun persistTree() {
         CensusDao.saveCensusDocument(
-            docId  = firestoreDocId,
-            roots  = allRoots.toList(),
+            docId     = firestoreDocId,
+            roots     = allRoots.toList(),
             onSuccess = { newDocId -> if (firestoreDocId == null) firestoreDocId = newDocId },
-            onError   = { e -> _error.postValue("Erreur sauvegarde : ${e.message}") }
+            onError   = { e ->
+                // saveCensusDocument → onError(Exception) : on mappe vers AppException
+                val appException = (e as? AppException) ?: FirebaseExceptionMapper.map(e)
+                _error.postValue(appException)
+            }
         )
     }
 }

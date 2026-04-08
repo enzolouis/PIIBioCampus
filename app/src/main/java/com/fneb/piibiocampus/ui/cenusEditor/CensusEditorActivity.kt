@@ -10,6 +10,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.fneb.piibiocampus.R
+import com.fneb.piibiocampus.data.ui.showError
 import com.fneb.piibiocampus.ui.BaseActivity
 import com.fneb.piibiocampus.utils.setTopBarTitle
 import com.fneb.piibiocampus.utils.showTopBarLeftButton
@@ -19,11 +20,11 @@ class CensusEditorActivity : BaseActivity() {
 
     private val viewModel: CensusEditorViewModel by viewModels()
 
-    private lateinit var recyclerView:   RecyclerView
-    private lateinit var tvHeaderTitle:  TextView
-    private lateinit var btnBack:        ImageButton
-    private lateinit var progressBar:    ProgressBar
-    private lateinit var tvEmpty:        TextView
+    private lateinit var recyclerView:  RecyclerView
+    private lateinit var tvHeaderTitle: TextView
+    private lateinit var btnBack:       ImageButton
+    private lateinit var progressBar:   ProgressBar
+    private lateinit var tvEmpty:       TextView
 
     private lateinit var adapter: CensusEditorAdapter
 
@@ -85,9 +86,10 @@ class CensusEditorActivity : BaseActivity() {
             progressBar.visibility = if (loading) View.VISIBLE else View.GONE
         }
 
-        viewModel.error.observe(this) { msg ->
-            msg ?: return@observe
-            Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
+        // AppException → showError() lit userMessage, gère aussi NetworkUnavailable
+        viewModel.error.observe(this) { exception ->
+            exception ?: return@observe
+            showError(exception)
         }
     }
 
@@ -111,9 +113,9 @@ class CensusEditorActivity : BaseActivity() {
 
     private fun openAddDialog() {
         CensusNodeEditorDialogFragment.show(
-            fm     = supportFragmentManager,
-            node   = null,
-            type   = viewModel.childTypeForCurrentLevel()
+            fm   = supportFragmentManager,
+            node = null,
+            type = viewModel.childTypeForCurrentLevel()
         ) { name, description, imageUrl ->
             viewModel.addNode(name, description, imageUrl)
         }
@@ -133,12 +135,10 @@ class CensusEditorActivity : BaseActivity() {
         val descendantCount = viewModel.countDescendants(node)
         val message = buildString {
             append("Supprimer « ${node.name} » ?")
-            if (descendantCount > 0) {
+            if (descendantCount > 0)
                 append("\n\nCette action supprimera également tout les enfants de ce noeud.")
-            }
             append("\n\nCette action est irréversible.")
         }
-
         MaterialAlertDialogBuilder(this)
             .setTitle("Confirmer la suppression")
             .setMessage(message)
@@ -167,8 +167,7 @@ class CensusEditorActivity : BaseActivity() {
                     CensusType.GENUS   -> "Espèces"
                     CensusType.SPECIES -> ""
                 }
-                if (nextLevel.isNotEmpty()) "$currentLevel — $nextLevel"
-                else currentLevel
+                if (nextLevel.isNotEmpty()) "$currentLevel — $nextLevel" else currentLevel
             }
         }
     }
