@@ -25,12 +25,12 @@ import java.util.Locale
 
 class UserProfileFragment : Fragment() {
 
-    private lateinit var recyclerView:   RecyclerView
-    private lateinit var pseudoText:     TextView
-    private lateinit var description:    TextView
-    private lateinit var profilePicture: ImageView
-    private lateinit var badge:          ImageView
-    private lateinit var progressBar:    View
+    private var recyclerView:   RecyclerView? = null
+    private var pseudoText:     TextView?     = null
+    private var description:    TextView?     = null
+    private var profilePicture: ImageView?    = null
+    private var badge:          ImageView?    = null
+    private var progressBar:    View?         = null
 
     private val photos = mutableListOf<Map<String, Any>>()
     private lateinit var adapter: PhotoAdapter
@@ -62,6 +62,7 @@ class UserProfileFragment : Fragment() {
 
         setTopBarTitle(R.string.titleProfile)
 
+        // Vues initialisées AVANT setupObservers pour éviter le crash lateinit
         recyclerView   = view.findViewById(R.id.photosRecycler)
         pseudoText     = view.findViewById(R.id.pseudoText)
         description    = view.findViewById(R.id.description)
@@ -69,11 +70,21 @@ class UserProfileFragment : Fragment() {
         badge          = view.findViewById(R.id.badge)
         progressBar    = view.findViewById(R.id.progressBar)
 
-        recyclerView.layoutManager = GridLayoutManager(requireContext(), 3)
         adapter = PhotoAdapter(photos)
-        recyclerView.adapter = adapter
+        recyclerView?.layoutManager = GridLayoutManager(requireContext(), 3)
+        recyclerView?.adapter = adapter
 
         setupObservers()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        recyclerView   = null
+        pseudoText     = null
+        description    = null
+        profilePicture = null
+        badge          = null
+        progressBar    = null
     }
 
     // ── Observers ─────────────────────────────────────────────────────────────
@@ -112,8 +123,8 @@ class UserProfileFragment : Fragment() {
     // ── Binding ───────────────────────────────────────────────────────────────
 
     private fun bindProfile(profile: UserProfile) {
-        pseudoText.text  = profile.name
-        description.text = profile.description
+        pseudoText?.text  = profile.name
+        description?.text = profile.description
 
         if (!profile.profilePictureUrl.isNullOrEmpty()) {
             Picasso.get()
@@ -121,7 +132,7 @@ class UserProfileFragment : Fragment() {
                 .placeholder(R.drawable.photo_placeholder)
                 .into(profilePicture)
         } else {
-            profilePicture.setImageResource(R.drawable.ic_profile)
+            profilePicture?.setImageResource(R.drawable.ic_profile)
         }
     }
 
@@ -140,13 +151,13 @@ class UserProfileFragment : Fragment() {
             count >= 1   -> R.drawable.ic_badge_abeille_curieuse
             else         -> R.drawable.norank
         }
-        badge.setImageResource(badgeRes)
+        badge?.setImageResource(badgeRes)
     }
 
     // ── UI helpers ────────────────────────────────────────────────────────────
 
     private fun showLoading(visible: Boolean) {
-        progressBar.visibility = if (visible) View.VISIBLE else View.GONE
+        progressBar?.visibility = if (visible) View.VISIBLE else View.GONE
     }
 
     // ── Adapter ───────────────────────────────────────────────────────────────
@@ -184,23 +195,9 @@ class UserProfileFragment : Fragment() {
             val recordingStatus = photo["recordingStatus"] as? Boolean ?: false
             val adminValidated  = photo["adminValidated"]  as? Boolean ?: false
 
-            when {
-                adminValidated -> {
-                    holder.validatedDot.visibility       = View.VISIBLE
-                    holder.recordingDotRed.visibility    = View.GONE
-                    holder.recordingDotOrange.visibility = View.GONE
-                }
-                !recordingStatus -> {
-                    holder.recordingDotRed.visibility    = View.VISIBLE
-                    holder.validatedDot.visibility       = View.GONE
-                    holder.recordingDotOrange.visibility = View.GONE
-                }
-                else -> {
-                    holder.recordingDotRed.visibility    = View.GONE
-                    holder.validatedDot.visibility       = View.GONE
-                    holder.recordingDotOrange.visibility = View.VISIBLE
-                }
-            }
+            holder.validatedDot.visibility       = if (adminValidated)                       View.VISIBLE else View.GONE
+            holder.recordingDotRed.visibility    = if (!adminValidated && !recordingStatus)  View.VISIBLE else View.GONE
+            holder.recordingDotOrange.visibility = if (!adminValidated && recordingStatus)   View.VISIBLE else View.GONE
 
             holder.image.setOnClickListener { openPhotoViewer(photo) }
         }
@@ -222,8 +219,8 @@ class UserProfileFragment : Fragment() {
                 latitude          = (loc?.get("latitude")   as? Double) ?: 0.0,
                 longitude         = (loc?.get("longitude")  as? Double) ?: 0.0,
                 altitude          = (loc?.get("altitude")   as? Double) ?: 0.0,
-                caller            = PicturesViewerCaller.MAP,
-                recordingStatus   = photo["recordingStatus"] as? Boolean ?: false
+                recordingStatus   = photo["recordingStatus"] as? Boolean ?: false,
+                caller            = PicturesViewerCaller.MY_PROFILE
             )
             PicturesViewerFragment.show(parentFragmentManager, state)
         }
