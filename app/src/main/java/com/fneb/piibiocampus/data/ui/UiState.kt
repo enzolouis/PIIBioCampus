@@ -1,9 +1,9 @@
 package com.fneb.piibiocampus.data.ui
 
-import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import com.fneb.piibiocampus.data.error.AppException
-import com.google.android.material.snackbar.Snackbar
 
 // ── UiState générique ─────────────────────────────────────────────────────────
 
@@ -40,24 +40,14 @@ sealed class UiState<out T> {
  * is UiState.Error -> { showLoading(false); showError(state.exception) }
  * ```
  */
-fun androidx.fragment.app.Fragment.showError(
-    exception: AppException,
-    anchor: View = requireView()
-) {
-    Snackbar.make(anchor, exception.userMessage, Snackbar.LENGTH_LONG).show()
+fun Fragment.showError(exception: AppException) {
+    Toast.makeText(requireContext(), exception.userMessage, Toast.LENGTH_LONG).show()
 }
 
 /**
- * Affiche le message d'erreur d'une [AppException] dans une Snackbar.
- * Version Activity — à appeler depuis une AppCompatActivity après avoir collecté un [UiState.Error].
- *
- * ```kotlin
- * is UiState.Error -> { showLoading(false); showError(state.exception) }
- * ```
+ * Affiche le message d'erreur d'une [AppException] dans un Toast.
+ * Version Activity.
  */
-fun AppCompatActivity.showError(
-    exception: AppException,
-    anchor: View = findViewById(android.R.id.content)
-) {
-    Snackbar.make(anchor, exception.userMessage, Snackbar.LENGTH_LONG).show()
+fun AppCompatActivity.showError(exception: AppException) {
+    Toast.makeText(this, exception.userMessage, Toast.LENGTH_LONG).show()
 }
