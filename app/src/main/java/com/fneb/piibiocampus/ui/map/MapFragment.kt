@@ -17,13 +17,13 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.fneb.piibiocampus.R
 import com.fneb.piibiocampus.data.model.Campus
+import com.fneb.piibiocampus.data.ui.UiState
+import com.fneb.piibiocampus.data.ui.showError
 import com.fneb.piibiocampus.ui.photo.PhotoViewerState
 import com.fneb.piibiocampus.ui.photo.PicturesViewerCaller
 import com.fneb.piibiocampus.ui.photo.PicturesViewerFragment
 import com.fneb.piibiocampus.utils.setTopBarTitle
 import com.google.android.gms.location.LocationServices
-import com.google.android.material.snackbar.Snackbar
-import com.squareup.picasso.Picasso
 import kotlinx.coroutines.launch
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.XYTileSource
@@ -33,6 +33,7 @@ import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Overlay
 import org.osmdroid.views.overlay.Polygon
 import org.osmdroid.views.overlay.infowindow.InfoWindow
+import com.squareup.picasso.Picasso
 
 class MapFragment : Fragment(R.layout.fragment_map) {
 
@@ -42,7 +43,7 @@ class MapFragment : Fragment(R.layout.fragment_map) {
     private val campusTextOverlays = mutableListOf<TextOverlay>()
     private var initialCenterDone  = false
 
-    // ── TextOverlay (pur rendu View, reste dans le Fragment) ──────────────────
+    // ── TextOverlay ───────────────────────────────────────────────────────────
 
     private inner class TextOverlay(
         private val position: GeoPoint,
@@ -107,20 +108,22 @@ class MapFragment : Fragment(R.layout.fragment_map) {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
 
-                // État : photos et campus
                 launch {
-                    viewModel.uiState.collect { state ->
-                        addMarkers(state.pictures)
-                        addCampusOverlays(state.campusList)
+                    viewModel.picturesState.collect { state ->
+                        when (state) {
+                            is UiState.Success -> addMarkers(state.data)
+                            is UiState.Error   -> showError(state.exception)
+                            else               -> Unit
+                        }
                     }
                 }
 
-                // Événements ponctuels : erreurs
                 launch {
-                    viewModel.events.collect { event ->
-                        when (event) {
-                            is MapEvent.ShowError ->
-                                view?.let { Snackbar.make(it, event.message, Snackbar.LENGTH_LONG).show() }
+                    viewModel.campusState.collect { state ->
+                        when (state) {
+                            is UiState.Success -> addCampusOverlays(state.data)
+                            is UiState.Error   -> showError(state.exception)
+                            else               -> Unit
                         }
                     }
                 }
@@ -204,21 +207,21 @@ class MapFragment : Fragment(R.layout.fragment_map) {
 
             marker.infoWindow = object : InfoWindow(R.layout.marker_info, map) {
                 override fun onOpen(item: Any?) {
-                    val titleView         = mView.findViewById<TextView>(R.id.title)
-                    val photoView         = mView.findViewById<ImageView>(R.id.photo)
-                    val dotRed: View      = mView.findViewById(R.id.ivDotRed)
-                    val dotOrange: View   = mView.findViewById(R.id.ivDotOrange)
-                    val dotGreen: View    = mView.findViewById(R.id.ivDotGreen)
-                    val imageUrl          = (o["imageUrl"] as? String) ?: (o["image"] as? String) ?: ""
-                    val adminValidated    = o["adminValidated"]  as? Boolean ?: false
-                    val recordingStatus   = o["recordingStatus"] as? Boolean ?: false
+                    val titleView       = mView.findViewById<TextView>(R.id.title)
+                    val photoView       = mView.findViewById<ImageView>(R.id.photo)
+                    val dotRed: View    = mView.findViewById(R.id.ivDotRed)
+                    val dotOrange: View = mView.findViewById(R.id.ivDotOrange)
+                    val dotGreen: View  = mView.findViewById(R.id.ivDotGreen)
+                    val imageUrl        = (o["imageUrl"] as? String) ?: (o["image"] as? String) ?: ""
+                    val adminValidated  = o["adminValidated"]  as? Boolean ?: false
+                    val recordingStatus = o["recordingStatus"] as? Boolean ?: false
 
                     titleView.text = marker.title
                     if (imageUrl.isNotEmpty()) Picasso.get().load(Uri.parse(imageUrl)).into(photoView)
 
-                    dotGreen.visibility  = if (adminValidated)              View.VISIBLE else View.GONE
-                    dotRed.visibility    = if (!adminValidated && !recordingStatus) View.VISIBLE else View.GONE
-                    dotOrange.visibility = if (!adminValidated && recordingStatus)  View.VISIBLE else View.GONE
+                    dotGreen.visibility  = if (adminValidated)                       View.VISIBLE else View.GONE
+                    dotRed.visibility    = if (!adminValidated && !recordingStatus)  View.VISIBLE else View.GONE
+                    dotOrange.visibility = if (!adminValidated && recordingStatus)   View.VISIBLE else View.GONE
 
                     photoView.setOnClickListener {
                         val loc   = o["location"] as? Map<*, *>
@@ -286,7 +289,6 @@ class MapFragment : Fragment(R.layout.fragment_map) {
             map.overlays.add(insertIndex, textOverlay)
         }
 
-        // On s'assure que les marqueurs restent au-dessus des polygones
         val markers = map.overlays.filterIsInstance<Marker>()
         map.overlays.removeAll { it is Marker }
         map.overlays.addAll(markers)
@@ -299,10 +301,9 @@ class MapFragment : Fragment(R.layout.fragment_map) {
     fun reloadMarkers() = viewModel.loadAllPictures()
 
     private fun formatTimestamp(timestamp: Any?): String = when (timestamp) {
-        is com.google.firebase.Timestamp -> {
+        is com.google.firebase.Timestamp ->
             java.text.SimpleDateFormat("dd/MM/yyyy à HH:mm", java.util.Locale.FRENCH)
                 .format(timestamp.toDate())
-        }
         is java.util.Date ->
             java.text.SimpleDateFormat("dd/MM/yyyy à HH:mm", java.util.Locale.FRENCH)
                 .format(timestamp)

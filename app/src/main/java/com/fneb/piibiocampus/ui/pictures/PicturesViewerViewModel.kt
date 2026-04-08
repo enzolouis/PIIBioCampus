@@ -7,13 +7,17 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.fneb.piibiocampus.data.dao.PictureDao
 import com.fneb.piibiocampus.data.error.AppException
+import com.fneb.piibiocampus.data.ui.UiState
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 // ── Événements ponctuels émis vers le Fragment ────────────────────────────────
 
 sealed class PicturesViewerEvent {
+    /** Feedback de succès à afficher en Toast */
     data class ShowToast(val message: String) : PicturesViewerEvent()
+    /** Erreur métier — le Fragment appelle showError(exception) */
+    data class ShowError(val exception: AppException) : PicturesViewerEvent()
     data class PictureValidated(val pictureId: String, val newValue: Boolean) : PicturesViewerEvent()
     data class PictureDeleted(val pictureId: String) : PicturesViewerEvent()
     object CensusUpdated : PicturesViewerEvent()
@@ -36,23 +40,18 @@ class PicturesViewerViewModel(initialState: PhotoViewerState) : ViewModel() {
         val current  = _uiState.value
         val newValue = !current.adminValidated
 
-        // Signature DAO : onError(Exception) — en pratique toujours une AppException
-        // car le DAO mappe systématiquement via FirebaseExceptionMapper.map()
         PictureDao.setAdminValidated(
             pictureId = current.pictureId,
             validated = newValue,
             onSuccess = {
                 _uiState.update { it.copy(adminValidated = newValue) }
                 emit(PicturesViewerEvent.PictureValidated(current.pictureId, newValue))
-                emit(PicturesViewerEvent.ShowToast(
-                    if (newValue) "Photo validée" else "Photo invalidée"
-                ))
+                emit(PicturesViewerEvent.ShowToast(if (newValue) "Photo validée" else "Photo invalidée"))
             },
             onError = { e ->
-                // On caste vers AppException pour récupérer userMessage ;
-                // si le cast échoue (cas imprévu), on affiche le message brut.
-                val message = (e as? AppException)?.userMessage ?: e.message ?: "Erreur inattendue"
-                emit(PicturesViewerEvent.ShowToast(message))
+                // setAdminValidated déclare (Exception) mais mappe toujours via FirebaseExceptionMapper
+                val appException = (e as? AppException) ?: AppException.Unknown(e)
+                emit(PicturesViewerEvent.ShowError(appException))
             }
         )
     }
@@ -60,7 +59,6 @@ class PicturesViewerViewModel(initialState: PhotoViewerState) : ViewModel() {
     fun deletePicture() {
         val pictureId = _uiState.value.pictureId
 
-        // Même signature que setAdminValidated : onError(Exception)
         PictureDao.deletePicture(
             pictureId = pictureId,
             onSuccess = {
@@ -69,14 +67,14 @@ class PicturesViewerViewModel(initialState: PhotoViewerState) : ViewModel() {
                 emit(PicturesViewerEvent.Dismiss)
             },
             onError = { e ->
-                val message = (e as? AppException)?.userMessage ?: e.message ?: "Erreur inattendue"
-                emit(PicturesViewerEvent.ShowToast(message))
+                val appException = (e as? AppException) ?: AppException.Unknown(e)
+                emit(PicturesViewerEvent.ShowError(appException))
             }
         )
     }
 
     fun reloadPicture() {
-        // Signature DAO : onError(AppException) → userMessage directement accessible
+        // getPictureEnrichedById → onError: (AppException) directement
         PictureDao.getPictureEnrichedById(
             pictureId = _uiState.value.pictureId,
             onSuccess = { updatedPhoto ->
@@ -93,10 +91,8 @@ class PicturesViewerViewModel(initialState: PhotoViewerState) : ViewModel() {
                 emit(PicturesViewerEvent.CensusUpdated)
             },
             onError = { appException ->
-                // Erreur réseau ou Firestore : mise à jour partielle (recensement marqué terminé)
-                // pour ne pas bloquer l'UI, et notification du parent quand même
                 _uiState.update { it.copy(recordingStatus = true) }
-                emit(PicturesViewerEvent.ShowToast(appException.userMessage))
+                emit(PicturesViewerEvent.ShowError(appException))
                 emit(PicturesViewerEvent.CensusUpdated)
             }
         )

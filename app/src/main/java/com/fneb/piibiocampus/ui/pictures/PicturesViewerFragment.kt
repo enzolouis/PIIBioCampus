@@ -16,6 +16,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.fneb.piibiocampus.R
+import com.fneb.piibiocampus.data.ui.showError
 import com.fneb.piibiocampus.ui.census.CensusMode
 import com.fneb.piibiocampus.ui.census.CensusTreeActivity
 import com.fneb.piibiocampus.ui.profiles.UserProfileFragment
@@ -36,24 +37,22 @@ class PicturesViewerFragment : DialogFragment() {
 
     // ── Vues ──────────────────────────────────────────────────────────────────
 
-    private var ivAuthorProfile: ImageView? = null
-    private var tvTitle: TextView?          = null
-    private var tvValidationStatus: TextView? = null
-    private var photoView: PhotoView?       = null
-    private var tvDate: TextView?           = null
-    private var tvDescription: TextView?   = null
-    private var btnResumeCensus: Button?   = null
-    private var btnValidate: Button?       = null
-    private var btnBack: Button?           = null
-    private var btnDelete: Button?         = null
+    private var ivAuthorProfile:    ImageView? = null
+    private var tvTitle:            TextView?  = null
+    private var tvValidationStatus: TextView?  = null
+    private var photoView:          PhotoView? = null
+    private var tvDate:             TextView?  = null
+    private var tvDescription:      TextView?  = null
+    private var btnResumeCensus:    Button?    = null
+    private var btnValidate:        Button?    = null
+    private var btnBack:            Button?    = null
+    private var btnDelete:          Button?    = null
 
     // ── Launcher recensement ──────────────────────────────────────────────────
 
     private val censusLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                viewModel.reloadPicture()
-            }
+            if (result.resultCode == Activity.RESULT_OK) viewModel.reloadPicture()
         }
 
     // ── Companion ─────────────────────────────────────────────────────────────
@@ -84,7 +83,6 @@ class PicturesViewerFragment : DialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         bindViews(view)
         setupClickListeners()
         observeViewModel()
@@ -102,17 +100,16 @@ class PicturesViewerFragment : DialogFragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        // Éviter les fuites mémoire sur les références de vues
-        ivAuthorProfile = null
-        tvTitle         = null
+        ivAuthorProfile    = null
+        tvTitle            = null
         tvValidationStatus = null
-        photoView       = null
-        tvDate          = null
-        tvDescription   = null
-        btnResumeCensus = null
-        btnValidate     = null
-        btnBack         = null
-        btnDelete       = null
+        photoView          = null
+        tvDate             = null
+        tvDescription      = null
+        btnResumeCensus    = null
+        btnValidate        = null
+        btnBack            = null
+        btnDelete          = null
     }
 
     // ── Initialisation des vues ───────────────────────────────────────────────
@@ -130,7 +127,7 @@ class PicturesViewerFragment : DialogFragment() {
         btnDelete          = view.findViewById(R.id.btnDelete)
     }
 
-    // ── Listeners (stables, indépendants de l'état) ───────────────────────────
+    // ── Listeners ─────────────────────────────────────────────────────────────
 
     private fun setupClickListeners() {
         btnBack?.setOnClickListener { dismiss() }
@@ -146,10 +143,9 @@ class PicturesViewerFragment : DialogFragment() {
 
         btnValidate?.setOnClickListener {
             val isValidated = viewModel.uiState.value.adminValidated
-            val message = if (!isValidated) "Valider cette photo ?" else "Invalider cette photo ?"
             MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Confirmation")
-                .setMessage(message)
+                .setMessage(if (!isValidated) "Valider cette photo ?" else "Invalider cette photo ?")
                 .setPositiveButton("Oui") { _, _ -> viewModel.validatePicture() }
                 .setNegativeButton("Annuler", null)
                 .show()
@@ -184,31 +180,54 @@ class PicturesViewerFragment : DialogFragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
 
-                // État UI
-                launch {
-                    viewModel.uiState.collect { state -> renderState(state) }
-                }
+                launch { viewModel.uiState.collect { state -> renderState(state) } }
 
-                // Événements ponctuels
                 launch {
-                    viewModel.events.collect { event -> handleEvent(event) }
+                    viewModel.events.collect { event ->
+                        when (event) {
+                            is PicturesViewerEvent.ShowToast  ->
+                                Toast.makeText(requireContext(), event.message, Toast.LENGTH_SHORT).show()
+                            is PicturesViewerEvent.ShowError  ->
+                                showError(event.exception)
+                            is PicturesViewerEvent.PictureValidated ->
+                                parentFragmentManager.setFragmentResult(
+                                    REQUEST_KEY,
+                                    Bundle().apply {
+                                        putString("validated_picture_id", event.pictureId)
+                                        putBoolean("validated_value", event.newValue)
+                                    }
+                                )
+                            is PicturesViewerEvent.PictureDeleted ->
+                                parentFragmentManager.setFragmentResult(
+                                    REQUEST_KEY,
+                                    Bundle().apply {
+                                        putBoolean(RESULT_DELETED, true)
+                                        putString("deleted_picture_id", event.pictureId)
+                                    }
+                                )
+                            is PicturesViewerEvent.CensusUpdated ->
+                                parentFragmentManager.setFragmentResult(
+                                    REQUEST_KEY,
+                                    Bundle().apply { putBoolean("census_updated", true) }
+                                )
+                            PicturesViewerEvent.Dismiss -> dismiss()
+                        }
+                    }
                 }
             }
         }
     }
 
-    // ── Rendu complet depuis l'état ───────────────────────────────────────────
+    // ── Rendu depuis l'état ───────────────────────────────────────────────────
 
     private fun renderState(state: PhotoViewerState) {
-        // Photo principale (chargée une seule fois — l'URL ne change pas)
-        photoView?.let { pv ->
+        photoView?.let {
             Picasso.get().load(state.imageUrl)
                 .placeholder(R.drawable.photo_placeholder)
                 .error(R.drawable.photo_placeholder)
-                .into(pv)
+                .into(it)
         }
 
-        // Photo de profil de l'auteur
         if (state.showAuthorProfile && !state.profilePictureUrl.isNullOrEmpty()) {
             ivAuthorProfile?.isVisible = true
             ivAuthorProfile?.let {
@@ -221,7 +240,6 @@ class PicturesViewerFragment : DialogFragment() {
             ivAuthorProfile?.isVisible = false
         }
 
-        // Titre et métadonnées taxonomiques
         tvTitle?.text = state.displayTitle
         tvDate?.text  = state.timestamp
         tvDescription?.text = buildString {
@@ -230,53 +248,13 @@ class PicturesViewerFragment : DialogFragment() {
             append(    "Espèce  : ${state.specie  ?: "Non identifiée"}")
         }
 
-        // Statut de validation
         renderValidationStatus(state)
 
-        // Bouton "Valider / Invalider" (admin)
         btnValidate?.isVisible = state.showValidate
         if (state.showValidate) renderValidateButton(state)
 
-        // Bouton "Reprendre le recensement"
         btnResumeCensus?.isVisible = state.showResumeCensus
-
-        // Bouton "Supprimer"
-        btnDelete?.isVisible = state.showDelete
-    }
-
-    // ── Gestion des événements ────────────────────────────────────────────────
-
-    private fun handleEvent(event: PicturesViewerEvent) {
-        when (event) {
-            is PicturesViewerEvent.ShowToast -> {
-                Toast.makeText(requireContext(), event.message, Toast.LENGTH_SHORT).show()
-            }
-            is PicturesViewerEvent.PictureValidated -> {
-                parentFragmentManager.setFragmentResult(
-                    REQUEST_KEY,
-                    Bundle().apply {
-                        putString("validated_picture_id", event.pictureId)
-                        putBoolean("validated_value", event.newValue)
-                    }
-                )
-            }
-            is PicturesViewerEvent.PictureDeleted -> {
-                parentFragmentManager.setFragmentResult(
-                    REQUEST_KEY,
-                    Bundle().apply {
-                        putBoolean(RESULT_DELETED, true)
-                        putString("deleted_picture_id", event.pictureId)
-                    }
-                )
-            }
-            is PicturesViewerEvent.CensusUpdated -> {
-                parentFragmentManager.setFragmentResult(
-                    REQUEST_KEY,
-                    Bundle().apply { putBoolean("census_updated", true) }
-                )
-            }
-            PicturesViewerEvent.Dismiss -> dismiss()
-        }
+        btnDelete?.isVisible       = state.showDelete
     }
 
     // ── Helpers de rendu ─────────────────────────────────────────────────────
@@ -285,18 +263,9 @@ class PicturesViewerFragment : DialogFragment() {
         tvValidationStatus?.apply {
             isVisible = true
             when {
-                state.adminValidated -> {
-                    text = "✓ Validé par un administrateur"
-                    setTextColor(Color.parseColor("#4CAF50"))
-                }
-                !state.recordingStatus -> {
-                    text = "● Recensement non terminé"
-                    setTextColor(Color.parseColor("#F44336"))
-                }
-                else -> {
-                    text = "○ Recensement non validé par un admin"
-                    setTextColor(Color.parseColor("#FF9800"))
-                }
+                state.adminValidated    -> { text = "✓ Validé par un administrateur";       setTextColor(Color.parseColor("#4CAF50")) }
+                !state.recordingStatus  -> { text = "● Recensement non terminé";            setTextColor(Color.parseColor("#F44336")) }
+                else                    -> { text = "○ Recensement non validé par un admin"; setTextColor(Color.parseColor("#FF9800")) }
             }
         }
     }

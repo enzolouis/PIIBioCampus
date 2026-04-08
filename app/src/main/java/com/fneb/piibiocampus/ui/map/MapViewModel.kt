@@ -2,66 +2,45 @@ package com.fneb.piibiocampus.ui.map
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.fneb.piibiocampus.data.dao.CampusDao
 import com.fneb.piibiocampus.data.dao.PictureDao
-import com.fneb.piibiocampus.data.error.AppException
 import com.fneb.piibiocampus.data.model.Campus
+import com.fneb.piibiocampus.data.ui.UiState
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
-
-// ── État UI ───────────────────────────────────────────────────────────────────
-
-data class MapUiState(
-    val pictures:   List<Map<String, Any>> = emptyList(),
-    val campusList: List<Campus>           = emptyList()
-)
-
-// ── Événements ponctuels ──────────────────────────────────────────────────────
-
-sealed class MapEvent {
-    data class ShowError(val message: String) : MapEvent()
-}
-
-// ── ViewModel ─────────────────────────────────────────────────────────────────
 
 class MapViewModel : ViewModel() {
 
     private val TAG = "MapViewModel"
 
-    private val _uiState = MutableStateFlow(MapUiState())
-    val uiState: StateFlow<MapUiState> = _uiState.asStateFlow()
+    private val _picturesState = MutableStateFlow<UiState<List<Map<String, Any>>>>(UiState.Idle)
+    val picturesState: StateFlow<UiState<List<Map<String, Any>>>> = _picturesState.asStateFlow()
 
-    private val _events = MutableSharedFlow<MapEvent>()
-    val events: SharedFlow<MapEvent> = _events.asSharedFlow()
+    private val _campusState = MutableStateFlow<UiState<List<Campus>>>(UiState.Idle)
+    val campusState: StateFlow<UiState<List<Campus>>> = _campusState.asStateFlow()
 
     // ── Chargement des photos ─────────────────────────────────────────────────
 
     fun loadAllPictures() {
+        _picturesState.value = UiState.Loading
         PictureDao.getAllPicturesEnriched(
-            onSuccess = { list ->
-                _uiState.update { it.copy(pictures = list) }
-            },
-            onError = { e ->
+            onSuccess = { list -> _picturesState.value = UiState.Success(list) },
+            onError   = { e ->
                 Log.e(TAG, "Erreur récupération pictures : ${e.userMessage}", e)
-                emit(MapEvent.ShowError(e.userMessage))
-                _uiState.update { it.copy(pictures = emptyList()) }
+                _picturesState.value = UiState.Error(e)
             }
         )
     }
 
     fun loadPicturesNear(lat: Double, lon: Double, radiusMeters: Double) {
+        _picturesState.value = UiState.Loading
         PictureDao.getPicturesNearLocationEnriched(
             centerLat    = lat,
             centerLon    = lon,
             radiusMeters = radiusMeters,
-            onSuccess    = { list ->
-                _uiState.update { it.copy(pictures = list) }
-            },
-            onError = { e ->
+            onSuccess    = { list -> _picturesState.value = UiState.Success(list) },
+            onError      = { e ->
                 Log.e(TAG, "Erreur récupération nearby pictures : ${e.userMessage}", e)
-                emit(MapEvent.ShowError(e.userMessage))
-                _uiState.update { it.copy(pictures = emptyList()) }
+                _picturesState.value = UiState.Error(e)
             }
         )
     }
@@ -69,21 +48,13 @@ class MapViewModel : ViewModel() {
     // ── Chargement des campus ─────────────────────────────────────────────────
 
     fun loadCampus() {
-        // CampusDao.getAll → onError: (AppException) → userMessage directement accessible
+        _campusState.value = UiState.Loading
         CampusDao.getAll(
-            onComplete = { list ->
-                _uiState.update { it.copy(campusList = list) }
-            },
-            onError = { e ->
+            onComplete = { list -> _campusState.value = UiState.Success(list) },
+            onError    = { e ->
                 Log.e(TAG, "Erreur récupération campus : ${e.userMessage}", e)
-                emit(MapEvent.ShowError(e.userMessage))
+                _campusState.value = UiState.Error(e)
             }
         )
-    }
-
-    // ── Helper interne ────────────────────────────────────────────────────────
-
-    private fun emit(event: MapEvent) {
-        viewModelScope.launch { _events.emit(event) }
     }
 }
