@@ -39,11 +39,13 @@ class PictureActivity : BaseActivity() {
             finish()
         }
     }
-
+    override fun onResume() {
+        super.onResume()
+        askCameraPermission()
+    }
     // nettoyer la camera
     override fun onDestroy() {
         super.onDestroy()
-        cleanupCamera()
     }
 
     // stop la caméra quand l'activité se met en pause
@@ -68,11 +70,10 @@ class PictureActivity : BaseActivity() {
     }
 
     private fun startCamera() {
+        if (cameraController != null) return
+
         Log.d("CAMERA", "lancement de la caméra")
         val previewView: PreviewView = viewBinding.viewFinder
-
-        // Si la caméra existe déjà, la nettoyer d'abord
-        cleanupCamera()
 
         cameraController = LifecycleCameraController(this).apply {
             bindToLifecycle(this@PictureActivity)
