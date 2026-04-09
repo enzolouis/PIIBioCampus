@@ -81,9 +81,9 @@ class MyProfileFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         setTopBarTitle(R.string.titleProfile)
-        // Pas de rechargement ici : le ViewModel persiste et le listener Firestore
-        // est déjà actif. On recharge le profil uniquement si l'état est Idle
-        // (premier lancement géré par le init du ViewModel).
+        photos.clear()
+        adapter.notifyDataSetChanged()
+        viewModel.loadProfile()
     }
 
     // ── Boutons ───────────────────────────────────────────────────────────────
