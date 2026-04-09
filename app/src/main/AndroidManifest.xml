@@ -43,13 +43,13 @@
             android:name=".ui.admin.DashboardAdminActivity"
             android:exported="true" />
         <activity
-            android:name=".ui.admin.SearchUsersAdminActivity"
+            android:name=".ui.admin.searchUsersAdmin.SearchUsersAdminActivity"
             android:exported="true" />
         <activity
-            android:name=".ui.admin.ExportDataActivity"
+            android:name=".ui.admin.exportdata.ExportDataActivity"
             android:exported="true" />
         <activity
-            android:name=".ui.census.CensusTreeActivity"
+            android:name=".ui.user.census.CensusTreeActivity"
             android:exported="true" />
         <activity
             android:name=".ui.auth.ResetPassWordActivity"
@@ -58,34 +58,34 @@
             android:name=".ui.MainActivity"
             android:exported="true" />
         <activity
-            android:name=".pictures.PictureActivity"
+            android:name=".ui.user.pictures.PictureActivity"
             android:exported="true" />
         <activity
-            android:name=".pictures.PreviewPictureActivity"
+            android:name=".ui.user.pictures.PreviewPictureActivity"
             android:exported="true" />
         <activity
             android:name=".ui.admin.PicturesAdminActivity"
             android:exported="true" />
         <activity
-            android:name=".ui.admin.NewsListAdminActivity"
+            android:name=".ui.admin.news.NewsListAdminActivity"
             android:exported="true" />
         <activity
-            android:name=".ui.admin.UpdateNewsAdminActivity"
+            android:name=".ui.admin.news.UpdateNewsAdminActivity"
             android:exported="true" />
         <activity
             android:name=".ui.census.CensusEditorActivity"
             android:exported="true" />
         <activity
-            android:name=".ui.library.LibraryFragment"
+            android:name=".ui.user.library.LibraryFragment"
             android:exported="true" />
         <activity
             android:name=".ui.admin.settings.SettingsAdminActivity"
             android:exported="true" />
         <activity
-            android:name=".ui.admin.settings.CguActivityAdmin"
+            android:name=".ui.admin.settings.cgu.CguActivityAdmin"
             android:exported="true" />
         <activity
-            android:name=".ui.admin.settings.EditProfileActivityAdmin"
+            android:name=".ui.admin.settings.profile.EditProfileActivityAdmin"
             android:exported="true" />
 
     </application>

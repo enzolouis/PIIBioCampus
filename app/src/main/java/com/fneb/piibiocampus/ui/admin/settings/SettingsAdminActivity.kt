@@ -3,18 +3,29 @@ package com.fneb.piibiocampus.ui.admin.settings
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
+import android.widget.ProgressBar
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.fneb.piibiocampus.R
-import com.fneb.piibiocampus.data.dao.ExportDao
-import com.fneb.piibiocampus.data.dao.UserDao
+import com.fneb.piibiocampus.data.ui.UiState
+import com.fneb.piibiocampus.data.ui.showError
+import com.fneb.piibiocampus.ui.admin.settings.cgu.CguActivityAdmin
+import com.fneb.piibiocampus.ui.admin.settings.profile.EditProfileActivityAdmin
 import com.fneb.piibiocampus.ui.auth.ConnectionActivity
 import com.fneb.piibiocampus.utils.setTopBarTitle
 import com.fneb.piibiocampus.utils.showTopBarLeftButton
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
 
 class SettingsAdminActivity : AppCompatActivity() {
+
+    private val viewModel: SettingsViewModel by viewModels()
+
+    private lateinit var rowDeleteAccount: View
+    private lateinit var progressBar:      ProgressBar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,25 +34,30 @@ class SettingsAdminActivity : AppCompatActivity() {
         setTopBarTitle(R.string.titleSettings)
         showTopBarLeftButton { finish() }
 
+        rowDeleteAccount = findViewById(R.id.rowDeleteAccountAdmin)
+        progressBar      = findViewById(R.id.progressBar)
+
+        setupClickListeners()
+        observeViewModel()
+        viewModel.loadUserRole()
+    }
+
+    // ── Listeners (stables) ───────────────────────────────────────────────────
+
+    private fun setupClickListeners() {
         findViewById<View>(R.id.rowEditProfileAdmin).setOnClickListener {
             startActivity(Intent(this, EditProfileActivityAdmin::class.java))
         }
 
         findViewById<View>(R.id.rowSaveAdmin).setOnClickListener {
-            launchExport()
+            viewModel.exportData(applicationContext)
         }
 
         findViewById<View>(R.id.rowDeconnexionAdmin).setOnClickListener {
-            android.app.AlertDialog.Builder(this)
+            MaterialAlertDialogBuilder(this)
                 .setTitle("Déconnexion")
                 .setMessage("Es-tu sûr de vouloir te déconnecter ?")
-                .setPositiveButton("Déconnexion") { _, _ ->
-                    UserDao.signOut()
-                    val intent = Intent(this, ConnectionActivity::class.java)
-                    intent.flags =
-                        Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                    startActivity(intent)
-                }
+                .setPositiveButton("Déconnexion") { _, _ -> viewModel.signOut() }
                 .setNegativeButton("Annuler", null)
                 .show()
         }
@@ -50,65 +66,74 @@ class SettingsAdminActivity : AppCompatActivity() {
             startActivity(Intent(this, CguActivityAdmin::class.java))
         }
 
-        lifecycleScope.launch {
-            val user = UserDao.getCurrentUserProfile()
-            val deleteRow = findViewById<View>(R.id.rowDeleteAccountAdmin)
+        rowDeleteAccount.setOnClickListener { showDeleteDialog() }
+    }
 
-            if (user?.role == "SUPER_ADMIN") {
-                deleteRow.visibility = View.GONE
-            } else {
-                deleteRow.setOnClickListener {
-                    showDeleteDialog()
+    // ── Observers ─────────────────────────────────────────────────────────────
+
+    private fun observeViewModel() {
+        // Rôle : masque la ligne supprimer si SUPER_ADMIN
+        viewModel.isSuperAdmin.observe(this) { isSuperAdmin ->
+            rowDeleteAccount.visibility = if (isSuperAdmin) View.GONE else View.VISIBLE
+        }
+
+        // Suppression du compte
+        viewModel.deleteState.observe(this) { state ->
+            when (state) {
+                is UiState.Loading -> showLoading(true)
+                is UiState.Success -> showLoading(false)   // navigation gérée par l'event
+                is UiState.Error   -> { showLoading(false); showError(state.exception) }
+                else -> Unit
+            }
+        }
+
+        // Export CSV
+        viewModel.exportState.observe(this) { state ->
+            when (state) {
+                is UiState.Loading -> showLoading(true)
+                is UiState.Success -> {
+                    showLoading(false)
+                    android.widget.Toast.makeText(this, "Export réussi", android.widget.Toast.LENGTH_SHORT).show()
+                }
+                is UiState.Error -> { showLoading(false); showError(state.exception) }
+                else -> Unit
+            }
+        }
+
+        // Événements ponctuels (navigation)
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.events.collect { event ->
+                    when (event) {
+                        SettingsEvent.NavigateToLogin -> navigateToLogin()
+                    }
                 }
             }
         }
     }
 
+    // ── Dialogues ─────────────────────────────────────────────────────────────
+
     private fun showDeleteDialog() {
-        android.app.AlertDialog.Builder(this)
+        MaterialAlertDialogBuilder(this)
             .setTitle("Supprimer mon compte")
-            .setMessage("Tu es sur le point de supprimer définitivement ton compte...")
-            .setPositiveButton("Supprimer") { _, _ ->
-                lifecycleScope.launch {
-                    try {
-                        UserDao.deleteCurrentUser()
-                        val intent = Intent(this@SettingsAdminActivity, ConnectionActivity::class.java)
-                        intent.flags =
-                            Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                        startActivity(intent)
-                    } catch (e: Exception) {
-                        Toast.makeText(
-                            this@SettingsAdminActivity,
-                            "Erreur : ${e.message}",
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
-                }
-            }
+            .setMessage("Tu es sur le point de supprimer définitivement ton compte…")
+            .setPositiveButton("Supprimer") { _, _ -> viewModel.deleteAccount() }
             .setNegativeButton("Annuler", null)
             .show()
     }
 
-    private fun launchExport() {
-        val progressDialog = android.app.ProgressDialog(this).apply {
-            setMessage("Préparation de l'export…")
-            setCancelable(false)
-            show()
-        }
+    // ── Helpers ───────────────────────────────────────────────────────────────
 
-        lifecycleScope.launch {
-            val uid = UserDao.getCurrentUser()?.uid ?: run {
-                progressDialog.dismiss()
-                return@launch
-            }
+    private fun showLoading(loading: Boolean) {
+        progressBar.visibility = if (loading) View.VISIBLE else View.GONE
+    }
 
-            try {
-                ExportDao.exportUserDataAsCsv(this@SettingsAdminActivity, uid)
-            } catch (e: Exception) {
-                Toast.makeText(this@SettingsAdminActivity, "Erreur lors de l'export", Toast.LENGTH_SHORT).show()
-            } finally {
-                progressDialog.dismiss()
+    private fun navigateToLogin() {
+        startActivity(
+            Intent(this, ConnectionActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             }
-        }
+        )
     }
 }

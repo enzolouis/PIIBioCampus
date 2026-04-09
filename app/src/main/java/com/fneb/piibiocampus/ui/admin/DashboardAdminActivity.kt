@@ -2,29 +2,18 @@ package com.fneb.piibiocampus.ui.admin
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
-import android.view.View
 import android.widget.Button
+import android.widget.GridLayout
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import android.widget.GridLayout
-import androidx.activity.viewModels
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.viewModelScope
 import com.fneb.piibiocampus.R
-import com.fneb.piibiocampus.data.dao.UserDao
-import com.fneb.piibiocampus.data.repository.AuthRepository
-import com.fneb.piibiocampus.ui.MainActivity
-import com.fneb.piibiocampus.ui.auth.AuthViewModel
 import com.fneb.piibiocampus.ui.BaseActivity
+import com.fneb.piibiocampus.ui.admin.exportdata.ExportDataActivity
 import com.fneb.piibiocampus.ui.admin.settings.SettingsAdminActivity
+import com.fneb.piibiocampus.ui.admin.news.NewsListAdminActivity
+import com.fneb.piibiocampus.ui.admin.searchUsersAdmin.SearchUsersAdminActivity
 import com.fneb.piibiocampus.ui.census.CensusEditorActivity
-import com.fneb.piibiocampus.ui.common.LoadingDialog
-import com.fneb.piibiocampus.ui.profiles.settings.SettingsFragment
-import com.fneb.piibiocampus.utils.Extensions.toast
 import com.fneb.piibiocampus.utils.setTopBarTitle
-import kotlinx.coroutines.launch
-import kotlin.getValue
 
 class DashboardAdminActivity : BaseActivity() {
 
