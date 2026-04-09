@@ -1,6 +1,9 @@
 package com.fneb.piibiocampus.ui.admin.news
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
@@ -11,6 +14,7 @@ import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import com.fneb.piibiocampus.R
 import com.fneb.piibiocampus.data.ui.UiState
@@ -105,7 +109,7 @@ class UpdateNewsAdminActivity : BaseActivity() {
 
     private fun setupListeners() {
         btnChangeImage.setOnClickListener {
-            pickImageLauncher.launch("image/*")
+            requestGalleryAccess()
         }
 
         btnSuppr.setOnClickListener {
@@ -148,6 +152,48 @@ class UpdateNewsAdminActivity : BaseActivity() {
         btnChangeImage.isEnabled = !isLoading
         // Optionnel : Vous pouvez aussi afficher un ProgressBar central ici
     }
+
+    private fun requestGalleryAccess() {
+        when {
+            // Permission déjà accordée → ouvre directement la galerie
+            ContextCompat.checkSelfPermission(this, readPermission)
+                    == PackageManager.PERMISSION_GRANTED -> {
+                pickImageLauncher.launch("image/*")
+            }
+            // L'utilisateur a déjà refusé une fois → explique pourquoi on en a besoin
+            shouldShowRequestPermissionRationale(readPermission) -> {
+                Toast.makeText(
+                    this,
+                    "L'accès à la galerie est nécessaire pour choisir une image",
+                    Toast.LENGTH_LONG
+                ).show()
+                permissionLauncher.launch(readPermission)
+            }
+            // Première demande
+            else -> permissionLauncher.launch(readPermission)
+        }
+    }
+
+    // ── Permission selon version Android ─────────────────────────────────────
+    private val readPermission: String
+        get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+            Manifest.permission.READ_MEDIA_IMAGES
+        else
+            Manifest.permission.READ_EXTERNAL_STORAGE
+
+    // ── Launcher permission ───────────────────────────────────────────────────
+    private val permissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            if (granted) {
+                pickImageLauncher.launch("image/*")
+            } else {
+                Toast.makeText(
+                    this,
+                    "Permission refusée : impossible d'accéder à la galerie",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
 
     private fun dpToPx(dp: Int): Int {
         return (dp * resources.displayMetrics.density).toInt()
