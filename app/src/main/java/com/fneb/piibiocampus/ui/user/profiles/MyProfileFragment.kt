@@ -83,7 +83,8 @@ class MyProfileFragment : Fragment() {
         setTopBarTitle(R.string.titleProfile)
         photos.clear()
         adapter.notifyDataSetChanged()
-        viewModel.loadProfile()
+        viewModel.reloadPhotos()
+        setupObservers()
     }
 
     // ── Boutons ───────────────────────────────────────────────────────────────
