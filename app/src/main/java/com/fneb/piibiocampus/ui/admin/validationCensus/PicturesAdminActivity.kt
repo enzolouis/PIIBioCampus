@@ -369,6 +369,7 @@ class PicturesAdminActivity : BaseActivity() {
             val image: ImageView   = view.findViewById(R.id.photoItem)
             val recordingDot: View = view.findViewById(R.id.ivDotRed)
             val validatedDot: View = view.findViewById(R.id.ivDotGreen)
+            val recordingDotOrange: View      = view.findViewById(R.id.ivDotOrange)
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH =
@@ -392,14 +393,17 @@ class PicturesAdminActivity : BaseActivity() {
                 adminValidated -> {
                     holder.validatedDot.visibility = View.VISIBLE
                     holder.recordingDot.visibility = View.GONE
+                    holder.recordingDotOrange.visibility = View.GONE
                 }
                 !recordingStatus -> {
                     holder.recordingDot.visibility = View.VISIBLE
                     holder.validatedDot.visibility = View.GONE
+                    holder.recordingDotOrange.visibility = View.GONE
                 }
                 else -> {
                     holder.recordingDot.visibility = View.GONE
                     holder.validatedDot.visibility = View.GONE
+                    holder.recordingDotOrange.visibility = View.VISIBLE
                 }
             }
 
