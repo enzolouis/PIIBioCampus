@@ -3,9 +3,8 @@ package com.fneb.piibiocampus.data.repository
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.fneb.piibiocampus.data.dao.CensusDao
-import com.fneb.piibiocampus.data.error.AppException
 import com.fneb.piibiocampus.data.ui.UiState
-import com.fneb.piibiocampus.ui.census.CensusNode
+import com.fneb.piibiocampus.ui.user.census.CensusNode
 
 class CensusRepository(private val dao: CensusDao) {
 

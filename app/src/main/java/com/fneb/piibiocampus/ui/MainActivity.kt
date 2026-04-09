@@ -7,20 +7,19 @@ import android.os.Bundle
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
-import com.fneb.piibiocampus.pictures.PictureActivity
+import com.fneb.piibiocampus.ui.user.pictures.PictureActivity
 import androidx.fragment.app.Fragment
 import com.fneb.piibiocampus.R
-import com.fneb.piibiocampus.news.NewsFragment
-import com.fneb.piibiocampus.ui.library.LibraryFragment
-import com.fneb.piibiocampus.ui.map.MapFragment
-import com.fneb.piibiocampus.ui.profiles.MyProfileFragment
-import com.fneb.piibiocampus.ui.searchUsers.SearchUsersFragment
+import com.fneb.piibiocampus.ui.user.news.NewsFragment
+import com.fneb.piibiocampus.ui.user.library.LibraryFragment
+import com.fneb.piibiocampus.ui.user.map.MapFragment
+import com.fneb.piibiocampus.ui.user.profiles.MyProfileFragment
+import com.fneb.piibiocampus.ui.user.searchUsers.SearchUsersFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 

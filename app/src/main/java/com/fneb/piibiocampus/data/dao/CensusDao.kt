@@ -2,8 +2,8 @@ package com.fneb.piibiocampus.data.dao
 
 import com.fneb.piibiocampus.data.error.AppException
 import com.fneb.piibiocampus.data.error.FirebaseExceptionMapper
-import com.fneb.piibiocampus.ui.census.CensusNode
-import com.fneb.piibiocampus.ui.census.CensusType
+import com.fneb.piibiocampus.ui.user.census.CensusNode
+import com.fneb.piibiocampus.ui.user.census.CensusType
 import com.google.firebase.firestore.FirebaseFirestore
 
 object CensusDao {
