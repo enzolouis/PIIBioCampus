@@ -16,7 +16,7 @@ object CensusDao {
      * Récupère la hiérarchie complète depuis la collection "census".
      * Appelle onComplete(rootNodes) sur succès.
      */
-    fun fetchCensusTree(onComplete: (List<com.fneb.piibiocampus.ui.user.census.CensusNode>) -> Unit, onError: (AppException) -> Unit) {
+    fun fetchCensusTree(onComplete: (List<CensusNode>) -> Unit, onError: (AppException) -> Unit) {
         fetchCensusTreeFull(
             onComplete = { _, roots -> onComplete(roots) },
             onError    = onError
@@ -28,7 +28,7 @@ object CensusDao {
      * Utilisé par CensusEditorViewModel pour pouvoir sauvegarder le document.
      */
     fun fetchCensusTreeFull(
-        onComplete: (docId: String?, roots: List<com.fneb.piibiocampus.ui.user.census.CensusNode>) -> Unit,
+        onComplete: (docId: String?, roots: List<CensusNode>) -> Unit,
         onError: (AppException) -> Unit
     ) {
         db.collection("census").get()
