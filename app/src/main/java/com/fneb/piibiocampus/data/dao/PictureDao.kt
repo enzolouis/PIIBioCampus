@@ -34,24 +34,6 @@ object PictureDao {
     private val picturesRef = firestore.collection("pictures")
     private val storageRef  = storage.reference
 
-    /**
-     * Télécharge une image depuis son URL Firebase Storage et retourne ses bytes.
-     */
-    fun downloadImageBytes(
-        imageUrl: String,
-        onSuccess: (ByteArray) -> Unit,
-        onError: (Exception) -> Unit
-    ) {
-        Thread {
-            try {
-                val bytes = URL(imageUrl).readBytes()
-                onSuccess(bytes)
-            } catch (e: Exception) {
-                onError(FirebaseExceptionMapper.map(e))
-            }
-        }.start()
-    }
-
     fun listenToPicturesByUserEnrichedSortedByDate(
         userId: String,
         onUpdate: (List<Map<String, Any>>) -> Unit,
