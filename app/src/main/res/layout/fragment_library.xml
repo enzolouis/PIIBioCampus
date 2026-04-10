@@ -121,7 +121,7 @@
         android:id="@+id/tvLibraryEmpty"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Aucune espèce ne correspond à votre recherche."
+        android:text="@string/aucune_esp_ce_ne_correspond_votre_recherche"
         android:textSize="14sp"
         android:textColor="@color/grey"
         android:gravity="center"

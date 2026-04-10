@@ -1,44 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <!-- Photo -->
     <ImageView
         android:id="@+id/photoItem"
-        android:layout_width="match_parent"
-        android:layout_height="120dp"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:scaleType="centerCrop"
-        android:src="@drawable/photo_placeholder" />
+        android:src="@drawable/photo_placeholder"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Point rouge en haut à droite : recordingStatus == false -->
     <View
         android:id="@+id/ivDotRed"
         android:layout_width="12dp"
         android:layout_height="12dp"
-        android:layout_gravity="top|end"
-        android:layout_margin="6dp"
+        android:layout_marginTop="6dp"
+        android:layout_marginEnd="6dp"
         android:background="@drawable/bg_dot_red"
-        android:visibility="gone" />
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <View
         android:id="@+id/ivDotOrange"
         android:layout_width="12dp"
         android:layout_height="12dp"
-        android:layout_gravity="top|end"
-        android:layout_margin="6dp"
+        android:layout_marginTop="6dp"
+        android:layout_marginEnd="6dp"
         android:background="@drawable/bg_dot_orange"
-        android:visibility="gone" />
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Point vert en haut à droite : adminValidated == true -->
     <View
         android:id="@+id/ivDotGreen"
         android:layout_width="12dp"
         android:layout_height="12dp"
-        android:layout_gravity="top|end"
-        android:layout_margin="6dp"
+        android:layout_marginTop="6dp"
+        android:layout_marginEnd="6dp"
         android:background="@drawable/bg_dot_green"
-        android:visibility="gone" />
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
-</FrameLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

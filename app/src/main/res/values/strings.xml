@@ -427,4 +427,5 @@ Document soumis au droit français — RGPD (UE) 2016/679 et Loi Informatique et
     <string name="sub_title_cgu_pcd">↓ Faites défiler jusqu\'en bas pour accepter</string>
     <string name="back">Retour</string>
     <string name="title_settings">Paramètres</string>
+    <string name="aucune_esp_ce_ne_correspond_votre_recherche">Aucune espèce ne correspond à votre recherche.</string>
 </resources>
