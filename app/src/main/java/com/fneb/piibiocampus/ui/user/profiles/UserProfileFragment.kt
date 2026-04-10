@@ -18,6 +18,7 @@ import com.fneb.piibiocampus.data.ui.showError
 import com.fneb.piibiocampus.ui.photo.PhotoViewerState
 import com.fneb.piibiocampus.ui.photo.PicturesViewerCaller
 import com.fneb.piibiocampus.ui.photo.PicturesViewerFragment
+import com.fneb.piibiocampus.utils.BadgeUtils
 import com.fneb.piibiocampus.utils.setTopBarTitle
 import com.squareup.picasso.Picasso
 import java.text.SimpleDateFormat
@@ -110,7 +111,6 @@ class UserProfileFragment : Fragment() {
                 is UiState.Success -> {
                     photos.clear()
                     photos.addAll(state.data)
-                    updateBadge(state.data.size)
                     adapter.notifyDataSetChanged()
                 }
                 is UiState.Error -> showError(state.exception)
@@ -133,22 +133,11 @@ class UserProfileFragment : Fragment() {
         } else {
             profilePicture?.setImageResource(R.drawable.ic_profile)
         }
-    }
 
-    private fun updateBadge(count: Int) {
-        val badgeRes = when {
-            count >= 100 -> R.drawable.ic_badge_cerf_erudit
-            count >= 90  -> R.drawable.ic_badge_chouette_savante
-            count >= 80  -> R.drawable.ic_badge_renard_ruse
-            count >= 70  -> R.drawable.ic_badge_sanglier_chercheur
-            count >= 60  -> R.drawable.ic_badge_pie_futee
-            count >= 50  -> R.drawable.ic_badge_ecureuil_eclaire
-            count >= 40  -> R.drawable.ic_badge_blaireau_fouineur
-            count >= 30  -> R.drawable.ic_badge_herisson_debrouillard
-            count >= 20  -> R.drawable.ic_badge_lapin_malin
-            count >= 10  -> R.drawable.ic_badge_scarabe_astucieux
-            count >= 1   -> R.drawable.ic_badge_abeille_curieuse
-            else         -> R.drawable.norank
+        val badgeRes = if (profile.currentBadge.isNotEmpty()) {
+            BadgeUtils.getDrawableById(profile.currentBadge)
+        } else {
+            R.drawable.norank
         }
         badge?.setImageResource(badgeRes)
     }
