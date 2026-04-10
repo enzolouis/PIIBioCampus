@@ -2,6 +2,8 @@ package com.fneb.piibiocampus.ui.user.profiles.settings
 
 import android.net.Uri
 import android.os.Bundle
+import android.text.InputFilter
+import android.text.Spanned
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -37,6 +39,14 @@ class EditProfileFragment : PermissionFragment() {
     private var selectedBadgeId: String  = ""
     private var pendingImageBytes: ByteArray? = null
 
+    // ── Limites ───────────────────────────────────────────────────────────────
+
+    companion object {
+        const val MAX_NAME_LENGTH        = 30
+        const val MAX_DESCRIPTION_LENGTH = 200
+        const val MAX_DESCRIPTION_LINES  = 4
+    }
+
     // ── Galerie ───────────────────────────────────────────────────────────────
 
     private val pickImageLauncher = registerForActivityResult(
@@ -71,6 +81,8 @@ class EditProfileFragment : PermissionFragment() {
         saveButton          = view.findViewById(R.id.saveButton)
         progressBar         = view.findViewById(R.id.progressBar)
 
+        setupInputFilters()
+
         view.findViewById<View>(R.id.editProfilePictureLabel).setOnClickListener { openGallery() }
         editProfilePicture.setOnClickListener { openGallery() }
         view.findViewById<View>(R.id.currentBadgeRow).setOnClickListener { showBadgePickerDialog() }
@@ -82,6 +94,61 @@ class EditProfileFragment : PermissionFragment() {
     override fun onResume() {
         super.onResume()
         setTopBarTitle(R.string.titleEditProfile)
+    }
+
+    // ── Filtres de saisie ─────────────────────────────────────────────────────
+
+    private fun setupInputFilters() {
+        // Pseudo : pas de retour à la ligne + limite de caractères
+        editName.filters = arrayOf(
+            NoNewLineFilter(),
+            InputFilter.LengthFilter(MAX_NAME_LENGTH)
+        )
+
+        // Description : max 4 retours à la ligne (= 5 lignes) + limite de caractères
+        editDescription.filters = arrayOf(
+            MaxLinesFilter(MAX_DESCRIPTION_LINES),
+            InputFilter.LengthFilter(MAX_DESCRIPTION_LENGTH)
+        )
+    }
+
+    /**
+     * Bloque toute saisie de retour à la ligne.
+     */
+    private class NoNewLineFilter : InputFilter {
+        override fun filter(
+            source: CharSequence, start: Int, end: Int,
+            dest: Spanned, dstart: Int, dend: Int
+        ): CharSequence? {
+            if (source.contains('\n')) {
+                return source.replace(Regex("\n"), "")
+            }
+            return null // null = accepter la saisie telle quelle
+        }
+    }
+
+    /**
+     * Limite le nombre de retours à la ligne à [maxLines].
+     * L'utilisateur peut saisir au maximum [maxLines] sauts de ligne,
+     * ce qui correspond à [maxLines + 1] lignes visuelles.
+     */
+    private class MaxLinesFilter(private val maxLines: Int) : InputFilter {
+        override fun filter(
+            source: CharSequence, start: Int, end: Int,
+            dest: Spanned, dstart: Int, dend: Int
+        ): CharSequence? {
+            // Texte résultant après application de la modification
+            val resultText = dest.subSequence(0, dstart).toString() +
+                    source.subSequence(start, end) +
+                    dest.subSequence(dend, dest.length)
+
+            val newlineCount = resultText.count { it == '\n' }
+            if (newlineCount > maxLines) {
+                // Bloquer la saisie qui ferait dépasser la limite
+                return ""
+            }
+            return null
+        }
     }
 
     // ── Observers ─────────────────────────────────────────────────────────────
@@ -198,7 +265,6 @@ class EditProfileFragment : PermissionFragment() {
         val newPassword     = editNewPassword.text.toString()
         val confirmPassword = editConfirmPassword.text.toString()
 
-        // Validation locale — pas besoin du ViewModel pour ça
         if (name.isEmpty()) {
             editName.error = "Le pseudo ne peut pas être vide"
             return

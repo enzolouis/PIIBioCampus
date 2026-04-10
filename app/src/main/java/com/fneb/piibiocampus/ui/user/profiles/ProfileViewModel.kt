@@ -54,6 +54,7 @@ class ProfileViewModel(private val userId: String?) : ViewModel() {
      */
     fun loadProfile() {
         _profileState.value = UiState.Loading
+        resolvedUserId = null // ✅ Reset avant chaque rechargement
         scope.launch {
             try {
                 val uid: String

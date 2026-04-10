@@ -69,7 +69,7 @@ class MyProfileFragment : Fragment() {
         recyclerView.clipToPadding = false
 
         setupButtons()
-        setupObservers()
+        setupObservers() // ✅ Une seule fois ici, pas dans onResume
 
         // Recharge les photos au retour du PicturesViewerFragment
         parentFragmentManager.setFragmentResultListener(
@@ -83,8 +83,8 @@ class MyProfileFragment : Fragment() {
         setTopBarTitle(R.string.titleProfile)
         photos.clear()
         adapter.notifyDataSetChanged()
-        viewModel.reloadPhotos()
-        setupObservers()
+        // ✅ loadProfile() recharge le profil ET déclenche le listener photos en cascade
+        viewModel.loadProfile()
     }
 
     // ── Boutons ───────────────────────────────────────────────────────────────
