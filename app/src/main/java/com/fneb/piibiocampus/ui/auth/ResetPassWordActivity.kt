@@ -1,6 +1,5 @@
 package com.fneb.piibiocampus.ui.auth
 
-import ResetPasswordViewModel
 import android.os.Bundle
 import android.view.ViewGroup
 import android.widget.Button
@@ -12,6 +11,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.fneb.piibiocampus.R
+import com.fneb.piibiocampus.data.ui.showError
 import com.fneb.piibiocampus.ui.BaseActivity
 import com.fneb.piibiocampus.utils.Extensions.toast
 import kotlinx.coroutines.launch
@@ -21,14 +21,14 @@ class ResetPassWordActivity : BaseActivity() {
     private val viewModel: ResetPasswordViewModel by viewModels()
 
     private lateinit var pseudoZone: EditText
-    private lateinit var sendBtn: Button
+    private lateinit var sendBtn:    Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_resetpassword)
 
         pseudoZone = findViewById(R.id.txtIdentifiant)
-        sendBtn = findViewById(R.id.btnReinitialiserMotDePasse)
+        sendBtn    = findViewById(R.id.btnReinitialiserMotDePasse)
 
         ViewCompat.setOnApplyWindowInsetsListener(sendBtn) { view, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -40,27 +40,27 @@ class ResetPassWordActivity : BaseActivity() {
 
         sendBtn.setOnClickListener {
             val email = pseudoZone.text.toString().trim()
-            if (email.isEmpty()) {
-                toast("Veuillez remplir tous les champs")
-                return@setOnClickListener
-            }
+            if (email.isEmpty()) { toast("Veuillez remplir tous les champs"); return@setOnClickListener }
             viewModel.sendResetEmail(email)
         }
 
-        // Observer le flow
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { state ->
                     when (state) {
-                        ResetPasswordUiState.Loading -> sendBtn.isEnabled = false
-                        ResetPasswordUiState.Idle -> sendBtn.isEnabled = true
+                        ResetPasswordUiState.Loading  -> sendBtn.isEnabled = false
+                        ResetPasswordUiState.Idle     -> sendBtn.isEnabled = true
                         ResetPasswordUiState.EmailSent -> {
                             sendBtn.isEnabled = true
                             toast("Email de réinitialisation envoyé")
                         }
                         is ResetPasswordUiState.Error -> {
                             sendBtn.isEnabled = true
-                            toast(state.message)
+                            showError(state.exception)
+                        }
+                        is ResetPasswordUiState.CooldownError -> {
+                            sendBtn.isEnabled = true
+                            toast("Veuillez attendre ${state.secondsLeft} secondes avant une nouvelle demande")
                         }
                     }
                 }

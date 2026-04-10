@@ -2,9 +2,9 @@ package com.fneb.piibiocampus.ui.auth
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.ViewGroup
 import android.text.method.HideReturnsTransformationMethod
 import android.text.method.PasswordTransformationMethod
+import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
@@ -47,7 +47,7 @@ class CreateAccountActivity : BaseActivity() {
             finish()
         }
 
-        val togglePassword = findViewById<ImageView>(R.id.btnTogglePassword)
+        val togglePassword    = findViewById<ImageView>(R.id.btnTogglePassword)
         var isPasswordVisible = false
 
         togglePassword.setOnClickListener {
@@ -73,18 +73,16 @@ class CreateAccountActivity : BaseActivity() {
             }
 
             if (isCguAccepted()) {
-                    LoadingDialog.show(supportFragmentManager, "Création du compte…")
-                    viewModel.register(emailStr, passwordStr, usernameStr)
+                LoadingDialog.show(supportFragmentManager, "Création du compte…")
+                viewModel.register(emailStr, passwordStr, usernameStr)
             } else {
                 CguDialogFragment.show(
-                    fm = supportFragmentManager,
+                    fm         = supportFragmentManager,
                     onAccepted = {
                         LoadingDialog.show(supportFragmentManager, "Création du compte…")
                         viewModel.register(emailStr, passwordStr, usernameStr)
                     },
-                    onDeclined = {
-                        toast("Vous devez accepter les CGU pour créer un compte")
-                    }
+                    onDeclined = { toast("Vous devez accepter les CGU pour créer un compte") }
                 )
             }
         }
@@ -92,17 +90,13 @@ class CreateAccountActivity : BaseActivity() {
         lifecycleScope.launch {
             viewModel.uiState.collect { state ->
                 when (state) {
-                    is AuthUiState.Loading -> {
-                        // LoadingDialog déjà affiché au clic
-                    }
+                    is AuthUiState.Loading -> Unit
 
                     is AuthUiState.EmailVerificationSent -> {
                         LoadingDialog.hide(supportFragmentManager)
-
-                        // Pop-up "compte créé + email envoyé" → redirige vers connexion au clic
                         EmailSentDialogFragment.show(
-                            fm   = supportFragmentManager,
-                            mode = EmailSentDialogFragment.MODE_ACCOUNT_CREATED,
+                            fm        = supportFragmentManager,
+                            mode      = EmailSentDialogFragment.MODE_ACCOUNT_CREATED,
                             onDismiss = {
                                 startActivity(
                                     Intent(this@CreateAccountActivity, ConnectionActivity::class.java)
@@ -118,8 +112,7 @@ class CreateAccountActivity : BaseActivity() {
 
                     is AuthUiState.Error -> {
                         LoadingDialog.hide(supportFragmentManager)
-                        errorZone.text =
-                            state.throwable.message ?: "Erreur lors de la création du compte"
+                        errorZone.text = state.exception.userMessage
                     }
 
                     else -> Unit
