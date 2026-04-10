@@ -70,7 +70,7 @@ class EmailSentDialogFragment : DialogFragment() {
             MODE_ACCOUNT_CREATED -> {
                 title.text   = "Compte créé !"
                 message.text =
-                    "Un email de vérification vient d'être envoyé à votre adresse.\n\n" +
+                    "Un email de vérification vient d'être envoyé à votre adresse (il peut se trouver dans les spams).\n\n" +
                     "Cliquez sur le lien dans l'email pour activer votre compte, " +
                     "puis revenez vous connecter."
                 sender.text  = "Expéditeur : noreply@piibiocampus.fr"

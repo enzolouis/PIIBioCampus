@@ -33,7 +33,7 @@ class SearchUsersAdminActivity : BaseActivity() {
         // Initialisation du ViewModel (Old School)
         viewModel = ViewModelProvider(this).get(SearchUsersAdminViewModel::class.java)
 
-        setTopBarTitle(R.string.txtSearchAdmin)
+        setTopBarTitle(R.string.titleSearchUser)
         showTopBarLeftButton { finish() }
 
         recyclerView = findViewById(R.id.resultsRecyclerView)

@@ -51,7 +51,13 @@ object UserDao {
 
             db.collection("users")
                 .document(user.uid)
-                .set(mapOf("name" to name, "email" to email, "role" to "USER"))
+                .set(mapOf(
+                    "name" to name,
+                    "description" to "Je débute ici !",
+                    "profilePictureUrl" to "https://firebasestorage.googleapis.com/v0/b/piibiocampus-c8f50.firebasestorage.app/o/defaultProfilePicture%2FdefaultProfilePicture.png?alt=media&token=9ec98653-3c8d-4795-854f-f5024d51e145",
+                    "email" to email,
+                    "role" to "USER",
+                    "currentBadge" to ""))
                 .await()
 
             user
@@ -102,18 +108,6 @@ object UserDao {
             throw e
         } catch (e: Exception) {
             throw FirebaseExceptionMapper.map(e)
-        }
-    }
-
-    suspend fun getAllUsersAndAdmins(): List<UserProfile> {
-        val snapshot = db.collection("users")
-            .whereIn("role",listOf("USER", "ADMIN"))
-            .orderBy("name")
-            .get()
-            .await()
-
-        return snapshot.documents.mapNotNull { doc ->
-            doc.toObject(UserProfile::class.java)?.copy(uid = doc.id)
         }
     }
 
@@ -191,6 +185,23 @@ object UserDao {
         } catch (e: Exception) {
             throw FirebaseExceptionMapper.map(e)
         }
+    }
+
+    suspend fun getAllUsersAndAdmins(): List<UserProfile> {
+        val snapshot = db.collection("users")
+            .whereIn("role",listOf("USER", "ADMIN"))
+            .orderBy("name")
+            .get()
+            .await()
+
+        return snapshot.documents.mapNotNull { doc ->
+            doc.toObject(UserProfile::class.java)?.copy(uid = doc.id)
+        }.sortedWith(
+            compareBy(
+                { if (it.role == "ADMIN") 0 else 1 }, // ADMIN en premier
+                { it.name }                             // puis par nom
+            )
+        )
     }
 
     // ── Écriture ──────────────────────────────────────────────────────────────

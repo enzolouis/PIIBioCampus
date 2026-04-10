@@ -39,7 +39,16 @@ class UserAdapter(
         val user = users[position]
         holder.pseudo.text = user.name
 
-        holder.spinnerRole.visibility = if (role == "ADMIN") View.GONE else View.VISIBLE
+        // invisible :
+        // holder.spinnerRole.visibility = if (role == "ADMIN") View.GONE else View.VISIBLE
+        // grisé (mieux) :
+        holder.spinnerRole.isEnabled = role == "SUPER_ADMIN"
+
+        holder.btnBan.visibility = when {
+            role == "SUPER_ADMIN" -> View.VISIBLE
+            role == "ADMIN" && user.role == "USER" -> View.VISIBLE
+            else -> View.GONE
+        }
 
         Picasso.get().cancelRequest(holder.avatar)
         if (!user.profilePictureUrl.isNullOrEmpty()) {
