@@ -72,7 +72,7 @@ class UserProfileFragment : Fragment() {
 
         adapter = PhotoAdapter(photos)
         recyclerView?.adapter = adapter
-
+        setTopBarTitle("Profile")
         setupObservers()
     }
 
@@ -232,5 +232,10 @@ class UserProfileFragment : Fragment() {
             is String -> timestamp
             else      -> "Date inconnue"
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        setTopBarTitle("Profile") // Ou R.string.titleProfile
     }
 }
