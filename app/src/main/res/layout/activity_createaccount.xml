@@ -1,104 +1,121 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background">
 
-    <ImageView
+    <View
         android:id="@+id/purpleFigure"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/primary"
+        app:layout_constraintHeight_percent="0.28"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideLeft"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/rectangle"
-        android:translationY="-1000px" />
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.15" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideRight"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.85" />
 
     <ImageView
         android:id="@+id/logoPurple"
-        android:layout_width="120dp"
-        android:layout_height="120dp"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:src="@drawable/logo_purple" />
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:src="@drawable/logo_purple"
+        app:layout_constraintBottom_toTopOf="@+id/titleCreateAccount"
+        app:layout_constraintTop_toTopOf="@id/purpleFigure"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintVertical_bias="0.3"
+        app:layout_constraintVertical_chainStyle="packed" />
 
     <TextView
         android:id="@+id/titleCreateAccount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/logoPurple"
-        android:layout_centerHorizontal="true"
+        android:layout_marginTop="8dp"
         android:text="@string/titleCreateAccount"
-        android:textAlignment="center"
         android:textColor="@color/white"
-        android:textSize="30sp"
+        android:textSize="28sp"
         android:fontFamily="@font/kg_blank_space_sketch"
-        />
+        app:layout_constraintBottom_toBottomOf="@id/purpleFigure"
+        app:layout_constraintTop_toBottomOf="@id/logoPurple"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="120dp"
-        android:layout_height="120dp"
-        android:layout_below="@id/titleCreateAccount"
-        android:layout_centerInParent="true"
-        android:layout_marginTop="50dp"
-        android:src="@drawable/logo_piibiocampus" />
+        android:layout_width="140dp"
+        android:layout_height="140dp"
+        android:layout_marginTop="10dp"
+        android:src="@drawable/logo_piibiocampus"
+        app:layout_constraintTop_toBottomOf="@id/purpleFigure"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <EditText
         android:id="@+id/txtIdentifiant"
-        android:layout_width="207dp"
+        android:layout_width="0dp"
         android:layout_height="48dp"
-        android:layout_below="@id/imageView"
-        android:layout_centerInParent="true"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="15dp"
         android:background="@drawable/fields_round_border"
-        android:ems="10"
         android:hint="@string/txtName"
-        android:inputType="text"
-        android:paddingStart="10dp"
-        android:textColorHint="@color/grey"
-        android:textSize="20sp"
+        android:inputType="textPersonName"
+        android:paddingStart="15dp"
+        android:textSize="18sp"
         android:fontFamily="@font/gentium_plus_regular"
-        />
+        app:layout_constraintTop_toBottomOf="@id/imageView"
+        app:layout_constraintStart_toStartOf="@id/guideLeft"
+        app:layout_constraintEnd_toEndOf="@id/guideRight" />
+
     <EditText
         android:id="@+id/txtMail"
-        android:layout_width="207dp"
+        android:layout_width="0dp"
         android:layout_height="48dp"
-        android:layout_below="@id/txtIdentifiant"
-        android:layout_centerInParent="true"
         android:layout_marginTop="10dp"
         android:background="@drawable/fields_round_border"
-        android:ems="10"
         android:hint="@string/txtMail"
-        android:inputType="text"
-        android:paddingStart="10dp"
-        android:textColorHint="@color/grey"
-        android:textSize="20sp"
+        android:inputType="textEmailAddress"
+        android:paddingStart="15dp"
+        android:textSize="18sp"
         android:fontFamily="@font/gentium_plus_regular"
-        />
+        app:layout_constraintTop_toBottomOf="@id/txtIdentifiant"
+        app:layout_constraintStart_toStartOf="@id/guideLeft"
+        app:layout_constraintEnd_toEndOf="@id/guideRight" />
 
     <RelativeLayout
         android:id="@+id/passwordLayout"
-        android:layout_width="207dp"
+        android:layout_width="0dp"
         android:layout_height="48dp"
-        android:layout_below="@id/txtMail"
-        android:layout_centerInParent="true"
         android:layout_marginTop="10dp"
-        android:background="@drawable/fields_round_border">
-
+        android:background="@drawable/fields_round_border"
+        app:layout_constraintTop_toBottomOf="@id/txtMail"
+        app:layout_constraintStart_toStartOf="@id/guideLeft"
+        app:layout_constraintEnd_toEndOf="@id/guideRight">
         <EditText
             android:id="@+id/txtMdp"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_toStartOf="@id/btnTogglePassword"
             android:background="@android:color/transparent"
-            android:ems="10"
             android:hint="@string/txtPassword"
             android:inputType="textPassword"
-            android:paddingStart="10dp"
-            android:textColorHint="@color/grey"
-            android:textSize="20sp"
+            android:paddingStart="15dp"
+            android:textSize="18sp"
             android:fontFamily="@font/gentium_plus_regular"/>
-
         <ImageView
             android:id="@+id/btnTogglePassword"
             android:layout_width="24dp"
@@ -106,41 +123,44 @@
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
             android:layout_marginEnd="10dp"
-            android:src="@drawable/eye_close"
-            android:clickable="true"
-            android:focusable="true"/>
+            android:src="@drawable/eye_close" />
     </RelativeLayout>
-
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnAlreadyAccount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/passwordLayout"
-        android:layout_centerInParent="true"
-        android:layout_marginTop="5dp"
+        android:layout_marginTop="2dp"
         android:text="@string/txtAlreadyAccount"
-        style="@style/ButtonLink"/>
+        android:minHeight="0dp"
+        android:padding="4dp"
+        style="@style/ButtonLink"
+        app:layout_constraintTop_toBottomOf="@id/passwordLayout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <TextView
         android:id="@+id/errorMsg"
-        android:layout_width="300dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_below="@id/btnAlreadyAccount"
-        android:layout_centerInParent="true"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="4dp"
         android:text=""
         android:textAlignment="center"
         android:textColor="@android:color/holo_red_dark"
-        android:textSize="13sp" />
+        android:textSize="13sp"
+        app:layout_constraintTop_toBottomOf="@id/btnAlreadyAccount"
+        app:layout_constraintStart_toStartOf="@id/guideLeft"
+        app:layout_constraintEnd_toEndOf="@id/guideRight" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnConnexion"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerInParent="true"
+        android:layout_marginTop="8dp"
         android:text="@string/txtBtnCreateAccount"
         style="@style/ButtonPrimary"
-        />
-</RelativeLayout>
+        app:layout_constraintTop_toBottomOf="@id/errorMsg"
+        app:layout_constraintStart_toStartOf="@id/guideLeft"
+        app:layout_constraintEnd_toEndOf="@id/guideRight" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

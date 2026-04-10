@@ -2,76 +2,92 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background">
 
-    <ImageView
+    <View
         android:id="@+id/purpleFigure"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/rectangle"
-        android:translationY="-1000px"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <ImageView
-        android:id="@+id/logoPurple"
-        android:layout_width="120dp"
-        android:layout_height="120dp"
-        android:src="@drawable/logo_purple"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/primary"
+        app:layout_constraintHeight_percent="0.28"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideLeft"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.15" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideRight"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.85" />
+
+    <ImageView
+        android:id="@+id/logoPurple"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:src="@drawable/logo_purple"
+        app:layout_constraintBottom_toTopOf="@+id/titleConnexion"
+        app:layout_constraintTop_toTopOf="@id/purpleFigure"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintVertical_chainStyle="packed" />
 
     <TextView
         android:id="@+id/titleConnexion"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         android:text="@string/titleConnexion"
-        android:textAlignment="center"
         android:textColor="@color/white"
-        android:textSize="30sp"
+        android:textSize="28sp"
         android:fontFamily="@font/kg_blank_space_sketch"
+        app:layout_constraintBottom_toBottomOf="@id/purpleFigure"
         app:layout_constraintTop_toBottomOf="@id/logoPurple"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="120dp"
-        android:layout_height="120dp"
-        android:layout_marginTop="50dp"
+        android:layout_width="140dp"
+        android:layout_height="140dp"
+        android:layout_marginTop="10dp"
         android:src="@drawable/logo_piibiocampus"
-        app:layout_constraintTop_toBottomOf="@id/titleConnexion"
+        app:layout_constraintTop_toBottomOf="@id/purpleFigure"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
     <EditText
         android:id="@+id/txtIdentifiant"
-        android:layout_width="207dp"
+        android:layout_width="0dp"
         android:layout_height="48dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="20dp"
         android:background="@drawable/fields_round_border"
         android:hint="@string/txtMail"
-        android:inputType="text"
-        android:paddingStart="10dp"
-        android:textColorHint="@color/grey"
-        android:textSize="20sp"
+        android:inputType="textEmailAddress"
+        android:paddingStart="15dp"
+        android:textSize="18sp"
         app:layout_constraintTop_toBottomOf="@id/imageView"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintStart_toStartOf="@id/guideLeft"
+        app:layout_constraintEnd_toEndOf="@id/guideRight" />
 
     <RelativeLayout
         android:id="@+id/passwordLayout"
-        android:layout_width="207dp"
+        android:layout_width="0dp"
         android:layout_height="48dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="12dp"
         android:background="@drawable/fields_round_border"
         app:layout_constraintTop_toBottomOf="@id/txtIdentifiant"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintStart_toStartOf="@id/guideLeft"
+        app:layout_constraintEnd_toEndOf="@id/guideRight">
         <EditText
             android:id="@+id/txtMdp"
             android:layout_width="match_parent"
@@ -80,8 +96,8 @@
             android:background="@android:color/transparent"
             android:hint="@string/txtPassword"
             android:inputType="textPassword"
-            android:paddingStart="10dp"
-            android:textSize="20sp" />
+            android:paddingStart="15dp"
+            android:textSize="18sp" />
         <ImageView
             android:id="@+id/btnTogglePassword"
             android:layout_width="24dp"
@@ -96,8 +112,10 @@
         android:id="@+id/btnResetPassWord"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="4dp"
         android:text="@string/txtBtnForgetPassWord"
+        android:minHeight="0dp"
+        android:padding="4dp"
         style="@style/ButtonLink"
         app:layout_constraintTop_toBottomOf="@id/passwordLayout"
         app:layout_constraintStart_toStartOf="parent"
@@ -107,8 +125,9 @@
         android:id="@+id/btnNoAccount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
         android:text="@string/txtNewAccount"
+        android:minHeight="0dp"
+        android:padding="4dp"
         style="@style/ButtonLink"
         app:layout_constraintTop_toBottomOf="@id/btnResetPassWord"
         app:layout_constraintStart_toStartOf="parent"
@@ -116,15 +135,13 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnConnexion"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
         android:text="@string/txtBtnConnect"
         style="@style/ButtonPrimary"
-
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-
         app:layout_constraintTop_toBottomOf="@id/btnNoAccount"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        app:layout_constraintStart_toStartOf="@id/guideLeft"
+        app:layout_constraintEnd_toEndOf="@id/guideRight" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
