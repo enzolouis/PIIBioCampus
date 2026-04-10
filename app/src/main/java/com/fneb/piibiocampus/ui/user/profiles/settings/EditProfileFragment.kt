@@ -36,12 +36,13 @@ class EditProfileFragment : PermissionFragment() {
 
     private val viewModel: EditProfileViewModel by viewModels { EditProfileViewModelFactory() }
 
-    private var selectedBadgeId: String  = ""
+    private var selectedBadgeId: String   = ""
     private var pendingImageBytes: ByteArray? = null
 
     // ── Limites ───────────────────────────────────────────────────────────────
 
     companion object {
+        const val REQUEST_KEY            = "edit_profile_result"
         const val MAX_NAME_LENGTH        = 30
         const val MAX_DESCRIPTION_LENGTH = 200
         const val MAX_DESCRIPTION_LINES  = 4
@@ -99,54 +100,35 @@ class EditProfileFragment : PermissionFragment() {
     // ── Filtres de saisie ─────────────────────────────────────────────────────
 
     private fun setupInputFilters() {
-        // Pseudo : pas de retour à la ligne + limite de caractères
         editName.filters = arrayOf(
             NoNewLineFilter(),
             InputFilter.LengthFilter(MAX_NAME_LENGTH)
         )
-
-        // Description : max 4 retours à la ligne (= 5 lignes) + limite de caractères
         editDescription.filters = arrayOf(
             MaxLinesFilter(MAX_DESCRIPTION_LINES),
             InputFilter.LengthFilter(MAX_DESCRIPTION_LENGTH)
         )
     }
 
-    /**
-     * Bloque toute saisie de retour à la ligne.
-     */
     private class NoNewLineFilter : InputFilter {
         override fun filter(
             source: CharSequence, start: Int, end: Int,
             dest: Spanned, dstart: Int, dend: Int
         ): CharSequence? {
-            if (source.contains('\n')) {
-                return source.replace(Regex("\n"), "")
-            }
-            return null // null = accepter la saisie telle quelle
+            if (source.contains('\n')) return source.replace(Regex("\n"), "")
+            return null
         }
     }
 
-    /**
-     * Limite le nombre de retours à la ligne à [maxLines].
-     * L'utilisateur peut saisir au maximum [maxLines] sauts de ligne,
-     * ce qui correspond à [maxLines + 1] lignes visuelles.
-     */
     private class MaxLinesFilter(private val maxLines: Int) : InputFilter {
         override fun filter(
             source: CharSequence, start: Int, end: Int,
             dest: Spanned, dstart: Int, dend: Int
         ): CharSequence? {
-            // Texte résultant après application de la modification
             val resultText = dest.subSequence(0, dstart).toString() +
                     source.subSequence(start, end) +
                     dest.subSequence(dend, dest.length)
-
-            val newlineCount = resultText.count { it == '\n' }
-            if (newlineCount > maxLines) {
-                // Bloquer la saisie qui ferait dépasser la limite
-                return ""
-            }
+            if (resultText.count { it == '\n' } > maxLines) return ""
             return null
         }
     }
@@ -175,6 +157,7 @@ class EditProfileFragment : PermissionFragment() {
                 is UiState.Success -> {
                     showLoading(false)
                     Toast.makeText(requireContext(), "Profil mis à jour", Toast.LENGTH_SHORT).show()
+                    parentFragmentManager.setFragmentResult(REQUEST_KEY, Bundle())
                     parentFragmentManager.popBackStack()
                 }
                 is UiState.Error -> {
@@ -301,7 +284,7 @@ class EditProfileFragment : PermissionFragment() {
 
     private fun showLoading(visible: Boolean) {
         progressBar?.visibility = if (visible) View.VISIBLE else View.GONE
-        saveButton.isEnabled   = !visible
+        saveButton.isEnabled    = !visible
     }
 
     // ── Adapter badge picker ──────────────────────────────────────────────────

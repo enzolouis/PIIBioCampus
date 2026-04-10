@@ -28,11 +28,13 @@ class MainActivity : BaseActivity() {
     private lateinit var fabCamera: FloatingActionButton
     private lateinit var bottomNav: BottomNavigationView
 
-    private val mapFragment     by lazy { MapFragment() }
-    private val profileFragment by lazy { MyProfileFragment() }
-    private val newsFragment    by lazy { NewsFragment() }
-    private val libraryFragment by lazy { LibraryFragment() }
+    private val mapFragment         by lazy { MapFragment() }
+    private val profileFragment     by lazy { MyProfileFragment() }
+    private val newsFragment        by lazy { NewsFragment() }
+    private val libraryFragment     by lazy { LibraryFragment() }
     private val searchUsersFragment by lazy { SearchUsersFragment() }
+
+    private var activeFragment: Fragment = mapFragment
 
     override fun onCreate(savedInstanceState: Bundle?) {
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -59,7 +61,6 @@ class MainActivity : BaseActivity() {
             } else {
                 bottomNav.visibility = View.VISIBLE
                 if (bottomNav.selectedItemId == R.id.nav_map) fabCamera.show()
-                // Padding = hauteur réelle de la bottomNav (inclut déjà les system bars via fitsSystemWindows)
                 view.post {
                     view.setPadding(0, 0, 0, bottomNav.height)
                 }
@@ -68,11 +69,32 @@ class MainActivity : BaseActivity() {
         }
 
         if (savedInstanceState == null) {
-            showFragment(mapFragment)
+            // Ajoute tous les fragments une seule fois, tous cachés sauf la map
+            supportFragmentManager.beginTransaction().apply {
+                add(R.id.fragment_container, mapFragment,         "map")
+                add(R.id.fragment_container, profileFragment,     "profile")
+                add(R.id.fragment_container, newsFragment,        "news")
+                add(R.id.fragment_container, libraryFragment,     "library")
+                add(R.id.fragment_container, searchUsersFragment, "search")
+                hide(profileFragment)
+                hide(newsFragment)
+                hide(libraryFragment)
+                hide(searchUsersFragment)
+            }.commit()
+
+            activeFragment = mapFragment
             bottomNav.selectedItemId = R.id.nav_map
         }
 
         bottomNav.setOnItemSelectedListener { item ->
+            if (supportFragmentManager.backStackEntryCount > 0) {
+                supportFragmentManager.popBackStackImmediate(
+                    null,
+                    androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE
+                )
+            }
+
+            // 2. Changer d'onglet normalement
             when (item.itemId) {
                 R.id.nav_map          -> { fabCamera.show(); showFragment(mapFragment);         true }
                 R.id.nav_compte       -> { fabCamera.hide(); showFragment(profileFragment);     true }
@@ -81,7 +103,6 @@ class MainActivity : BaseActivity() {
                 R.id.nav_recherche    -> { fabCamera.hide(); showFragment(searchUsersFragment); true }
                 else -> false
             }
-            true
         }
 
         fabCamera.setOnClickListener {
@@ -113,10 +134,14 @@ class MainActivity : BaseActivity() {
         }
     }
 
+    // show/hide au lieu de replace — les fragments ne sont jamais détruits
     private fun showFragment(fragment: Fragment) {
+        if (fragment == activeFragment) return
         supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, fragment)
+            .hide(activeFragment)
+            .show(fragment)
             .commit()
+        activeFragment = fragment
     }
 
     private fun askLocationPermission() {

@@ -10,8 +10,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.RecyclerView
 import com.fneb.piibiocampus.R
 import com.fneb.piibiocampus.data.model.UserProfile
@@ -21,6 +20,7 @@ import com.fneb.piibiocampus.ui.MainActivity
 import com.fneb.piibiocampus.ui.photo.PhotoViewerState
 import com.fneb.piibiocampus.ui.photo.PicturesViewerCaller
 import com.fneb.piibiocampus.ui.photo.PicturesViewerFragment
+import com.fneb.piibiocampus.ui.user.profiles.settings.EditProfileFragment
 import com.fneb.piibiocampus.ui.user.profiles.settings.SettingsFragment
 import com.fneb.piibiocampus.utils.BadgeUtils
 import com.fneb.piibiocampus.utils.setTopBarTitle
@@ -30,15 +30,16 @@ import java.util.Locale
 
 class MyProfileFragment : Fragment() {
 
-    private lateinit var recyclerView:    RecyclerView
-    private lateinit var pseudoText:      TextView
-    private lateinit var description:     TextView
-    private lateinit var profilePicture:  ImageView
-    private lateinit var badge:           ImageView
-    private lateinit var settingsButton:  ImageView
+    private lateinit var recyclerView:   RecyclerView
+    private lateinit var pseudoText:     TextView
+    private lateinit var description:    TextView
+    private lateinit var profilePicture: ImageView
+    private lateinit var badge:          ImageView
+    private lateinit var settingsButton: ImageView
     private var progressBar: View? = null
 
-    private val viewModel: ProfileViewModel by viewModels { MyProfileViewModelFactory() }
+    // ViewModel lié à l'Activity → survit aux switches d'onglets
+    private val viewModel: ProfileViewModel by activityViewModels { MyProfileViewModelFactory() }
 
     private val photos = mutableListOf<Map<String, Any>>()
     private lateinit var adapter: PhotoAdapter
@@ -69,22 +70,29 @@ class MyProfileFragment : Fragment() {
         recyclerView.clipToPadding = false
 
         setupButtons()
-        setupObservers() // ✅ Une seule fois ici, pas dans onResume
+        setupObservers()
 
         // Recharge les photos au retour du PicturesViewerFragment
         parentFragmentManager.setFragmentResultListener(
             PicturesViewerFragment.REQUEST_KEY,
             viewLifecycleOwner
         ) { _, _ -> viewModel.reloadPhotos() }
+
+        // Recharge le profil au retour de EditProfileFragment
+        parentFragmentManager.setFragmentResultListener(
+            EditProfileFragment.REQUEST_KEY,
+            viewLifecycleOwner
+        ) { _, _ -> viewModel.loadProfile() }
+
+        // Premier chargement uniquement si le ViewModel n'a encore rien
+        if (viewModel.profileState.value == null || viewModel.profileState.value is UiState.Idle) {
+            viewModel.loadProfile()
+        }
     }
 
     override fun onResume() {
         super.onResume()
         setTopBarTitle(R.string.titleProfile)
-        photos.clear()
-        adapter.notifyDataSetChanged()
-        // ✅ loadProfile() recharge le profil ET déclenche le listener photos en cascade
-        viewModel.loadProfile()
     }
 
     // ── Boutons ───────────────────────────────────────────────────────────────
