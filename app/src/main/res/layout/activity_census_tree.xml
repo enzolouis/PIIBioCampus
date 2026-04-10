@@ -54,7 +54,7 @@
 
     </LinearLayout>
 
-    <!-- RecyclerView : grille 2 colonnes -->
+    <!-- RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="0dp"
@@ -62,6 +62,8 @@
         android:clipToPadding="false"
         android:paddingStart="12dp"
         android:paddingEnd="12dp"
+        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+        app:spanCount="@integer/grid_columns_default"
         app:layout_constraintTop_toBottomOf="@id/header"
         app:layout_constraintBottom_toTopOf="@id/bottomBar"
         app:layout_constraintStart_toStartOf="parent"
@@ -82,7 +84,7 @@
         android:textColor="?attr/colorOnSurface"
         android:lineSpacingExtra="4dp"
         android:fontFamily="@font/gentium_plus_regular"
-        android:text="Ce niveau de l'arbre n'a pas encore été renseigné par les administrateur·ices.\n\nVous pouvez stopper le recensement ici et le reprendre plus tard, une fois l'arbre mis à jour."
+        android:text="@string/message_no_more_element_in_tree"
         app:layout_constraintTop_toBottomOf="@id/header"
         app:layout_constraintBottom_toTopOf="@id/bottomBar"
         app:layout_constraintStart_toStartOf="parent"

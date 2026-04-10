@@ -109,7 +109,9 @@
             android:layout_weight="1"
             android:paddingStart="8dp"
             android:paddingEnd="8dp"
-            android:clipToPadding="false"/>
+            android:clipToPadding="false"
+            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+            app:spanCount="@integer/grid_columns_profile" />
 
     </LinearLayout>
 

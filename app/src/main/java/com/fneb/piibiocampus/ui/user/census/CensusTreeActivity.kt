@@ -152,7 +152,6 @@ class CensusTreeActivity : BaseActivity() {
             },
             onInfoClick = { node -> showInfoDialog(node) }
         )
-        recyclerView.layoutManager = GridLayoutManager(this, 2)
         recyclerView.adapter = adapter
     }
 

@@ -71,7 +71,6 @@ class UserProfileFragment : Fragment() {
         progressBar    = view.findViewById(R.id.progressBar)
 
         adapter = PhotoAdapter(photos)
-        recyclerView?.layoutManager = GridLayoutManager(requireContext(), 3)
         recyclerView?.adapter = adapter
 
         setupObservers()

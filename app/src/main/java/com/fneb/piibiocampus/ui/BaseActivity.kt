@@ -15,6 +15,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.fneb.piibiocampus.R
 import com.fneb.piibiocampus.network.NetworkMonitor
 import kotlinx.coroutines.launch
+import androidx.core.graphics.toColorInt
 
 
 abstract class BaseActivity : AppCompatActivity() {
@@ -45,7 +46,7 @@ abstract class BaseActivity : AppCompatActivity() {
             if (floatingNetworkIcon == null) {
                 floatingNetworkIcon = ImageView(this).apply {
                     setImageResource(R.drawable.ic_signal_wifi_off)
-                    imageTintList = ColorStateList.valueOf(Color.parseColor("#E53935"))
+                    imageTintList = ColorStateList.valueOf("#E53935".toColorInt())
                     val sizePx = (64 * resources.displayMetrics.density).toInt()
                     layoutParams = FrameLayout.LayoutParams(sizePx, sizePx).apply {
                         gravity = Gravity.CENTER

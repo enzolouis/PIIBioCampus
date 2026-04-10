@@ -9,7 +9,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.fneb.piibiocampus.R
 import com.fneb.piibiocampus.data.ui.showError
@@ -60,7 +60,6 @@ class CensusEditorActivity : BaseActivity() {
             onDelete   = { node -> confirmDelete(node) },
             onAdd      = { openAddDialog() }
         )
-        recyclerView.layoutManager = GridLayoutManager(this, 2)
         recyclerView.adapter = adapter
         recyclerView.clipToPadding = false
         ViewCompat.setOnApplyWindowInsetsListener(recyclerView) { view, insets ->

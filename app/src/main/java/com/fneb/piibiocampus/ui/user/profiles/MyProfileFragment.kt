@@ -6,11 +6,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.fneb.piibiocampus.R
 import com.fneb.piibiocampus.data.model.UserProfile
@@ -63,7 +64,6 @@ class MyProfileFragment : Fragment() {
         settingsButton = view.findViewById(R.id.settingsButton)
         progressBar    = view.findViewById(R.id.progressBar)
 
-        recyclerView.layoutManager = GridLayoutManager(requireContext(), 3)
         adapter = PhotoAdapter(photos)
         recyclerView.adapter = adapter
         recyclerView.clipToPadding = false
