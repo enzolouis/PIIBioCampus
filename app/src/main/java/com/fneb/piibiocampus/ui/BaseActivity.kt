@@ -20,7 +20,7 @@ import androidx.core.graphics.toColorInt
 
 abstract class BaseActivity : AppCompatActivity() {
 
-    protected lateinit var networkMonitor: NetworkMonitor
+    lateinit var networkMonitor: NetworkMonitor
     private var floatingNetworkIcon: ImageView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -2,6 +2,7 @@ package com.fneb.piibiocampus.ui.photo
 
 import android.app.Activity
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
 import android.view.*
@@ -17,6 +18,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.fneb.piibiocampus.R
 import com.fneb.piibiocampus.data.ui.showError
+import com.fneb.piibiocampus.ui.BaseActivity
 import com.fneb.piibiocampus.ui.user.census.CensusMode
 import com.fneb.piibiocampus.ui.user.census.CensusTreeActivity
 import com.fneb.piibiocampus.ui.user.profiles.UserProfileFragment
@@ -47,6 +49,7 @@ class PicturesViewerFragment : DialogFragment() {
     private var btnValidate:        Button?    = null
     private var btnBack:            Button?    = null
     private var btnDelete:          Button?    = null
+    private var dialogNetworkIcon: ImageView? = null
 
     // ── Launcher recensement ──────────────────────────────────────────────────
 
@@ -86,6 +89,34 @@ class PicturesViewerFragment : DialogFragment() {
         bindViews(view)
         setupClickListeners()
         observeViewModel()
+        val activity = requireActivity() as? BaseActivity
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                activity?.networkMonitor?.isOnline?.collect { online ->
+                    updateDialogNetworkIcon(!online)
+                }
+            }
+        }
+    }
+
+    private fun updateDialogNetworkIcon(show: Boolean) {
+        val window = dialog?.window ?: return
+        if (show) {
+            if (dialogNetworkIcon == null) {
+                dialogNetworkIcon = ImageView(requireContext()).apply {
+                    setImageResource(R.drawable.ic_signal_wifi_off)
+                    imageTintList = ColorStateList.valueOf(Color.parseColor("#E53935"))
+                    val sizePx = (64 * resources.displayMetrics.density).toInt()
+                    layoutParams = FrameLayout.LayoutParams(sizePx, sizePx).apply {
+                        gravity = Gravity.CENTER
+                    }
+                }
+                (window.decorView as? ViewGroup)?.addView(dialogNetworkIcon)
+            }
+        } else {
+            dialogNetworkIcon?.let { (it.parent as? ViewGroup)?.removeView(it) }
+            dialogNetworkIcon = null
+        }
     }
 
     override fun onStart() {
