@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -11,87 +12,76 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/rectangle"
-        android:translationY="-1000px" />
+        android:translationY="-1000px"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <ImageView
         android:id="@+id/logoPurple"
         android:layout_width="120dp"
         android:layout_height="120dp"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:src="@drawable/logo_purple" />
+        android:src="@drawable/logo_purple"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <TextView
         android:id="@+id/titleConnexion"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/logoPurple"
-        android:layout_centerHorizontal="true"
         android:text="@string/titleConnexion"
         android:textAlignment="center"
         android:textColor="@color/white"
         android:textSize="30sp"
         android:fontFamily="@font/kg_blank_space_sketch"
-        />
+        app:layout_constraintTop_toBottomOf="@id/logoPurple"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="120dp"
         android:layout_height="120dp"
-        android:layout_below="@id/titleConnexion"
-        android:layout_centerInParent="true"
         android:layout_marginTop="50dp"
-        android:src="@drawable/logo_piibiocampus" />
-
-    <TextView
-        android:id="@+id/txtVerificationBanner"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#FFF3CD"
-        android:padding="12dp"
-        android:textColor="#856404"
-        android:textSize="14sp"
-        android:visibility="gone" />
+        android:src="@drawable/logo_piibiocampus"
+        app:layout_constraintTop_toBottomOf="@id/titleConnexion"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <EditText
         android:id="@+id/txtIdentifiant"
         android:layout_width="207dp"
         android:layout_height="48dp"
-        android:layout_below="@id/imageView"
-        android:layout_centerInParent="true"
         android:layout_marginTop="10dp"
         android:background="@drawable/fields_round_border"
-        android:ems="10"
         android:hint="@string/txtMail"
         android:inputType="text"
         android:paddingStart="10dp"
         android:textColorHint="@color/grey"
         android:textSize="20sp"
-        android:fontFamily="@font/gentium_plus_regular"
-        />
+        app:layout_constraintTop_toBottomOf="@id/imageView"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <RelativeLayout
         android:id="@+id/passwordLayout"
         android:layout_width="207dp"
         android:layout_height="48dp"
-        android:layout_below="@id/txtIdentifiant"
-        android:layout_centerInParent="true"
         android:layout_marginTop="10dp"
-        android:background="@drawable/fields_round_border">
-
+        android:background="@drawable/fields_round_border"
+        app:layout_constraintTop_toBottomOf="@id/txtIdentifiant"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
         <EditText
             android:id="@+id/txtMdp"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_toStartOf="@id/btnTogglePassword"
             android:background="@android:color/transparent"
-            android:ems="10"
             android:hint="@string/txtPassword"
             android:inputType="textPassword"
             android:paddingStart="10dp"
-            android:textColorHint="@color/grey"
-            android:textSize="20sp"
-            android:fontFamily="@font/gentium_plus_regular"/>
-
+            android:textSize="20sp" />
         <ImageView
             android:id="@+id/btnTogglePassword"
             android:layout_width="24dp"
@@ -99,40 +89,42 @@
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
             android:layout_marginEnd="10dp"
-            android:src="@drawable/eye_close"
-            android:clickable="true"
-            android:focusable="true"/>
+            android:src="@drawable/eye_close" />
     </RelativeLayout>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnResetPassWord"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/passwordLayout"
-        android:layout_centerInParent="true"
         android:layout_marginTop="10dp"
         android:text="@string/txtBtnForgetPassWord"
-        style="@style/ButtonLink"/>
+        style="@style/ButtonLink"
+        app:layout_constraintTop_toBottomOf="@id/passwordLayout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnNoAccount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/btnResetPassWord"
-        android:layout_centerInParent="true"
         android:layout_marginTop="5dp"
         android:text="@string/txtNewAccount"
-        style="@style/ButtonLink"/>
+        style="@style/ButtonLink"
+        app:layout_constraintTop_toBottomOf="@id/btnResetPassWord"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnConnexion"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerInParent="true"
         android:text="@string/txtBtnConnect"
+        style="@style/ButtonPrimary"
+
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        style="@style/ButtonPrimary"/>
 
+        app:layout_constraintTop_toBottomOf="@id/btnNoAccount"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
-</RelativeLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
