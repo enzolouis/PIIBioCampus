@@ -46,6 +46,16 @@ class NewsListAdminActivity : BaseActivity() {
                 systemBars.bottom + extraPadding
             insets
         }
+        val featuredContainer = findViewById<View>(R.id.featuredContainer)
+        ViewCompat.setOnApplyWindowInsetsListener(featuredContainer) { view, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val marginParams = view.layoutParams as ViewGroup.MarginLayoutParams
+            val baseMargin = (12 * resources.displayMetrics.density).toInt()
+            marginParams.bottomMargin = systemBars.bottom + baseMargin
+
+            view.layoutParams = marginParams
+            insets
+        }
 
         recyclerView = findViewById(R.id.recyclerView)
         recyclerView.layoutManager = GridLayoutManager(this, 1)

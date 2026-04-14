@@ -3,13 +3,13 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <!-- Top bar -->
         <include
             android:id="@+id/topBar"
             layout="@layout/view_top_bar"
@@ -17,10 +17,12 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
 
-        <!-- ========================= -->
-        <!-- SECTION 1 : LISTE NEWS -->
-        <!-- ========================= -->
-
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guidelineHalf"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.55" />
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/listContainer"
             android:layout_width="0dp"
@@ -30,23 +32,21 @@
             android:elevation="4dp"
             android:padding="12dp"
             app:layout_constraintTop_toBottomOf="@id/topBar"
-            app:layout_constraintBottom_toTopOf="@id/featuredContainer"
+            app:layout_constraintBottom_toTopOf="@id/guidelineHalf"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
 
-            <!-- Titre en haut -->
             <TextView
                 android:id="@+id/titleList"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Actualités"
+                android:text="@string/actualites_title"
                 android:textSize="20sp"
                 android:textStyle="bold"
                 android:fontFamily="@font/gentium_plus_bold"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent"/>
 
-            <!-- RecyclerView prend tout l'espace restant au-dessous du titre -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerView"
                 android:layout_width="0dp"
@@ -63,28 +63,23 @@
                 style="@style/ButtonPrimary"
                 android:layout_width="0dp"
                 android:layout_height="48dp"
-                android:text="+ Ajouter une actualité"
-                android:textSize="16sp"
+                android:text="@string/ajouter_une_actualite"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                android:layout_marginTop="8dp"/>
-
+                app:layout_constraintEnd_toEndOf="parent"/>
         </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <!-- ========================= -->
-        <!-- SECTION 2 : A LA UNE -->
-        <!-- ========================= -->
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/featuredContainer"
             android:layout_width="0dp"
-            android:layout_height="220dp"
+            android:layout_height="0dp"
             android:layout_marginHorizontal="12dp"
             android:layout_marginBottom="12dp"
+            android:layout_marginTop="0dp"
             android:background="@drawable/bg_section"
             android:elevation="4dp"
             android:padding="12dp"
+            app:layout_constraintTop_toBottomOf="@id/guidelineHalf"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
@@ -93,58 +88,59 @@
                 android:id="@+id/titleFeatured"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="La FNEB et ses projets"
+                android:text="@string/la_fneb_et_ses_projets"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:fontFamily="@font/gentium_plus_bold"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent"/>
 
-            <!-- Grande image -->
             <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/featuredMain"
                 android:layout_width="0dp"
-                android:layout_height="70dp"
+                android:layout_height="0dp"
                 android:layout_marginTop="8dp"
                 android:scaleType="centerCrop"
                 android:src="@drawable/ic_placeholder_image"
                 app:shapeAppearanceOverlay="@style/roundedImageView"
                 app:layout_constraintTop_toBottomOf="@id/titleFeatured"
+                app:layout_constraintBottom_toTopOf="@id/featuredLeft"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"/>
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintVertical_weight="1"/>
 
-            <!-- Image gauche -->
             <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/featuredLeft"
                 android:layout_width="0dp"
-                android:layout_height="80dp"
+                android:layout_height="0dp"
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="4dp"
                 android:scaleType="centerCrop"
                 android:src="@drawable/ic_placeholder_image"
                 app:shapeAppearanceOverlay="@style/roundedImageView"
                 app:layout_constraintTop_toBottomOf="@id/featuredMain"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toStartOf="@id/featuredRight"
-                app:layout_constraintWidth_percent="0.5"/>
+                app:layout_constraintHorizontal_chainStyle="spread"
+                app:layout_constraintVertical_weight="1"/>
 
-            <!-- Image droite -->
             <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/featuredRight"
                 android:layout_width="0dp"
-                android:layout_height="80dp"
+                android:layout_height="0dp"
                 android:layout_marginTop="8dp"
                 android:layout_marginStart="4dp"
                 android:scaleType="centerCrop"
                 android:src="@drawable/ic_placeholder_image"
                 app:shapeAppearanceOverlay="@style/roundedImageView"
                 app:layout_constraintTop_toBottomOf="@id/featuredMain"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toEndOf="@id/featuredLeft"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintWidth_percent="0.5"/>
+                app:layout_constraintVertical_weight="1"/>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
 </FrameLayout>

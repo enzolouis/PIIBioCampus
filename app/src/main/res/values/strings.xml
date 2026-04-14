@@ -429,4 +429,7 @@ Document soumis au droit français — RGPD (UE) 2016/679 et Loi Informatique et
     <string name="title_settings">Paramètres</string>
     <string name="aucune_esp_ce_ne_correspond_votre_recherche">Aucune espèce ne correspond à votre recherche.</string>
     <string name="message_no_more_element_in_tree">Ce niveau de l\'arbre n\'a pas encore été renseigné par les administrateur·ices.\n\nVous pouvez stopper le recensement ici et le reprendre plus tard, une fois l\'arbre mis à jour.</string>
+    <string name="actualites_title">Actualités</string>
+    <string name="la_fneb_et_ses_projets">La FNEB et ses projets</string>
+    <string name="ajouter_une_actualite">+ Ajouter une actualité</string>
 </resources>

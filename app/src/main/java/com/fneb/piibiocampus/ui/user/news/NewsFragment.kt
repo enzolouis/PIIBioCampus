@@ -19,6 +19,7 @@ import com.fneb.piibiocampus.data.ui.UiState
 import com.fneb.piibiocampus.data.ui.showError
 import com.fneb.piibiocampus.utils.setTopBarTitle
 import com.squareup.picasso.Picasso
+import androidx.core.net.toUri
 
 class NewsFragment : Fragment() {
 
@@ -79,7 +80,6 @@ class NewsFragment : Fragment() {
                     Picasso.get().load(item.imageUrl).into(targetImageView)
 
                     targetImageView.setOnClickListener {
-                        Log.d("Test",item.source)
                         openUrl(item.source)
                     }
                 }
@@ -90,7 +90,7 @@ class NewsFragment : Fragment() {
     private fun openUrl(url: String?) {
         if (url.isNullOrEmpty()) return
         try {
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            val intent = Intent(Intent.ACTION_VIEW, url.toUri())
             startActivity(intent)
         } catch (e: Exception) {
             // pas de navigateur ?
