@@ -23,11 +23,10 @@ object UserDao {
 
     // ── Auth ──────────────────────────────────────────────────────────────────
 
-    /**
-     * @throws AppException
-     */
     suspend fun login(email: String, password: String): FirebaseUser {
         return try {
+            if (isEmailBanned(email)) throw AppException.AccountBanned()
+
             auth.signInWithEmailAndPassword(email, password)
                 .await()
                 .user
@@ -39,11 +38,10 @@ object UserDao {
         }
     }
 
-    /**
-     * @throws AppException
-     */
     suspend fun createUser(email: String, password: String, name: String): FirebaseUser {
         return try {
+            if (isEmailBanned(email)) throw AppException.AccountBanned()
+
             val user = auth.createUserWithEmailAndPassword(email, password)
                 .await()
                 .user
@@ -52,12 +50,13 @@ object UserDao {
             db.collection("users")
                 .document(user.uid)
                 .set(mapOf(
-                    "name" to name,
-                    "description" to "Je débute ici !",
+                    "name"              to name,
+                    "description"       to "Je débute ici !",
                     "profilePictureUrl" to "https://firebasestorage.googleapis.com/v0/b/piibiocampus-c8f50.firebasestorage.app/o/defaultProfilePicture%2FdefaultProfilePicture.png?alt=media&token=9ec98653-3c8d-4795-854f-f5024d51e145",
-                    "email" to email,
-                    "role" to "USER",
-                    "currentBadge" to ""))
+                    "email"             to email,
+                    "role"              to "USER",
+                    "currentBadge"      to ""
+                ))
                 .await()
 
             user
@@ -68,21 +67,15 @@ object UserDao {
         }
     }
 
-    /**
-     * @throws AppException
-     */
     suspend fun updatePassword(oldPassword: String, newPassword: String) {
         try {
             val user  = auth.currentUser ?: throw AppException.NotAuthenticated()
             val email = user.email       ?: throw AppException.NotAuthenticated()
-
             try {
                 user.reauthenticate(EmailAuthProvider.getCredential(email, oldPassword)).await()
             } catch (e: Exception) {
-                // L'échec de ré-auth doit être traduit en ReauthenticationFailed, pas en InvalidCredentials
                 throw AppException.ReauthenticationFailed()
             }
-
             user.updatePassword(newPassword).await()
         } catch (e: AppException) {
             throw e
@@ -92,14 +85,36 @@ object UserDao {
     }
 
     fun getCurrentUser(): FirebaseUser? = auth.currentUser
-
     fun signOut() = auth.signOut()
+
+    // ── Liste noire ───────────────────────────────────────────────────────────
+
+    /**
+     * Convertit l'email en clé Firestore valide.
+     * Ex : "user@example.com" → "user_at_example_com"
+     */
+    private fun emailToKey(email: String): String =
+        email.lowercase().replace("@", "_at_").replace(".", "_")
+
+    /**
+     * Vérifie si un email est dans la liste noire.
+     */
+    suspend fun isEmailBanned(email: String): Boolean {
+        return try {
+            val doc = db.collection("banned_emails")
+                .document(emailToKey(email))
+                .get()
+                .await()
+            doc.exists()
+        } catch (e: Exception) {
+            // En cas d'erreur réseau, on laisse passer (fail open)
+            // pour ne pas bloquer les utilisateurs légitimes
+            false
+        }
+    }
 
     // ── Lecture ───────────────────────────────────────────────────────────────
 
-    /**
-     * @throws AppException
-     */
     suspend fun getUserRole(uid: String): String {
         return try {
             val snapshot = db.collection("users").document(uid).get().await()
@@ -124,11 +139,6 @@ object UserDao {
             .addOnFailureListener { onError(it) }
     }
 
-
-    /**
-     * Retourne null si l'utilisateur n'est pas connecté (cas normal, pas une erreur).
-     * @throws AppException pour toute erreur réseau ou Firestore
-     */
     suspend fun getCurrentUserProfile(): UserProfile? {
         return try {
             val currentUser = auth.currentUser ?: return null
@@ -141,9 +151,6 @@ object UserDao {
         }
     }
 
-    /**
-     * @throws AppException
-     */
     suspend fun getUserProfileById(userId: String): UserProfile? {
         return try {
             val snapshot = db.collection("users").document(userId).get().await()
@@ -155,9 +162,6 @@ object UserDao {
         }
     }
 
-    /**
-     * @throws AppException
-     */
     suspend fun getAllUsersWithUid(): List<UserProfile> {
         return try {
             db.collection("users").orderBy("name").get().await()
@@ -171,9 +175,6 @@ object UserDao {
         }
     }
 
-    /**
-     * @throws AppException
-     */
     suspend fun getAllUsers(): List<UserProfile> {
         return try {
             db.collection("users").whereEqualTo("role", "USER").orderBy("name").get().await()
@@ -189,7 +190,7 @@ object UserDao {
 
     suspend fun getAllUsersAndAdmins(): List<UserProfile> {
         val snapshot = db.collection("users")
-            .whereIn("role",listOf("USER", "ADMIN"))
+            .whereIn("role", listOf("USER", "ADMIN"))
             .orderBy("name")
             .get()
             .await()
@@ -198,17 +199,14 @@ object UserDao {
             doc.toObject(UserProfile::class.java)?.copy(uid = doc.id)
         }.sortedWith(
             compareBy(
-                { if (it.role == "ADMIN") 0 else 1 }, // ADMIN en premier
-                { it.name }                             // puis par nom
+                { if (it.role == "ADMIN") 0 else 1 },
+                { it.name }
             )
         )
     }
 
     // ── Écriture ──────────────────────────────────────────────────────────────
 
-    /**
-     * @throws AppException
-     */
     suspend fun updateUserProfile(name: String, description: String) {
         try {
             val user = auth.currentUser ?: throw AppException.NotAuthenticated()
@@ -223,9 +221,6 @@ object UserDao {
         }
     }
 
-    /**
-     * @throws AppException
-     */
     suspend fun updateCurrentBadge(badgeId: String) {
         try {
             val user = auth.currentUser ?: throw AppException.NotAuthenticated()
@@ -237,9 +232,6 @@ object UserDao {
         }
     }
 
-    /**
-     * @throws AppException
-     */
     suspend fun uploadProfilePicture(context: Context, imageBytes: ByteArray): String {
         return try {
             val user = auth.currentUser ?: throw AppException.NotAuthenticated()
@@ -263,17 +255,33 @@ object UserDao {
         }
     }
 
-    // ── Suppression ───────────────────────────────────────────────────────────
+    // ── Suppression / Ban ─────────────────────────────────────────────────────
 
-    /**
-     * Supprime toutes les photos puis le compte Firestore d'un utilisateur (action admin).
-     * @throws AppException
-     */
     suspend fun banUser(uid: String) {
         try {
-            val pictures = db.collection("pictures").whereEqualTo("userRef", uid).get().await()
+            val userDoc = db.collection("users").document(uid).get().await()
+            val email   = userDoc.getString("email") ?: ""
+
+            if (email.isNotEmpty()) {
+                db.collection("banned_emails")
+                    .document(emailToKey(email))
+                    .set(mapOf(
+                        "email"    to email,
+                        "bannedAt" to com.google.firebase.Timestamp.now()
+                    ))
+                    .await()
+            }
+
+            // Supprime les photos
+            val pictures = db.collection("pictures")
+                .whereEqualTo("userRef", uid)
+                .get()
+                .await()
             for (doc in pictures.documents) doc.reference.delete().await()
+
+            // Supprime le document utilisateur
             db.collection("users").document(uid).delete().await()
+
         } catch (e: AppException) {
             throw e
         } catch (e: Exception) {
@@ -281,10 +289,6 @@ object UserDao {
         }
     }
 
-    /**
-     * Supprime le compte de l'utilisateur actuellement connecté.
-     * @throws AppException
-     */
     suspend fun deleteCurrentUser() {
         try {
             val user = auth.currentUser ?: throw AppException.NotAuthenticated()
@@ -299,12 +303,8 @@ object UserDao {
 
     // ── Export ────────────────────────────────────────────────────────────────
 
-    /**
-     * Données brutes pour l'export CSV — ne lance pas d'exception (retourne une map vide si non connecté).
-     * @throws AppException uniquement sur erreur Firestore
-     */
     suspend fun getCurrentUserDataForExport(): Map<String, String> {
-        val user = auth.currentUser ?: return emptyMap()
+        val user    = auth.currentUser ?: return emptyMap()
         val profile = getCurrentUserProfile() ?: return emptyMap()
         return mapOf(
             "email"             to (user.email ?: ""),
@@ -313,25 +313,20 @@ object UserDao {
             "profilePictureUrl" to (profile.profilePictureUrl ?: "")
         )
     }
-    /**
-     * Update profile name
-     */
+
     suspend fun updateUserProfileName(name: String) {
         val user = auth.currentUser ?: return
-        db.collection("users")
-            .document(user.uid)
-            .update(mapOf("name" to name))
-            .await()
+        db.collection("users").document(user.uid).update(mapOf("name" to name)).await()
     }
 
     suspend fun getCurrentUserData(): Map<String, String> {
-        val user = auth.currentUser ?: return emptyMap()
+        val user    = auth.currentUser ?: return emptyMap()
         val profile = getCurrentUserProfile() ?: return emptyMap()
         return mapOf(
             "email"             to (user.email ?: ""),
-            "name"              to (profile.name),
-            "description"       to (profile.description),
-            "profilePictureUrl" to (profile.profilePictureUrl)
+            "name"              to profile.name,
+            "description"       to profile.description,
+            "profilePictureUrl" to profile.profilePictureUrl
         )
     }
 }

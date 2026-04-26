@@ -74,4 +74,11 @@ sealed class AppException(val userMessage: String, cause: Throwable? = null) : E
 
     /** Tout ce qui n'est pas identifié */
     class Unknown(cause: Throwable? = null) : AppException("Une erreur inattendue s'est produite.", cause)
+
+    // ── Bannissement ──────────────────────────────────────────────────────────
+
+    /** Email bani */
+    class AccountBanned : AppException(
+        userMessage = "Cette adresse email est bannie. Vous ne pouvez pas accéder à l'application."
+    )
 }
