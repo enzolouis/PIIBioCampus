@@ -67,11 +67,11 @@ class SettingsViewModel : ViewModel() {
 
     // ── Suppression du compte ─────────────────────────────────────────────────
 
-    fun deleteAccount() {
+    fun deleteAccount(password: String) {
         _deleteState.value = UiState.Loading
         viewModelScope.launch {
             try {
-                UserDao.deleteCurrentUser()
+                UserDao.deleteCurrentUser(password)
                 _deleteState.value = UiState.Success(Unit)
                 _events.emit(SettingsEvent.NavigateToLogin)
             } catch (e: AppException) {

@@ -257,27 +257,39 @@ object UserDao {
 
     // ── Suppression / Ban ─────────────────────────────────────────────────────
 
-    suspend fun banUser(uid: String) {
+    suspend fun addToBannedEmails(uid: String) {
         try {
             val userDoc = db.collection("users").document(uid).get().await()
-            val email   = userDoc.getString("email") ?: ""
+            val email = userDoc.getString("email") ?: ""
 
-            // ✅ Liste noire par email (empêche la recréation de compte)
             if (email.isNotEmpty()) {
                 db.collection("banned_emails")
                     .document(emailToKey(email))
-                    .set(mapOf("email" to email, "bannedAt" to com.google.firebase.Timestamp.now()))
+                    .set(
+                        mapOf(
+                            "email" to email,
+                            "bannedAt" to com.google.firebase.Timestamp.now()
+                        )
+                    )
                     .await()
             }
+        } catch (e: AppException) {
+            throw e
+        } catch (e: Exception) {
+            throw FirebaseExceptionMapper.map(e)
+        }
+    }
 
-            // ✅ Liste noire par UID (bloque les opérations Firestore en temps réel)
-            db.collection("banned_users")
-                .document(uid)
-                .set(mapOf("bannedAt" to com.google.firebase.Timestamp.now()))
+    suspend fun deleteUserData(uid: String) {
+        try {
+            // Supprime les photos
+            val pictures = db.collection("pictures")
+                .whereEqualTo("userRef", uid)
+                .get()
                 .await()
-
-            val pictures = db.collection("pictures").whereEqualTo("userRef", uid).get().await()
             for (doc in pictures.documents) doc.reference.delete().await()
+
+            // Supprime le document utilisateur
             db.collection("users").document(uid).delete().await()
 
         } catch (e: AppException) {
@@ -287,11 +299,53 @@ object UserDao {
         }
     }
 
+    /**
+     * Ban admin : blackliste l'email + supprime toutes les données.
+     * Le compte Firebase Auth reste actif (pas d'Admin SDK côté client),
+     * mais isEmailBanned() bloquera toute future tentative de login/création.
+     */
+    suspend fun banUser(uid: String) {
+        try {
+            addToBannedEmails(uid)
+            deleteUserData(uid)
+        } catch (e: AppException) {
+            throw e
+        } catch (e: Exception) {
+            throw FirebaseExceptionMapper.map(e)
+        }
+    }
+
+    /**
+     * Suppression volontaire : l'utilisateur efface son propre compte.
+     * Pas de blacklist — il pourra recréer un compte avec le même email.
+     */
     suspend fun deleteCurrentUser() {
         try {
             val user = auth.currentUser ?: throw AppException.NotAuthenticated()
-            banUser(user.uid)
+            deleteUserData(user.uid)
             user.delete().await()
+        } catch (e: AppException) {
+            throw e
+        } catch (e: Exception) {
+            throw FirebaseExceptionMapper.map(e)
+        }
+    }
+
+    suspend fun deleteCurrentUser(password: String) {
+        try {
+            val user  = auth.currentUser ?: throw AppException.NotAuthenticated()
+            val email = user.email       ?: throw AppException.NotAuthenticated()
+
+            // Réauthentification obligatoire avant delete()
+            try {
+                user.reauthenticate(EmailAuthProvider.getCredential(email, password)).await()
+            } catch (e: Exception) {
+                throw AppException.ReauthenticationFailed()
+            }
+
+            deleteUserData(user.uid)
+            user.delete().await()
+
         } catch (e: AppException) {
             throw e
         } catch (e: Exception) {

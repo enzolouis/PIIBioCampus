@@ -85,7 +85,24 @@ class SettingsFragment : PermissionFragment() {
                     "Tu es sur le point de supprimer définitivement ton compte ainsi que toutes " +
                             "tes données associées (photos, observations…). Cette action est irréversible."
                 )
-                .setPositiveButton("Supprimer") { _, _ -> viewModel.deleteAccount() }
+                .setPositiveButton("Supprimer") { _, _ ->
+                    // 2e dialog pour le mot de passe
+                    val input = android.widget.EditText(requireContext()).apply {
+                        inputType = android.text.InputType.TYPE_CLASS_TEXT or
+                                android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
+                        hint = "Mot de passe"
+                    }
+                    android.app.AlertDialog.Builder(requireContext())
+                        .setTitle("Confirmer la suppression")
+                        .setMessage("Saisis ton mot de passe pour confirmer.")
+                        .setView(input)
+                        .setPositiveButton("Confirmer") { _, _ ->
+                            val password = input.text.toString()
+                            if (password.isNotBlank()) viewModel.deleteAccount(password)
+                        }
+                        .setNegativeButton("Annuler", null)
+                        .show()
+                }
                 .setNegativeButton("Annuler", null)
                 .show()
         }

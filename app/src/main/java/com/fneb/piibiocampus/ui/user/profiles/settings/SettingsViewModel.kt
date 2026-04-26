@@ -55,11 +55,11 @@ class SettingsViewModel : ViewModel() {
      */
     fun signOut() = UserDao.signOut()
 
-    fun deleteAccount() {
+    fun deleteAccount(password: String) {
         _deleteState.value = UiState.Loading
         scope.launch {
             try {
-                UserDao.deleteCurrentUser()
+                UserDao.deleteCurrentUser(password)
                 _deleteState.postValue(UiState.Success(Unit))
             } catch (e: AppException) {
                 _deleteState.postValue(UiState.Error(e))
