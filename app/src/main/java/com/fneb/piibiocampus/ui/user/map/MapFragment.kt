@@ -141,6 +141,9 @@ class MapFragment : Fragment(R.layout.fragment_map) {
         map.setTileSource(cartoLight)
         map.setTilesScaledToDpi(true)
         map.setMultiTouchControls(true)
+        map.zoomController.setVisibility(
+            org.osmdroid.views.CustomZoomButtonsController.Visibility.NEVER
+        )
         map.controller.setZoom(15.0)
         map.minZoomLevel = 3.0
         map.maxZoomLevel = 20.0
