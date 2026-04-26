@@ -18,7 +18,8 @@ class UserAdapter(
     private val users: MutableList<UserProfile>,
     private val role: String?,
     private val onBanRequested: (UserProfile, Int) -> Unit,
-    private val onRoleChangeRequested: (UserProfile, String, Int) -> Unit
+    private val onRoleChangeRequested: (UserProfile, String, Int) -> Unit,
+    private val onProfileClicked: (String) -> Unit
 ) : RecyclerView.Adapter<UserAdapter.UserViewHolder>() {
 
     private val roles = listOf("USER", "ADMIN")
@@ -78,6 +79,8 @@ class UserAdapter(
         }
 
         holder.btnBan.setOnClickListener { onBanRequested(user, holder.adapterPosition) }
+        holder.avatar.setOnClickListener { onProfileClicked(user.uid) }
+        holder.pseudo.setOnClickListener { onProfileClicked(user.uid) }
     }
 
     override fun getItemCount() = users.size

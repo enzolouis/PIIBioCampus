@@ -1,6 +1,7 @@
 package com.fneb.piibiocampus.ui.admin.searchUsersAdmin
 
 import android.animation.*
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.widget.Toast
@@ -52,10 +53,18 @@ class SearchUsersAdminActivity : BaseActivity() {
             users = displayedUsers,
             role = role,
             onBanRequested = { user, pos -> showBanDialog(user, pos) },
-            onRoleChangeRequested = { user, newRole, pos -> showRoleDialog(user, newRole, pos) }
+            onRoleChangeRequested = { user, newRole, pos -> showRoleDialog(user, newRole, pos) },
+            onProfileClicked = { userId -> openUserProfile(userId) }
         )
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
+    }
+
+    private fun openUserProfile(userId: String) {
+        val intent = android.content.Intent(this, UserProfileAdminActivity::class.java).apply {
+            putExtra(UserProfileAdminActivity.EXTRA_USER_ID, userId)
+        }
+        startActivity(intent)
     }
 
     private fun setupListeners() {

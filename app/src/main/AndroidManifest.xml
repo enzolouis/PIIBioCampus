@@ -90,6 +90,8 @@
         <activity
             android:name=".ui.admin.settings.profile.EditProfileActivityAdmin"
             android:exported="true" />
+        <activity android:name=".ui.admin.searchUsersAdmin.UserProfileAdminActivity"
+            android:exported="true" />
 
     </application>
 
