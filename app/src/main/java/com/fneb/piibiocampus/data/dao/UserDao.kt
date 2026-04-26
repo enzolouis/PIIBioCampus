@@ -307,6 +307,11 @@ object UserDao {
     suspend fun banUser(uid: String) {
         try {
             addToBannedEmails(uid)
+            db.collection("banned_users")
+                .document(uid)
+                .set(mapOf("bannedAt" to com.google.firebase.Timestamp.now()))
+                .await()
+
             deleteUserData(uid)
         } catch (e: AppException) {
             throw e
