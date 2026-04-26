@@ -142,6 +142,21 @@ class ProfileViewModel(private val userId: String?) : ViewModel() {
         photosListener?.remove()
         scope.cancel()
     }
+
+    fun refreshProfile() {
+        scope.launch {
+            try {
+                val profile = if (userId == null) {
+                    UserDao.getCurrentUserProfile()
+                } else {
+                    UserDao.getUserProfileById(userId)
+                }
+                profile?.let { _profileState.postValue(UiState.Success(it)) }
+            } catch (_: Exception) {
+                // Rafraîchissement silencieux — on ne montre pas d'erreur
+            }
+        }
+    }
 }
 
 // ── Factories ─────────────────────────────────────────────────────────────────

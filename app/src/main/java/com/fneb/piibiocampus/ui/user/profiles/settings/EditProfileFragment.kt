@@ -45,6 +45,7 @@ class EditProfileFragment : PermissionFragment() {
         const val MAX_NAME_LENGTH        = 30
         const val MAX_DESCRIPTION_LENGTH = 200
         const val MAX_DESCRIPTION_LINES  = 4
+        const val RESULT_EDIT_SAVED      = "edit_profile_saved"
     }
 
     // ── Galerie ───────────────────────────────────────────────────────────────
