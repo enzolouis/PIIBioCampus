@@ -262,24 +262,22 @@ object UserDao {
             val userDoc = db.collection("users").document(uid).get().await()
             val email   = userDoc.getString("email") ?: ""
 
+            // ✅ Liste noire par email (empêche la recréation de compte)
             if (email.isNotEmpty()) {
                 db.collection("banned_emails")
                     .document(emailToKey(email))
-                    .set(mapOf(
-                        "email"    to email,
-                        "bannedAt" to com.google.firebase.Timestamp.now()
-                    ))
+                    .set(mapOf("email" to email, "bannedAt" to com.google.firebase.Timestamp.now()))
                     .await()
             }
 
-            // Supprime les photos
-            val pictures = db.collection("pictures")
-                .whereEqualTo("userRef", uid)
-                .get()
+            // ✅ Liste noire par UID (bloque les opérations Firestore en temps réel)
+            db.collection("banned_users")
+                .document(uid)
+                .set(mapOf("bannedAt" to com.google.firebase.Timestamp.now()))
                 .await()
-            for (doc in pictures.documents) doc.reference.delete().await()
 
-            // Supprime le document utilisateur
+            val pictures = db.collection("pictures").whereEqualTo("userRef", uid).get().await()
+            for (doc in pictures.documents) doc.reference.delete().await()
             db.collection("users").document(uid).delete().await()
 
         } catch (e: AppException) {
