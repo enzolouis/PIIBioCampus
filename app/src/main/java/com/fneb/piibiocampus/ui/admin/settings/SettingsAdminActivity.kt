@@ -81,7 +81,7 @@ class SettingsAdminActivity : AppCompatActivity() {
         viewModel.deleteState.observe(this) { state ->
             when (state) {
                 is UiState.Loading -> showLoading(true)
-                is UiState.Success -> showLoading(false)   // navigation gérée par l'event
+                is UiState.Success -> { showLoading(false); navigateToLogin(); }   // navigation gérée par l'event
                 is UiState.Error   -> { showLoading(false); showError(state.exception) }
                 else -> Unit
             }
@@ -118,7 +118,24 @@ class SettingsAdminActivity : AppCompatActivity() {
         MaterialAlertDialogBuilder(this)
             .setTitle("Supprimer mon compte")
             .setMessage("Tu es sur le point de supprimer définitivement ton compte…")
-            .setPositiveButton("Supprimer") { _, _ -> viewModel.deleteAccount() }
+            .setPositiveButton("Supprimer") { _, _ ->
+                // 2e dialog pour le mot de passe
+                val input = android.widget.EditText(this).apply {
+                    inputType = android.text.InputType.TYPE_CLASS_TEXT or
+                            android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
+                    hint = "Mot de passe"
+                }
+                android.app.AlertDialog.Builder(this)
+                    .setTitle("Confirmer la suppression")
+                    .setMessage("Saisis ton mot de passe pour confirmer.")
+                    .setView(input)
+                    .setPositiveButton("Confirmer") { _, _ ->
+                        val password = input.text.toString()
+                        if (password.isNotBlank()) viewModel.deleteAccount(password)
+                    }
+                    .setNegativeButton("Annuler", null)
+                    .show()
+            }
             .setNegativeButton("Annuler", null)
             .show()
     }
