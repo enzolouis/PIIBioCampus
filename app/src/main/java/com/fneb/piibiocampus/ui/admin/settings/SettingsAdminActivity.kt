@@ -57,7 +57,7 @@ class SettingsAdminActivity : AppCompatActivity() {
             MaterialAlertDialogBuilder(this)
                 .setTitle("Déconnexion")
                 .setMessage("Es-tu sûr de vouloir te déconnecter ?")
-                .setPositiveButton("Déconnexion") { _, _ -> viewModel.signOut() }
+                .setPositiveButton("Déconnexion") { _, _ -> viewModel.signOut(applicationContext) }
                 .setNegativeButton("Annuler", null)
                 .show()
         }

@@ -1,5 +1,6 @@
 package com.fneb.piibiocampus.ui.user.profiles.settings
 
+import android.app.ActivityManager
 import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -14,6 +15,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class SettingsViewModel : ViewModel() {
 
@@ -53,7 +55,19 @@ class SettingsViewModel : ViewModel() {
      * Déconnexion synchrone — pas besoin d'UiState,
      * c'est le Fragment qui navigue immédiatement après.
      */
-    fun signOut() = UserDao.signOut()
+    fun signOut(context: Context) {
+        scope.launch {
+            try {
+                UserDao.signOut()
+                withContext(Dispatchers.IO) {
+                    val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+                    activityManager.clearApplicationUserData()
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
 
     fun deleteAccount(password: String) {
         _deleteState.value = UiState.Loading

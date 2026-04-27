@@ -10,6 +10,7 @@ import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageMetadata
 import kotlinx.coroutines.tasks.await
@@ -307,6 +308,11 @@ object UserDao {
     suspend fun banUser(uid: String) {
         try {
             addToBannedEmails(uid)
+            db.collection("banned_users")
+                .document(uid)
+                .set(mapOf("bannedAt" to com.google.firebase.Timestamp.now()))
+                .await()
+
             deleteUserData(uid)
         } catch (e: AppException) {
             throw e
@@ -380,5 +386,19 @@ object UserDao {
             "description"       to profile.description,
             "profilePictureUrl" to profile.profilePictureUrl
         )
+    }
+
+    fun listenToUserProfile(
+        uid: String,
+        onUpdate: (UserProfile) -> Unit,
+        onError: (AppException) -> Unit
+    ): ListenerRegistration {
+        return db.collection("users").document(uid)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) { onError(AppException.Unknown(error)); return@addSnapshotListener }
+                val profile = snapshot?.toObject(UserProfile::class.java)
+                if (profile != null) onUpdate(profile)
+                else onError(AppException.DocumentNotFound())
+            }
     }
 }

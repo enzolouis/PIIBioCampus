@@ -79,8 +79,6 @@ class MyProfileFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         setTopBarTitle(R.string.titleProfile)
-        viewModel.refreshProfile()
-        viewModel.reloadPhotos()
     }
 
     // ── Boutons ───────────────────────────────────────────────────────────────

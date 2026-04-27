@@ -40,6 +40,7 @@ class ProfileViewModel(private val userId: String?) : ViewModel() {
     private var resolvedUserId: String? = null
 
     private var photosListener: ListenerRegistration? = null
+    private var profileListener: ListenerRegistration? = null
 
     // ── Chargement ────────────────────────────────────────────────────────────
 
@@ -54,37 +55,33 @@ class ProfileViewModel(private val userId: String?) : ViewModel() {
      */
     fun loadProfile() {
         _profileState.value = UiState.Loading
-        resolvedUserId = null // ✅ Reset avant chaque rechargement
+        resolvedUserId = null
         scope.launch {
             try {
                 val uid: String
-                val profile: UserProfile?
 
                 if (userId == null) {
                     // Profil personnel
                     val currentUser = UserDao.getCurrentUser()
                         ?: throw AppException.NotAuthenticated()
-                    uid     = currentUser.uid
-                    profile = UserDao.getCurrentUserProfile()
-                } else {
-                    // Profil d'un autre utilisateur
-                    uid     = userId
-                    profile = UserDao.getUserProfileById(userId)
-                }
+                    uid = currentUser.uid
+                    resolvedUserId = uid
 
-                resolvedUserId = uid
-
-                if (profile != null) {
-                    _profileState.postValue(UiState.Success(profile))
-                } else {
-                    _profileState.postValue(UiState.Error(AppException.DocumentNotFound()))
-                }
-
-                // Lance l'écoute des photos seulement pour le profil personnel,
-                // et un chargement one-shot pour les autres profils.
-                if (userId == null) {
+                    startProfileListener(uid)
                     startPhotosListener(uid)
+
                 } else {
+                    // Profil d'un autre utilisateur (One-shot)
+                    uid = userId
+                    resolvedUserId = uid
+
+                    val profile = UserDao.getUserProfileById(uid)
+                    if (profile != null) {
+                        _profileState.postValue(UiState.Success(profile))
+                    } else {
+                        _profileState.postValue(UiState.Error(AppException.DocumentNotFound()))
+                    }
+
                     loadPhotosOneShot(uid)
                 }
 
@@ -137,25 +134,19 @@ class ProfileViewModel(private val userId: String?) : ViewModel() {
         if (userId == null) startPhotosListener(uid) else loadPhotosOneShot(uid)
     }
 
+    fun startProfileListener(uid: String) {
+        profileListener?.remove()
+        profileListener = UserDao.listenToUserProfile(  // méthode à ajouter dans UserDao
+            uid = uid,
+            onUpdate = { profile -> _profileState.postValue(UiState.Success(profile)) },
+            onError  = { e -> _profileState.postValue(UiState.Error(e)) }
+        )
+    }
+
     override fun onCleared() {
         super.onCleared()
         photosListener?.remove()
         scope.cancel()
-    }
-
-    fun refreshProfile() {
-        scope.launch {
-            try {
-                val profile = if (userId == null) {
-                    UserDao.getCurrentUserProfile()
-                } else {
-                    UserDao.getUserProfileById(userId)
-                }
-                profile?.let { _profileState.postValue(UiState.Success(it)) }
-            } catch (_: Exception) {
-                // Rafraîchissement silencieux — on ne montre pas d'erreur
-            }
-        }
     }
 }
 
