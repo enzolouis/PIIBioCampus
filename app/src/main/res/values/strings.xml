@@ -3,8 +3,8 @@
     <string name="titleConnexion">Connexion</string>
     <string name="txtName">Pseudo</string>
     <string name="txtPassword">Mot de passe</string>
-    <string name="txtNewAccount"><u>Vous n\'avez pas de compte, Cliquez-ici</u></string>
-    <string name="txtAlreadyAccount"><u>Vous avez déjà un compte, Cliquez-ici</u></string>
+    <string name="txtNewAccount">"Vous n'avez pas de compte, Cliquez-ici"</string>
+    <string name="txtAlreadyAccount">"Vous avez déjà un compte, Cliquez-ici"</string>
     <string name="titleCreateAccount">Création de compte</string>
     <string name="txtMail">Adresse e-mail</string>
     <string name="txtBtnConnect">Se connecter</string>
@@ -17,19 +17,20 @@
     <string name="titleCensus">Arbre de recensement</string>
     <string name="titleListAdmin">Liste des admins</string>
     <string name="titleListCensus">Liste des recensements</string>
-    <string name="txtBtnForgetPassWord"><u>Mot de passe oublié, Cliquez-ici</u></string>
+    <string name="txtBtnForgetPassWord">"Mot de passe oublié, Cliquez-ici"</string>
     <string name="titleMotDePasseOublie">Mot de passe oublié</string>
     <string name="txtBtnReinitaliserMotDePasse">Envoyer</string>
     <string name="txtWarningMail">Le mail que vous allez recevoir peut se trouver dans vos spams.</string>
 
     <string name="txtBtnBack">Retour</string>
-    <string name="txtBtnWatchProfile">Profil de l\'auteur</string>
+    <string name="txtBtnWatchProfile">"Profil de l'auteur"</string>
     <string name="camera">camera</string>
     <string name="txtConfirm">Confirmer</string>
     <string name="txtCancel">Annuler</string>
 
-    <string name="txtSearchAdmin">Gestion Recherche d\'utilisateur·rice</string>
-    <string name="txtSearchUsers">Recherche d\'utilisateur·rice</string>
+    <string name="txtSearchAdmin">"Gestion Recherche d'utilisateur·rice"</string>
+    <string name="txtSearchUsers">"Recherche d'utilisateur·rice"</string>
+
     <string name="logo_admin">Logo Admin</string>
     <string name="see_more">Voir plus</string>
     <string name="enter_username">Entrez un pseudo...</string>
@@ -40,22 +41,24 @@
     <string name="ban">Bannir</string>
     <string name="titleMap">Carte</string>
     <string name="reprendre_le_recensement">Reprendre le recensement</string>
-    <string name="famille_genre_espece">Famille : —\nGenre : —\nEspèce : —</string>
+    <string name="famille_genre_espece">"Famille : —\nGenre : —\nEspèce : —"</string>
     <string name="valider">Valider</string>
     <string name="retour">Retour</string>
     <string name="supprimer">Supprimer</string>
     <string name="stopper">Stopper</string>
     <string name="annuler">Annuler</string>
 
-    <string name="cgu_full_text">
-CONDITIONS GÉNÉRALES D\'UTILISATION
+    <string name="cacheManagerHandlingMessage" formatted="false">Downloading: %d, Errors: %d, Total: %d</string>
+
+    <string name="cgu_full_text">"
+CONDITIONS GÉNÉRALES D'UTILISATION
 Application PiiBioCampus
 Fédération Nationale des Étudiant·es en Sciences exactes, naturelles et techniques (FNEB)
 Version en vigueur au 15 mars 2026
 
 ─────────────────────────────────────
 
-ARTICLE 1 — PRÉSENTATION DE L\'APPLICATION ET DE L\'ORGANISATION
+ARTICLE 1 — PRÉSENTATION DE L'APPLICATION ET DE L'ORGANISATION
 
 PiiBioCampus est une application mobile de recensement de la biodiversité développée par la FNEB à des fins scientifiques et pédagogiques. Elle permet aux utilisateur·ices de photographier des espèces animales ou végétales observées sur le terrain au sein des campus universitaires français, puis de les identifier à travers un arbre taxonomique collaboratif.
 
@@ -64,25 +67,25 @@ Forme juridique : Association régie par la loi du 1er juillet 1901
 Siège social : FNEB c/o BIOSPHERE — 43 boulevard du 11 novembre 1918, 69622 Villeurbanne Cedex
 Contact : contact@fneb.fr
 Site web : https://fneb.fr
-Hébergement des données : Firebase (Google LLC) — infrastructure Europe de l\'Ouest.
+Hébergement des données : Firebase (Google LLC) — infrastructure Europe de l'Ouest.
 
 ─────────────────────────────────────
 
 ARTICLE 2 — ACCEPTATION DES CONDITIONS
 
-L\'utilisation de l\'application PiiBioCampus implique l\'acceptation pleine et entière des présentes Conditions Générales d\'Utilisation (CGU). Ces CGU sont susceptibles d\'être modifiées à tout moment ; les utilisateur·ices en seront informé·es par notification dans l\'application. La poursuite de l\'utilisation après toute modification vaut acceptation des nouvelles conditions.
+L'utilisation de l'application PiiBioCampus implique l'acceptation pleine et entière des présentes Conditions Générales d'Utilisation (CGU). Ces CGU sont susceptibles d'être modifiées à tout moment ; les utilisateur·ices en seront informé·es par notification dans l'application. La poursuite de l'utilisation après toute modification vaut acceptation des nouvelles conditions.
 
 ─────────────────────────────────────
 
 ARTICLE 3 — ACCÈS ET COMPTE UTILISATEUR·ICE
 
-L\'accès à l\'application nécessite la création d\'un compte personnel. L\'utilisateur·ice s\'engage à fournir des informations exactes lors de son inscription et à maintenir la confidentialité de ses identifiants de connexion.
+L'accès à l'application nécessite la création d'un compte personnel. L'utilisateur·ice s'engage à fournir des informations exactes lors de son inscription et à maintenir la confidentialité de ses identifiants de connexion.
 
-Deux niveaux d\'accès sont définis :
+Deux niveaux d'accès sont définis :
 
 • Utilisateur·ice : peut prendre des photos sur les campus référencés, effectuer des recensements taxonomiques et consulter ses contributions.
 
-• Administrateur·ice : dispose en outre des droits de gestion et de modification de l\'arbre taxonomique (ajout, modification et suppression d\'éléments taxonomiques), de validation des recensements soumis par les utilisateur·ices, ainsi que de correction de l\'identification taxonomique d\'une photo lorsqu\'une erreur de recensement est constatée.
+• Administrateur·ice : dispose en outre des droits de gestion et de modification de l'arbre taxonomique (ajout, modification et suppression d'éléments taxonomiques), de validation des recensements soumis par les utilisateur·ices, ainsi que de correction de l'identification taxonomique d'une photo lorsqu'une erreur de recensement est constatée.
 
 En cas de bannissement, les données du compte sont supprimées à l'exception de l'adresse e-mail et de la date et heure du bannissement, conservées afin d'empêcher toute reconnexion ou création d'un nouveau compte avec la même adresse. Un identifiant technique sans information personnelle est également conservé pour bloquer les requêtes résiduelles d'un·e utilisateur·ice encore connecté·e au moment du bannissement.
 Ces données sont conservées pour toute la durée du bannissement.
@@ -92,29 +95,29 @@ ARTICLE 4 — FONCTIONNEMENT ET DONNÉES COLLECTÉES
 
 4.1 Photographies
 
-Lors d\'une contribution, l\'utilisateur·ice prend une photographie via l\'application. Cette photo est transmise et stockée sur les serveurs Firebase. Les photographies sont accessibles aux autres utilisateur·ices connecté·es à des fins de consultation scientifique et pédagogique.
+Lors d'une contribution, l'utilisateur·ice prend une photographie via l'application. Cette photo est transmise et stockée sur les serveurs Firebase. Les photographies sont accessibles aux autres utilisateur·ices connecté·es à des fins de consultation scientifique et pédagogique.
 
 4.2 Restriction géographique aux campus
 
-L\'application est conçue pour un usage exclusif au sein des campus universitaires français référencés dans la base de données de la FNEB. Les données de recensement (photographies, géolocalisation et identification taxonomique) ne sont collectées et enregistrées que lorsque la prise de vue est réalisée à l\'intérieur du périmètre d\'un campus référencé. Toute contribution effectuée hors campus est signalée comme telle et peut être exclue des analyses.
+L'application est conçue pour un usage exclusif au sein des campus universitaires français référencés dans la base de données de la FNEB. Les données de recensement (photographies, géolocalisation et identification taxonomique) ne sont collectées et enregistrées que lorsque la prise de vue est réalisée à l'intérieur du périmètre d'un campus référencé. Toute contribution effectuée hors campus est signalée comme telle et peut être exclue des analyses.
 
 4.3 Données de géolocalisation
 
 À chaque photo est automatiquement associée la localisation GPS (latitude, longitude, altitude) du lieu où elle a été prise. Cette donnée constitue une métadonnée attachée à la photographie et est stockée en base de données.
 
-La géolocalisation est utilisée exclusivement à des fins scientifiques (cartographie de la biodiversité sur les campus) et n\'est jamais utilisée pour suivre les déplacements des utilisateur·ices en dehors de l\'acte de contribution.
+La géolocalisation est utilisée exclusivement à des fins scientifiques (cartographie de la biodiversité sur les campus) et n'est jamais utilisée pour suivre les déplacements des utilisateur·ices en dehors de l'acte de contribution.
 
 4.4 Données de recensement et arbre taxonomique
 
-L\'utilisateur·ice associe chaque photo à une identification taxonomique (ordre, famille, genre, espèce) choisie dans l\'arbre de recensement. Cette identification constitue une métadonnée scientifique liée à la photo.
+L'utilisateur·ice associe chaque photo à une identification taxonomique (ordre, famille, genre, espèce) choisie dans l'arbre de recensement. Cette identification constitue une métadonnée scientifique liée à la photo.
 
-L\'arbre taxonomique est maintenu et mis à jour par les administrateur·ices de la FNEB, qui disposent de droits exclusifs d\'ajout, de modification et de suppression des éléments taxonomiques (ordres, familles, genres, espèces). Toute modification de l\'arbre par un·e administrateur·ice est enregistrée et s\'applique immédiatement à l\'ensemble des utilisateur·ices.
+L'arbre taxonomique est maintenu et mis à jour par les administrateur·ices de la FNEB, qui disposent de droits exclusifs d'ajout, de modification et de suppression des éléments taxonomiques (ordres, familles, genres, espèces). Toute modification de l'arbre par un·e administrateur·ice est enregistrée et s'applique immédiatement à l'ensemble des utilisateur·ices.
 
-Les administrateur·ices sont habilité·es à corriger l\'identification taxonomique associée à une photo lorsqu\'ils ou elles constatent une erreur de recensement. Cette correction est effectuée dans un objectif de fiabilité scientifique des données. L\'utilisateur·ice concerné·e en est informé·e via l\'application.
+Les administrateur·ices sont habilité·es à corriger l'identification taxonomique associée à une photo lorsqu'ils ou elles constatent une erreur de recensement. Cette correction est effectuée dans un objectif de fiabilité scientifique des données. L'utilisateur·ice concerné·e en est informé·e via l'application.
 
 4.5 Données non collectées
 
-Les administrateur·ices n\'ont pas accès aux fichiers image bruts à des fins d\'export ou de téléchargement en dehors de l\'application. Seules les métadonnées (localisation GPS et identification taxonomique) sont exploitées à des fins d\'analyse scientifique.
+Les administrateur·ices n'ont pas accès aux fichiers image bruts à des fins d'export ou de téléchargement en dehors de l'application. Seules les métadonnées (localisation GPS et identification taxonomique) sont exploitées à des fins d'analyse scientifique.
 
 ─────────────────────────────────────
 
@@ -122,92 +125,92 @@ ARTICLE 5 — PROTECTION DES DONNÉES PERSONNELLES (RGPD)
 
 5.1 Responsable du traitement
 
-La FNEB, dont le siège est situé FNEB c/o BIOSPHERE — 43 boulevard du 11 novembre 1918, 69622 Villeurbanne Cedex, est responsable du traitement des données personnelles collectées via l\'application PiiBioCampus.
+La FNEB, dont le siège est situé FNEB c/o BIOSPHERE — 43 boulevard du 11 novembre 1918, 69622 Villeurbanne Cedex, est responsable du traitement des données personnelles collectées via l'application PiiBioCampus.
 
 5.2 Base légale du traitement
 
 Les traitements de données personnelles mis en œuvre reposent sur les bases légales suivantes au sens du Règlement (UE) 2016/679 (RGPD) :
 
-• Le consentement de l\'utilisateur·ice (article 6, §1, a) pour la collecte des photographies et des données de géolocalisation.
+• Le consentement de l'utilisateur·ice (article 6, §1, a) pour la collecte des photographies et des données de géolocalisation.
 
-• L\'intérêt légitime de l\'éditeur (article 6, §1, f) pour la gestion des comptes, la sécurité de l\'application et la cohérence scientifique de l\'arbre taxonomique.
+• L'intérêt légitime de l'éditeur (article 6, §1, f) pour la gestion des comptes, la sécurité de l'application et la cohérence scientifique de l'arbre taxonomique.
 
 5.3 Données personnelles traitées
 
 Les données suivantes sont collectées et traitées :
 
 • Adresse e-mail et pseudonyme (gestion du compte).
-• Photographies déposées par l\'utilisateur·ice.
+• Photographies déposées par l'utilisateur·ice.
 • Coordonnées GPS (latitude, longitude, altitude) associées à chaque photo.
-• Identification taxonomique choisie par l\'utilisateur·ice.
+• Identification taxonomique choisie par l'utilisateur·ice.
 • Date et heure de chaque contribution.
 • Informations de rôle (utilisateur·ice ou administrateur·ice).
 
 5.4 Durée de conservation
 
-Les données sont conservées pendant toute la durée d\'activité du compte de l\'utilisateur·ice. En cas de suppression du compte, les données personnelles identifiantes sont supprimées dans un délai de 30 jours, sauf en cas de bannissement, où l'adresse e-mail est conservée conformément à l'article 3. Les données scientifiques anonymisées (géolocalisation et identification taxonomique sans lien avec un compte) peuvent être conservées à des fins de recherche.
+Les données sont conservées pendant toute la durée d'activité du compte de l'utilisateur·ice. En cas de suppression du compte, les données personnelles identifiantes sont supprimées dans un délai de 30 jours, sauf en cas de bannissement, où l'adresse e-mail est conservée conformément à l'article 3. Les données scientifiques anonymisées (géolocalisation et identification taxonomique sans lien avec un compte) peuvent être conservées à des fins de recherche.
 
 5.5 Destinataires des données
 
-Les données sont hébergées sur les infrastructures Firebase (Google LLC). Google agit en qualité de sous-traitant et est soumis aux mêmes obligations que l\'éditeur au titre du RGPD. Aucune donnée n\'est cédée à des tiers à des fins commerciales.
+Les données sont hébergées sur les infrastructures Firebase (Google LLC). Google agit en qualité de sous-traitant et est soumis aux mêmes obligations que l'éditeur au titre du RGPD. Aucune donnée n'est cédée à des tiers à des fins commerciales.
 
 5.6 Droits des personnes concernées
 
 Conformément aux articles 15 à 22 du RGPD et à la loi Informatique et Libertés du 6 janvier 1978 modifiée, tout·e utilisateur·ice dispose des droits suivants :
 
-• Droit d\'accès aux données le ou la concernant.
+• Droit d'accès aux données le ou la concernant.
 • Droit de rectification des données inexactes.
-• Droit à l\'effacement (« droit à l\'oubli »).
+• Droit à l'effacement (« droit à l'oubli »).
 • Droit à la limitation du traitement.
 • Droit à la portabilité des données.
-• Droit d\'opposition au traitement.
+• Droit d'opposition au traitement.
 
-Ces droits peuvent être exercés par e-mail à l\'adresse : contact@fneb.fr
+Ces droits peuvent être exercés par e-mail à l'adresse : contact@fneb.fr
 
-En cas de réponse insatisfaisante, l\'utilisateur·ice peut introduire une réclamation auprès de la Commission Nationale de l\'Informatique et des Libertés (CNIL) : www.cnil.fr
+En cas de réponse instatisfaisante, l'utilisateur·ice peut introduire une réclamation auprès de la Commission Nationale de l'Informatique et des Libertés (CNIL) : www.cnil.fr
 
 5.7 Sécurité des données
 
-La FNEB met en œuvre les mesures techniques et organisationnelles appropriées pour garantir la sécurité, l\'intégrité et la confidentialité des données personnelles, notamment : authentification sécurisée, chiffrement des communications (HTTPS/TLS), contrôle d\'accès strict selon les rôles (utilisateur·ice / administrateur·ice).
+La FNEB met en œuvre les mesures techniques et organisationnelles appropriées pour garantir la sécurité, l'intégrité et la confidentialité des données personnelles, notamment : authentification sécurisée, chiffrement des communications (HTTPS/TLS), contrôle d'accès strict selon les rôles (utilisateur·ice / administrateur·ice).
 
 ─────────────────────────────────────
 
 ARTICLE 6 — PROPRIÉTÉ INTELLECTUELLE
 
-Les photographies déposées par les utilisateur·ices restent leur propriété. En déposant une photo, l\'utilisateur·ice concède à la FNEB une licence non exclusive, gratuite et mondiale d\'utilisation à des fins scientifiques et pédagogiques non commerciales.
+Les photographies déposées par les utilisateur·ices restent leur propriété. En déposant une photo, l'utilisateur·ice concède à la FNEB une licence non exclusive, gratuite et mondiale d'utilisation à des fins scientifiques et pédagogiques non commerciales.
 
-L\'arbre taxonomique, les descriptions et les images associées aux nœuds taxonomiques, produits et gérés par les administrateur·ices de la FNEB, sont la propriété de la FNEB et protégés par le droit d\'auteur.
+L'arbre taxonomique, les descriptions et les images associées aux nœuds taxonomiques, produits et gérés par les administrateur·ices de la FNEB, sont la propriété de la FNEB et protégés par le droit d'auteur.
 
 ─────────────────────────────────────
 
-ARTICLE 7 — OBLIGATIONS DE L\'UTILISATEUR·ICE
+ARTICLE 7 — OBLIGATIONS DE L'UTILISATEUR·ICE
 
-L\'utilisateur·ice s\'engage à :
+L'utilisateur·ice s'engage à :
 
-• Ne déposer que des photographies dont il, elle ou iel est l\'auteur·ice ou pour lesquelles il, elle ou iel dispose des droits nécessaires.
+• Ne déposer que des photographies dont il, elle ou iel est l'auteur·ice ou pour lesquelles il, elle ou iel dispose des droits nécessaires.
 • Effectuer ses contributions uniquement au sein des campus universitaires français référencés.
 • Ne pas déposer de contenu illicite, offensant ou portant atteinte aux droits de tiers.
-• Fournir des identifications taxonomiques de bonne foi, conformément à l\'arbre mis à disposition.
-• Ne pas tenter de modifier l\'arbre taxonomique sans disposer du rôle administrateur·ice.
-• Ne pas tenter de contourner les mécanismes de sécurité de l\'application.
-• Ne pas utiliser l\'application à des fins commerciales sans autorisation préalable de la FNEB.
+• Fournir des identifications taxonomiques de bonne foi, conformément à l'arbre mis à disposition.
+• Ne pas tenter de modifier l'arbre taxonomique sans disposer du rôle administrateur·ice.
+• Ne pas tenter de contourner les mécanismes de sécurité de l'application.
+• Ne pas utiliser l'application à des fins commerciales sans autorisation préalable de la FNEB.
 • Accepter qu'en cas de bannissement, certaines données soient conservées afin de prévenir tout contournement de la mesure.
 
 ─────────────────────────────────────
 
 ARTICLE 8 — RESPONSABILITÉ
 
-La FNEB s\'efforce d\'assurer la disponibilité de l\'application mais ne peut garantir une accessibilité ininterrompue. Des interruptions de service peuvent survenir pour des raisons de maintenance ou techniques.
+La FNEB s'efforce d'assurer la disponibilité de l'application mais ne peut garantir une accessibilité ininterrompue. Des interruptions de service peuvent survenir pour des raisons de maintenance ou techniques.
 
-La FNEB ne saurait être tenue responsable des erreurs d\'identification taxonomique introduites par les utilisateur·ices, des pertes de données consécutives à une défaillance technique, ou de l\'usage qui pourrait être fait des données scientifiques publiées.
+La FNEB ne saurait être tenue responsable des erreurs d'identification taxonomique introduites par les utilisateur·ices, des pertes de données consécutives à une défaillance technique, ou de l'usage qui pourrait être fait des données scientifiques publiées.
 
-Les modifications apportées à l\'arbre taxonomique ainsi que les corrections de recensements individuels effectuées par les administrateur·ices sont réalisées sous la responsabilité de la FNEB, qui s\'engage à maintenir la cohérence et la fiabilité scientifique des données. Toute correction de l\'identification d\'une photo est motivée par un intérêt scientifique et non par une appréciation subjective.
+Les modifications apportées à l'arbre taxonomique ainsi que les corrections de recensements individuels effectuées par les administrateur·ices sont réalisées sous la responsabilité de la FNEB, qui s'engage à maintenir la cohérence et la fiabilité scientifique des données. Toute correction de l'identification d'une photo est motivée par un intérêt scientifique et non par une appréciation subjective.
 
 ─────────────────────────────────────
 
 ARTICLE 9 — COOKIES ET TRACEURS
 
-L\'application mobile PiiBioCampus n\'utilise pas de cookies au sens strict. L\'infrastructure Firebase peut toutefois utiliser des identifiants techniques nécessaires au fonctionnement de l\'authentification et des services de stockage. Ces identifiants ne sont pas utilisés à des fins publicitaires ou de profilage comportemental.
+L'application mobile PiiBioCampus n'utilise pas de cookies au sens strict. L'infrastructure Firebase peut toutefois utiliser des identifiants techniques nécessaires au fonctionnement de l'authentification et des services de stockage. Ces identifiants ne sont pas utilisés à des fins publicitaires ou de profilage comportemental.
 
 ─────────────────────────────────────
 
@@ -229,8 +232,9 @@ Site web : https://fneb.fr
 ─────────────────────────────────────
 
 Document soumis au droit français — Loi n° 78-17 du 6 janvier 1978 modifiée et RGPD (UE) 2016/679.
-</string>
-    <string name="Politique_de_confidentitalite">
+"
+    </string>
+    <string name="Politique_de_confidentitalite">"
 POLITIQUE DE CONFIDENTIALITÉ
 Application PiiBioCampus
 Fédération Nationale des Étudiant·es en Sciences exactes, naturelles et techniques (FNEB)
@@ -426,6 +430,7 @@ Site web : https://fneb.fr
 ─────────────────────────────────────
 
 Document soumis au droit français — RGPD (UE) 2016/679 et Loi Informatique et Libertés modifiée
+"
     </string>
     <string name="recherche">Recherche</string>
     <string name="map">Carte</string>
@@ -434,14 +439,14 @@ Document soumis au droit français — RGPD (UE) 2016/679 et Loi Informatique et
     <string name="arbre_de_recensement">Arbre de recensement</string>
     <string name="chargement">Chargement…</string>
     <string name="titleSettings">Paramètres</string>
-    <string name="titleCgu">CGU &amp; Confidentialité (RGPD)</string>
+    <string name="titleCgu">"CGU &amp; Confidentialité (RGPD)"</string>
     <string name="titleEditProfile">Mon profil</string>
     <string name="title_cgu_pcd">En continuant, vous acceptez nos CGU et notre politique de confidentialité</string>
-    <string name="sub_title_cgu_pcd">↓ Faites défiler jusqu\'en bas pour accepter</string>
+    <string name="sub_title_cgu_pcd">"↓ Faites défiler jusqu'en bas pour accepter"</string>
     <string name="back">Retour</string>
     <string name="title_settings">Paramètres</string>
     <string name="aucune_esp_ce_ne_correspond_votre_recherche">Aucune espèce ne correspond à votre recherche.</string>
-    <string name="message_no_more_element_in_tree">Ce niveau de l\'arbre n\'a pas encore été renseigné par les administrateur·ices.\n\nVous pouvez stopper le recensement ici et le reprendre plus tard, une fois l\'arbre mis à jour.</string>
+    <string name="message_no_more_element_in_tree">"Ce niveau de l'arbre n'a pas encore été renseigné par les administrateur·ices.\n\nYou pouvez stopper le recensement ici et le reprendre plus tard, une fois l'arbre mis à jour."</string>
     <string name="actualites_title">Actualités</string>
     <string name="la_fneb_et_ses_projets">La FNEB et ses projets</string>
     <string name="ajouter_une_actualite">+ Ajouter une actualité</string>
