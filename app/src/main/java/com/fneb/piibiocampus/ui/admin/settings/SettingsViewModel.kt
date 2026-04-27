@@ -1,5 +1,6 @@
 package com.fneb.piibiocampus.ui.admin.settings
 
+import android.app.ActivityManager
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -13,6 +14,8 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import android.content.Context
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 // ── Événements ponctuels (navigation, non rejouables) ─────────────────────────
 
@@ -60,9 +63,20 @@ class SettingsViewModel : ViewModel() {
 
     // ── Déconnexion ───────────────────────────────────────────────────────────
 
-    fun signOut() {
-        UserDao.signOut()
-        viewModelScope.launch { _events.emit(SettingsEvent.NavigateToLogin) }
+    fun signOut(context: Context) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                UserDao.signOut()
+                val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+                activityManager.clearApplicationUserData()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                withContext(Dispatchers.Main) {
+                    _events.emit(SettingsEvent.NavigateToLogin)
+                }
+            }
+        }
     }
 
     // ── Suppression du compte ─────────────────────────────────────────────────

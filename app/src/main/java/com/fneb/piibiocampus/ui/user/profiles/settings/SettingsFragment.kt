@@ -64,7 +64,7 @@ class SettingsFragment : PermissionFragment() {
                 .setTitle("Déconnexion")
                 .setMessage("Es-tu sûr de vouloir te déconnecter ?")
                 .setPositiveButton("Déconnexion") { _, _ ->
-                    viewModel.signOut()
+                    viewModel.signOut(requireContext().applicationContext)
                     navigateToAuth()
                 }
                 .setNegativeButton("Annuler", null)
