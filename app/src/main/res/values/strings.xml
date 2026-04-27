@@ -84,6 +84,8 @@ Deux niveaux d\'accès sont définis :
 
 • Administrateur·ice : dispose en outre des droits de gestion et de modification de l\'arbre taxonomique (ajout, modification et suppression d\'éléments taxonomiques), de validation des recensements soumis par les utilisateur·ices, ainsi que de correction de l\'identification taxonomique d\'une photo lorsqu\'une erreur de recensement est constatée.
 
+En cas de bannissement, les données du compte sont supprimées à l'exception de l'adresse e-mail et de la date et heure du bannissement, conservées afin d'empêcher toute reconnexion ou création d'un nouveau compte avec la même adresse. Un identifiant technique sans information personnelle est également conservé pour bloquer les requêtes résiduelles d'un·e utilisateur·ice encore connecté·e au moment du bannissement.
+Ces données sont conservées pour toute la durée du bannissement.
 ─────────────────────────────────────
 
 ARTICLE 4 — FONCTIONNEMENT ET DONNÉES COLLECTÉES
@@ -143,7 +145,7 @@ Les données suivantes sont collectées et traitées :
 
 5.4 Durée de conservation
 
-Les données sont conservées pendant toute la durée d\'activité du compte de l\'utilisateur·ice. En cas de suppression du compte, les données personnelles identifiantes sont supprimées dans un délai de 30 jours. Les données scientifiques anonymisées (géolocalisation et identification taxonomique sans lien avec un compte) peuvent être conservées à des fins de recherche.
+Les données sont conservées pendant toute la durée d\'activité du compte de l\'utilisateur·ice. En cas de suppression du compte, les données personnelles identifiantes sont supprimées dans un délai de 30 jours, sauf en cas de bannissement, où l'adresse e-mail est conservée conformément à l'article 3. Les données scientifiques anonymisées (géolocalisation et identification taxonomique sans lien avec un compte) peuvent être conservées à des fins de recherche.
 
 5.5 Destinataires des données
 
@@ -189,6 +191,7 @@ L\'utilisateur·ice s\'engage à :
 • Ne pas tenter de modifier l\'arbre taxonomique sans disposer du rôle administrateur·ice.
 • Ne pas tenter de contourner les mécanismes de sécurité de l\'application.
 • Ne pas utiliser l\'application à des fins commerciales sans autorisation préalable de la FNEB.
+• Accepter qu'en cas de bannissement, certaines données soient conservées afin de prévenir tout contournement de la mesure.
 
 ─────────────────────────────────────
 
@@ -277,7 +280,14 @@ Dans le cadre de l’utilisation de l’application, les données suivantes peuv
 - Identifiants techniques
 - Données de navigation au sein de l’application
 
-Certaines de ces données sont collectées via des services tiers décrits à l’article 6.
+3.5 Données de bannissement
+- Adresse e-mail de l'utilisateur·ice banni·e
+- Date et heure du bannissement
+- Identifiant technique de référence (sans information personnelle)
+
+L'identifiant technique de référence ne contient aucune information personnelle ; il sert uniquement à invalider les sessions actives sur l'infrastructure Firebase.
+
+Certaines de ces données sont collectées via des services tiers décrits à l'article 6.
 
 ─────────────────────────────────────
 
@@ -303,6 +313,7 @@ Les traitements reposent sur :
   - la gestion technique de l’application
   - la sécurité
   - l’amélioration des services
+  - la prévention des accès non autorisés et de la recréation de compte après bannissement
 
 ─────────────────────────────────────
 
@@ -350,6 +361,8 @@ Toutefois :
 - Les données directement identifiantes peuvent être supprimées sur demande
 
 Les données scientifiques (notamment anonymisées) peuvent être conservées à long terme dans un objectif de recherche.
+
+Les données de bannissement (adresse e-mail, date et heure du bannissement, identifiant technique de référence) sont conservées pour toute la durée du bannissement, sans limite fixée, tant que la mesure reste en vigueur. Elles ne sont pas supprimées à l'issue d'un délai automatique.
 
 ─────────────────────────────────────
 
