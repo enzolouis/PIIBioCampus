@@ -79,9 +79,6 @@
             android:name=".ui.census.CensusEditorActivity"
             android:exported="true" />
         <activity
-            android:name=".ui.user.library.LibraryFragment"
-            android:exported="true" />
-        <activity
             android:name=".ui.admin.settings.SettingsAdminActivity"
             android:exported="true" />
         <activity

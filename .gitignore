@@ -22,3 +22,6 @@ local.properties
 .lo1
 /docs/LoopingImage.jpg
 /.kotlin/errors/errors-1772211636386.log
+
+*.jks
+docs/keyapp
